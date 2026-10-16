@@ -1,0 +1,100 @@
+{
+ "windows": [
+  52,
+  156,
+  260
+ ],
+ "horizons": [
+  26,
+  52
+ ],
+ "totalObs": 385588,
+ "baselineAvg": {
+  "26": 7.045702828755962,
+  "52": 16.329664509948827
+ },
+ "baselineWin": {
+  "26": 58.83741195265413,
+  "52": 62.98458458250775
+ },
+ "results": [
+  {
+   "score": -3,
+   "count": 86978,
+   "pctOfTotal": 22.56,
+   "avgFwd26": 7.62,
+   "winRate26": 56.81,
+   "edgeVsBaseline26": 0.574,
+   "avgFwd52": 17.251,
+   "winRate52": 60.82,
+   "edgeVsBaseline52": 0.921
+  },
+  {
+   "score": -2,
+   "count": 42,
+   "pctOfTotal": 0.01,
+   "avgFwd26": 22.909,
+   "winRate26": 78.57,
+   "edgeVsBaseline26": 15.863,
+   "avgFwd52": 29.078,
+   "winRate52": 64.29,
+   "edgeVsBaseline52": 12.748
+  },
+  {
+   "score": -1,
+   "count": 45437,
+   "pctOfTotal": 11.78,
+   "avgFwd26": 6.969,
+   "winRate26": 57.55,
+   "edgeVsBaseline26": -0.077,
+   "avgFwd52": 16.517,
+   "winRate52": 61.75,
+   "edgeVsBaseline52": 0.188
+  },
+  {
+   "score": 0,
+   "count": 19,
+   "pctOfTotal": 0,
+   "avgFwd26": 17.525,
+   "winRate26": 78.95,
+   "edgeVsBaseline26": 10.48,
+   "avgFwd52": 55.221,
+   "winRate52": 78.95,
+   "edgeVsBaseline52": 38.891
+  },
+  {
+   "score": 1,
+   "count": 71878,
+   "pctOfTotal": 18.64,
+   "avgFwd26": 5.238,
+   "winRate26": 57.15,
+   "edgeVsBaseline26": -1.807,
+   "avgFwd52": 12.932,
+   "winRate52": 61.06,
+   "edgeVsBaseline52": -3.398
+  },
+  {
+   "score": 2,
+   "count": 28,
+   "pctOfTotal": 0.01,
+   "avgFwd26": 8.511,
+   "winRate26": 46.43,
+   "edgeVsBaseline26": 1.465,
+   "avgFwd52": 62.545,
+   "winRate52": 71.43,
+   "edgeVsBaseline52": 46.216
+  },
+  {
+   "score": 3,
+   "count": 181206,
+   "pctOfTotal": 46.99,
+   "avgFwd26": 7.501,
+   "winRate26": 60.8,
+   "edgeVsBaseline26": 0.456,
+   "avgFwd52": 17.174,
+   "winRate52": 65.09,
+   "edgeVsBaseline52": 0.844
+  }
+ ],
+ "generatedAt": "2026-10-16T14:14:17.909Z"
+}

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS LONGTERM-MIDPOINT-TERMINAL</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1200px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+.stat-row{display:flex;gap:24px;flex-wrap:wrap;margin:14px 0 20px;}
+.stat b{font-family:var(--head);font-size:20px;color:var(--bright);display:block;}
+.stat span{font-size:8.5px;color:var(--muted);letter-spacing:1px;}
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+select,input[type=text]{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10.5px;padding:7px 10px;border-radius:4px;}
+.chip{font-family:var(--mono);font-size:10.5px;padding:7px 12px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;border-radius:4px;}
+.chip.active{border-color:var(--gold);color:var(--gold);background:rgba(240,192,64,.08);}
+table{width:100%;border-collapse:collapse;font-size:10.5px;}
+th{font-family:var(--head);font-size:8px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:7px 6px;border-bottom:1px solid rgba(14,116,144,.15);}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;max-height:650px;overflow-y:auto;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.source-note a{color:var(--accent);}
+.sym{color:var(--accent);cursor:pointer;font-weight:600;}
+.sym:hover{text-decoration:underline;}
+.sig{display:inline-block;width:20px;text-align:center;font-weight:700;}
+.sig.bull{color:var(--green);} .sig.bear{color:var(--red);} .sig.neutral{color:var(--muted);}
+.score-badge{font-family:var(--head);font-size:11px;padding:3px 8px;border-radius:3px;display:inline-block;min-width:28px;text-align:center;}
+.score-pos{background:rgba(185,28,28,.12);color:var(--red);}
+.score-neg{background:rgba(21,128,61,.12);color:var(--green);}
+.score-zero{background:rgba(95,114,119,.12);color:var(--muted);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.modal{display:none;position:fixed;inset:0;background:rgba(10,20,25,0.55);z-index:500;align-items:center;justify-content:center;padding:12px;}
+.modal.open{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--accent);border-radius:6px;width:100%;max-width:800px;max-height:92vh;overflow-y:auto;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);}
+.modal-sym{font-family:var(--head);font-size:14px;color:var(--accent);letter-spacing:2px;}
+.modal-close{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;}
+.modal-body{padding:16px 18px;}
+.modal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.mstat{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:8px 10px;}
+.mstat-label{font-size:8.5px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.mstat-value{font-family:var(--head);font-size:13px;color:var(--bright);margin-top:2px;}
+#liveBtn{font-family:var(--mono);font-size:10px;padding:7px 12px;border:1px solid var(--accent);color:var(--accent);background:transparent;cursor:pointer;border-radius:4px;margin-bottom:10px;}
+#liveBtn:hover{background:var(--accent);color:#fff;}
+#liveStatus{font-size:9.5px;color:var(--muted);margin-left:8px;}
+canvas#modalChart{width:100%!important;height:220px!important;}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">LONGTERM-MIDPOINT-TERMINAL</div><div class="logo-sub">JAHRES-KONFLUENZ: 1Y / 3Y / 5Y / 10Y</div></div>
+  <div style="display:flex;gap:8px;">
+    <a class="back" href="index.html">⏱ Kurzfrist-Terminal</a>
+    <a class="back" href="longterm-backtest.html">📊 Backtest</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">Gleiche Methodik wie das <a href="index.html">Kurzfrist-Terminal</a> (Kurs über/unter dem
+  Hoch-Tief-Mittelpunkt eines Lookback-Fensters), aber auf <b>Jahres-Skala</b>: 1/3/5/10 Jahre statt 1/3/6 Monate/1 Jahr.
+  Eigener Datensatz (10 Jahre wöchentliche Kurshistorie, frisch gefetcht), eigenes Terminal wie gewünscht.<br>
+  <b>Anderer Befund als kurzfristig:</b> Der <a href="longterm-backtest.html">Backtest</a> zeigt auf dieser Skala
+  <b>kein Mean-Reversion-Übergewicht</b> wie beim Kurzfrist-Terminal -- stattdessen performen <b>beide Extreme</b>
+  (volle Bearish- UND volle Bullish-Konfluenz) besser als die Baseline, während das <b>gemischte</b> Signal
+  (Score ±1) am schlechtesten abschneidet. Andere Marktdynamik auf Jahres- vs. Wochen/Monats-Skala, kein
+  Widerspruch zum Kurzfrist-Befund.<br>
+  <b>10Y-Fenster:</b> wird im Snapshot gezeigt (braucht nur den aktuellen Stand), konnte aber NICHT backgetestet
+  werden -- mit nur 10 Jahren Rohdaten bleibt für ein 10-Jahres-Lookback-Fenster kein Spielraum für mehrere
+  unabhängige historische Testpunkte (dafür wären 15-20+ Jahre Daten nötig). Ehrlich als Lücke benannt, nicht
+  verschwiegen. Signal läuft auf dividendenbereinigtem Kurs (gleiche Korrektur wie im Kurzfrist-Terminal).</div>
+  <div class="stat-row">
+    <div class="stat"><b id="stat-total">—</b><span>TITEL GESAMT</span></div>
+    <div class="stat"><b id="stat-bear4">—</b><span>VOLLE BEARISH-KONFLUENZ (-4)</span></div>
+    <div class="stat"><b id="stat-bull4">—</b><span>VOLLE BULLISH-KONFLUENZ (+4)</span></div>
+    <div class="stat"><b id="stat-rsiover">—</b><span>RSI(52W) ÜBERVERKAUFT (&lt;30)</span></div>
+    <div class="stat"><b id="stat-asof">—</b><span>DATEN-STAND</span></div>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Symbol oder Name…">
+    <select id="indexFilter"><option value="ALL">Alle Indizes</option></select>
+    <button class="chip" id="fullOnlyBtn">Nur volle Konfluenz (±4)</button>
+    <button class="chip" id="rsiExtremeBtn" title="RSI(52 Wochen) unter 30 oder über 70 -- unabhängig vom Midpoint-Score.">Nur RSI-Extreme</button>
+  </div>
+  <div id="content" class="loading">Lade Jahres-Konfluenz-Snapshot…</div>
+  <div class="source-note">Quelle: gecachte wöchentliche 10-Jahres-Kurshistorie (Yahoo Finance), ~1510 S&amp;P500+DAX40-Titel
+  mit ausreichender Historie. Methodik und Backtest-Ergebnis: <a href="longterm-backtest.html">Longterm-Backtest-Report</a>.</div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-head"><span class="modal-sym" id="modalSym">—</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <button id="liveBtn" onclick="refreshLive()">⚡ Live-Kurs nachladen</button><span id="liveStatus"></span>
+      <div class="modal-stats">
+        <div class="mstat"><div class="mstat-label">Kurs (Stand)</div><div class="mstat-value" id="m-price">—</div></div>
+        <div class="mstat"><div class="mstat-label">Score</div><div class="mstat-value" id="m-score">—</div></div>
+        <div class="mstat"><div class="mstat-label">Sektor</div><div class="mstat-value" id="m-sector" style="font-size:10px">—</div></div>
+        <div class="mstat"><div class="mstat-label">Index</div><div class="mstat-value" id="m-index" style="font-size:10px">—</div></div>
+      </div>
+      <div id="m-signals" style="font-size:11px;margin-bottom:12px;"></div>
+      <canvas id="modalChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+const PROXY = 'https://theserver-open-ai.replit.app';
+const WINDOWS = [{key:'1Y',w:52},{key:'3Y',w:156},{key:'5Y',w:260},{key:'10Y',w:520}];
+let SNAPSHOT = null, PRICEHIST = null, rows = [], sortKey='depth', sortDir='asc', fullOnly=false, rsiExtremeOnly=false;
+let modalChart = null, modalSym = null;
+
+function signalAt(closes, i, w) {
+  const start = i - w + 1;
+  if (start < 0) return null;
+  const slice = closes.slice(start, i+1);
+  const hi = Math.max(...slice), lo = Math.min(...slice);
+  const mid = (hi+lo)/2, px = closes[i];
+  return px > mid ? 1 : (px < mid ? -1 : 0);
+}
+
+function sigIcon(s) { return s===1 ? '<span class="sig bull">▲</span>' : s===-1 ? '<span class="sig bear">▼</span>' : '<span class="sig neutral">●</span>'; }
+function scoreBadge(score) {
+  const cls = score>0 ? 'score-pos' : score<0 ? 'score-neg' : 'score-zero';
+  return `<span class="score-badge ${cls}">${score>0?'+':''}${score}</span>`;
+}
+function rsiBadge(rsi) {
+  if (rsi == null) return '<span class="score-zero score-badge">—</span>';
+  if (rsi < 30) return `<span class="score-badge score-neg">${rsi.toFixed(0)} überverkauft</span>`;
+  if (rsi > 70) return `<span class="score-badge score-pos">${rsi.toFixed(0)} überkauft</span>`;
+  return `<span class="score-badge score-zero">${rsi.toFixed(0)}</span>`;
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const idx = document.getElementById('indexFilter').value;
+  let filtered = rows.filter(r => {
+    const mQ = !q || r.symbol.toLowerCase().includes(q) || r.name.toLowerCase().includes(q);
+    const mI = idx==='ALL' || r.index===idx;
+    const mF = !fullOnly || Math.abs(r.score)===4;
+    const mRSI = !rsiExtremeOnly || (r.rsi52w!=null && (r.rsi52w<30 || r.rsi52w>70));
+    return mQ && mI && mF && mRSI;
+  });
+  filtered.sort((a,b) => {
+    let av=a[sortKey], bv=b[sortKey];
+    if (av==null) av = sortDir==='asc' ? Infinity : -Infinity;
+    if (bv==null) bv = sortDir==='asc' ? Infinity : -Infinity;
+    if (typeof av==='string') return sortDir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sortDir==='asc' ? av-bv : bv-av;
+  });
+  document.getElementById('content').innerHTML = `<div class="table-wrap"><table>
+    <thead><tr>
+      <th data-k="symbol">Symbol</th><th data-k="name">Name</th><th data-k="sector">Sektor</th>
+      <th class="num" data-k="price">Kurs</th>
+      <th title="1 Jahr (52 Wochen)">1Y</th><th title="3 Jahre (156 Wochen)">3Y</th>
+      <th title="5 Jahre (260 Wochen)">5Y</th><th title="10 Jahre (520 Wochen, nur Snapshot, nicht backgetestet)">10Y</th>
+      <th class="num" data-k="score">Score</th>
+      <th class="num" data-k="depth" title="-1 = genau am Tief, 0 = am Mittelpunkt, +1 = genau am Hoch -- Durchschnitt über alle 4 Fenster." style="cursor:help">Tiefe ⓘ</th>
+      <th class="num" data-k="targetUpsidePct" title="Analysten-Kursziel (Mittelwert) ggü. aktuellem Kurs">Ziel-Upside</th>
+      <th class="num" data-k="rsi52w" title="RSI(52) auf Wochenbasis -- ein Jahr Lookback, passend zur Jahres-Skala dieses Terminals. <30 = überverkauft, >70 = überkauft." style="cursor:help">RSI(52W) ⓘ</th>
+    </tr></thead>
+    <tbody>${filtered.map(r => `<tr>
+      <td><span class="sym" onclick="openModal('${r.symbol}')">${r.symbol}</span></td>
+      <td>${r.name}</td><td style="color:var(--muted);font-size:9.5px;">${r.sector}</td>
+      <td class="num">${r.price.toFixed(2)}</td>
+      <td>${sigIcon(r.signals['1Y'])}</td><td>${sigIcon(r.signals['3Y'])}</td>
+      <td>${sigIcon(r.signals['5Y'])}</td><td>${sigIcon(r.signals['10Y'])}</td>
+      <td class="num">${scoreBadge(r.score)}</td>
+      <td class="num">${r.depth!=null?r.depth.toFixed(2):'—'}</td>
+      <td class="num ${r.targetUpsidePct>0?'sig bull':r.targetUpsidePct<0?'sig bear':''}">${r.targetUpsidePct!=null?(r.targetUpsidePct>0?'+':'')+r.targetUpsidePct+'%':'—'}</td>
+      <td class="num">${rsiBadge(r.rsi52w)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div><div style="font-size:9px;color:var(--muted);margin-top:8px;">${filtered.length} von ${rows.length} Titeln</div>`;
+  document.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.k;
+    if (sortKey===k) sortDir = sortDir==='asc'?'desc':'asc'; else { sortKey=k; sortDir = 'asc'; }
+    render();
+  }));
+}
+
+function openModal(sym) {
+  const r = rows.find(x => x.symbol===sym);
+  if (!r) return;
+  modalSym = sym;
+  document.getElementById('modalSym').textContent = sym + ' — ' + r.name;
+  document.getElementById('m-price').textContent = r.price.toFixed(2) + ' (' + r.asOfDate + ')';
+  document.getElementById('m-score').innerHTML = scoreBadge(r.score);
+  document.getElementById('m-sector').textContent = r.sector || '—';
+  document.getElementById('m-index').textContent = r.index || '—';
+  document.getElementById('m-signals').innerHTML = WINDOWS.map(w => `${w.key}: ${sigIcon(r.signals[w.key])}`).join('&nbsp;&nbsp;&nbsp;')
+    + (r.rsi52w!=null ? `&nbsp;&nbsp;&nbsp;RSI(52W): ${rsiBadge(r.rsi52w)}` : '');
+  document.getElementById('liveStatus').textContent = '';
+  document.getElementById('modal').classList.add('open');
+  loadChartWhenReady(sym);
+}
+function loadChartWhenReady(sym) {
+  if (PRICEHIST) { drawModalChart(sym); return; }
+  const canvas = document.getElementById('modalChart');
+  canvas.style.display = 'none';
+  let status = document.getElementById('chartLoadStatus');
+  if (!status) {
+    status = document.createElement('div');
+    status.id = 'chartLoadStatus';
+    status.style.cssText = 'font-size:10.5px;color:var(--muted);padding:20px 0;text-align:center;';
+    canvas.parentNode.insertBefore(status, canvas);
+  }
+  status.textContent = 'Lade 10-Jahres-Kurshistorie (30MB, einmalig)…';
+  loadPriceHist().then(() => {
+    status.remove();
+    canvas.style.display = 'block';
+    if (modalSym === sym) drawModalChart(sym);
+  }).catch(e => {
+    status.innerHTML = '⚠ Kurshistorie konnte nicht geladen werden (' + e.message + ') — <a href="#" onclick="loadChartWhenReady(\'' + sym + '\');return false;" style="color:var(--accent)">erneut versuchen</a>';
+  });
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  if (modalChart) { modalChart.destroy(); modalChart = null; }
+}
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id==='modal') closeModal(); });
+
+function drawModalChart(sym) {
+  const series = PRICEHIST[sym]?.series;
+  if (!series) { document.getElementById('modalChart').style.display='none'; return; }
+  const labels = series.map(r => r[0]);
+  const closes = series.map(r => r[2]); // dividend-adjusted -- same basis the score/depth/RSI use
+  const n = closes.length;
+  const mid10y = (() => { const s = closes.slice(Math.max(0,n-520)); return (Math.max(...s)+Math.min(...s))/2; })();
+  if (modalChart) modalChart.destroy();
+  const ctx = document.getElementById('modalChart').getContext('2d');
+  modalChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Kurs (dividendenbereinigt)', data: closes, borderColor: '#0e7490', borderWidth: 1.5, pointRadius: 0, tension: 0.15 },
+      { label: '10Y-Mittelpunkt', data: labels.map(()=>mid10y), borderColor: '#b45309', borderWidth: 1, borderDash: [5,4], pointRadius: 0 },
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+      plugins: { legend: { display: true, labels: { font: { family: 'JetBrains Mono', size: 9 }, color: '#5f7277' } } },
+      scales: {
+        x: { ticks: { color: '#5f7277', font: { family: 'JetBrains Mono', size: 8 }, maxTicksLimit: 8 }, grid: { color: 'rgba(14,116,144,.1)' } },
+        y: { ticks: { color: '#5f7277', font: { family: 'JetBrains Mono', size: 8 } }, grid: { color: 'rgba(14,116,144,.1)' } },
+      }}
+  });
+}
+
+async function refreshLive() {
+  if (!modalSym) return;
+  const status = document.getElementById('liveStatus');
+  status.textContent = 'lade…';
+  try {
+    const res = await fetch(`${PROXY}/eod/realtime/${modalSym}`, { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    const live = parseFloat(j?.close);
+    if (!isFinite(live) || live <= 0) throw new Error('keine gültige Live-Notiz');
+    const series = PRICEHIST[modalSym]?.series;
+    const closes = series.map(r => r[2]);
+    const liveCloses = closes.slice(0, -1).concat([live]);
+    const n = liveCloses.length;
+    const liveSignals = {};
+    let liveScore = 0;
+    WINDOWS.forEach(w => { const s = signalAt(liveCloses, n-1, w.w); liveSignals[w.key] = s; liveScore += s||0; });
+    document.getElementById('m-price').textContent = live.toFixed(2) + ' (live)';
+    document.getElementById('m-score').innerHTML = scoreBadge(liveScore);
+    document.getElementById('m-signals').innerHTML = WINDOWS.map(w => `${w.key}: ${sigIcon(liveSignals[w.key])}`).join('&nbsp;&nbsp;&nbsp;');
+    status.textContent = '✓ aktualisiert';
+  } catch (e) {
+    status.textContent = '⚠ ' + e.message;
+  }
+}
+
+let pricehistPromise = null;
+function loadPriceHist() {
+  if (pricehistPromise) return pricehistPromise;
+  pricehistPromise = fetch('data/price-history-10y-data.json', { signal: AbortSignal.timeout(90000) })
+    .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+    .then(j => { PRICEHIST = j; return j; })
+    .catch(e => { pricehistPromise = null; throw e; });
+  return pricehistPromise;
+}
+
+async function load() {
+  const content = document.getElementById('content');
+  try {
+    const snapRes = await fetch('data/longterm-snapshot.json', { signal: AbortSignal.timeout(20000) });
+    if (!snapRes.ok) throw new Error('Snapshot HTTP ' + snapRes.status);
+    SNAPSHOT = await snapRes.json();
+    rows = SNAPSHOT.rows;
+
+    document.getElementById('stat-total').textContent = rows.length.toLocaleString('de-DE');
+    document.getElementById('stat-bear4').textContent = rows.filter(r=>r.score===-4).length.toLocaleString('de-DE');
+    document.getElementById('stat-bull4').textContent = rows.filter(r=>r.score===4).length.toLocaleString('de-DE');
+    document.getElementById('stat-rsiover').textContent = rows.filter(r=>r.rsi52w!=null && r.rsi52w<30).length.toLocaleString('de-DE');
+    document.getElementById('stat-asof').textContent = SNAPSHOT.asOfDate;
+
+    const indices = [...new Set(rows.map(r=>r.index).filter(Boolean))].sort();
+    document.getElementById('indexFilter').innerHTML = '<option value="ALL">Alle Indizes</option>' + indices.map(i=>`<option value="${i}">${i}</option>`).join('');
+
+    document.getElementById('search').addEventListener('input', render);
+    document.getElementById('indexFilter').addEventListener('change', render);
+    document.getElementById('fullOnlyBtn').addEventListener('click', () => { fullOnly=!fullOnly; document.getElementById('fullOnlyBtn').classList.toggle('active',fullOnly); render(); });
+    document.getElementById('rsiExtremeBtn').addEventListener('click', () => { rsiExtremeOnly=!rsiExtremeOnly; document.getElementById('rsiExtremeBtn').classList.toggle('active',rsiExtremeOnly); render(); });
+    loadPriceHist().catch(() => {});
+
+    render();
+  } catch (e) {
+    content.innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>

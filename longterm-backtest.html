@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS LONGTERM-BACKTEST // Jahres-Konfluenz</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1100px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:900px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.stat-row{display:flex;gap:24px;flex-wrap:wrap;margin:14px 0 20px;}
+.stat b{font-family:var(--head);font-size:20px;color:var(--bright);display:block;}
+.stat span{font-size:8.5px;color:var(--muted);letter-spacing:1px;}
+canvas{background:var(--card);border:1px solid var(--border);border-radius:6px;width:100%;height:auto;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:16px;}
+th{font-family:var(--head);font-size:8px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:7px 6px;border-bottom:1px solid rgba(14,116,144,.15);}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);} .thin{color:var(--muted);font-style:italic;}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">LONGTERM-BACKTEST</div><div class="logo-sub">JAHRES-KONFLUENZ: 1Y / 3Y / 5Y</div></div>
+  <div style="display:flex;gap:8px;">
+    <a class="back" href="longterm.html">← Terminal</a>
+    <a class="back" href="midpoint-backtest.html">⏱ Kurzfrist-Backtest</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">Gleiche lookahead-freie Methodik wie der <a href="midpoint-backtest.html">Kurzfrist-Backtest</a>,
+  aber mit 1Y/3Y/5Y-Fenstern (statt 1M/3M/6M/1Y) und längeren Vorwärtsrenditen-Horizonten (26/52 Wochen statt 4/13).
+  Das <b>10Y-Fenster fehlt hier bewusst</b>: mit nur 10 Jahren Rohdaten bleibt für ein 10-Jahres-Lookback-Fenster
+  praktisch kein Spielraum für mehrere unabhängige historische Testpunkte -- dafür wären 15-20+ Jahre Daten nötig.
+  Wird im <a href="longterm.html">Terminal</a> trotzdem als aktueller Snapshot gezeigt (braucht nur den heutigen
+  Stand, keine Historie davon), nur eben nicht hier getestet.</div>
+  <div class="stat-row">
+    <div class="stat"><b id="stat-obs">—</b><span>BEOBACHTUNGEN (SYMBOL×WOCHE)</span></div>
+    <div class="stat"><b id="stat-baseline">—</b><span>UNBEDINGTE Ø-RENDITE 52W (BASELINE)</span></div>
+  </div>
+  <div id="finding" class="finding"></div>
+  <canvas id="chart" width="900" height="380"></canvas>
+  <h2>Ergebnis nach Konfluenz-Score</h2>
+  <div id="content" class="loading">Lade Backtest-Ergebnisse…</div>
+  <div class="caveat" id="caveat"></div>
+  <div class="source-note">Quelle: gecachte wöchentliche 10-Jahres-Kurshistorie (Yahoo Finance), S&amp;P500+DAX40.
+  Konfluenz-Score = Summe aus 3 Signalen (1Y/3Y/5Y, je +1/-1/0), Bereich -3 bis +3. Vorwärtsrendite = Total Return
+  (dividendenbereinigt) über 26 bzw. 52 Wochen ab Signalzeitpunkt.</div>
+</div>
+<script>
+async function load() {
+  const content = document.getElementById('content');
+  try {
+    const res = await fetch('data/longterm-backtest-result.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    document.getElementById('stat-obs').textContent = d.totalObs.toLocaleString('de-DE');
+    document.getElementById('stat-baseline').textContent = '+' + d.baselineAvg['52'].toFixed(2) + '%';
+
+    const bear3 = d.results.find(r => r.score === -3);
+    const bull3 = d.results.find(r => r.score === 3);
+    const mid1 = d.results.find(r => r.score === 1);
+    const thinScores = d.results.filter(r => r.pctOfTotal < 1).map(r => r.score);
+
+    document.getElementById('finding').innerHTML = `<b>Befund:</b> Anders als im Kurzfrist-Backtest gibt es hier
+      <b>kein eindeutiges Mean-Reversion-Übergewicht</b>. Volle Bearish-Konfluenz (Score -3, ${bear3.count.toLocaleString('de-DE')}
+      Beobachtungen) liegt bei ${bear3.avgFwd52>=0?'+':''}${bear3.avgFwd52}% über 52 Wochen
+      (${bear3.edgeVsBaseline52>=0?'+':''}${bear3.edgeVsBaseline52}pp ggü. Baseline), volle Bullish-Konfluenz
+      (Score +3, ${bull3.count.toLocaleString('de-DE')} Beobachtungen) liegt mit ${bull3.avgFwd52>=0?'+':''}${bull3.avgFwd52}%
+      (${bull3.edgeVsBaseline52>=0?'+':''}${bull3.edgeVsBaseline52}pp) fast gleich -- <b>beide Extreme schlagen die
+      Baseline ungefähr gleich stark</b>. Das <b>gemischte</b> Signal (Score +1, uneindeutige Konfluenz) schneidet
+      dagegen am schlechtesten ab: ${mid1.avgFwd52}% (${mid1.edgeVsBaseline52}pp). Interpretation: auf Jahres-Skala
+      scheint eine KLARE Konfluenz (in jede Richtung) informativer zu sein als ein uneindeutiges Signal -- anders als
+      kurzfristig, wo spezifisch Bearish-Konfluenz die beste Vorwärtsrendite zeigte. Kein Widerspruch, andere
+      Marktdynamik auf anderer Zeitskala. Scores ${thinScores.join(', ')} haben unter 1% der Beobachtungen (nur bei
+      exakt neutralem Signal in mind. einem Fenster möglich) -- nicht überinterpretieren.`;
+
+    const canvas = document.getElementById('chart');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height, pad = 50;
+    ctx.clearRect(0,0,W,H);
+    const sorted = d.results.slice().sort((a,b)=>a.score-b.score);
+    const vals = sorted.map(r=>r.avgFwd52);
+    const minV = Math.min(0,...vals), maxV = Math.max(...vals);
+    const bw = (W-2*pad)/sorted.length;
+    const py = v => H-pad - (v-minV)/(maxV-minV) * (H-2*pad);
+    ctx.strokeStyle = 'rgba(14,116,144,.3)'; ctx.beginPath(); ctx.moveTo(pad,py(0)); ctx.lineTo(W-pad,py(0)); ctx.stroke();
+    sorted.forEach((r,i) => {
+      const x = pad + i*bw + bw*0.15, w = bw*0.7;
+      const y0 = py(0), y1 = py(r.avgFwd52);
+      ctx.fillStyle = Math.abs(r.score)===3 ? 'rgba(14,116,144,0.7)' : r.score===0 ? 'rgba(95,114,119,0.6)' : 'rgba(185,28,28,0.5)';
+      ctx.fillRect(x, Math.min(y0,y1), w, Math.abs(y1-y0));
+      ctx.fillStyle = '#1c2e34'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'center';
+      ctx.fillText('Score ' + r.score, x+w/2, H-pad+16);
+    });
+    ctx.fillStyle = '#5f7277'; ctx.font='9px JetBrains Mono'; ctx.textAlign='left';
+    ctx.fillText('Ø Vorwärtsrendite 52 Wochen nach Konfluenz-Score (blau=Extreme, rot=gemischt/schwach)', pad, 20);
+
+    content.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Score</th><th class="num">N</th><th class="num">% aller Fälle</th>
+      <th class="num">Ø Rendite 26W</th><th class="num">Trefferquote 26W</th><th class="num">Edge 26W</th>
+      <th class="num">Ø Rendite 52W</th><th class="num">Trefferquote 52W</th><th class="num">Edge 52W</th></tr></thead>
+      <tbody>${sorted.map(r => {
+        const thin = r.pctOfTotal < 1;
+        return `<tr class="${thin?'thin':''}">
+        <td>${r.score>0?'+':''}${r.score}</td><td class="num">${r.count.toLocaleString('de-DE')}</td>
+        <td class="num">${r.pctOfTotal}%${thin?' (dünn)':''}</td>
+        <td class="num ${r.avgFwd26>=0?'pos':'neg'}">${r.avgFwd26>=0?'+':''}${r.avgFwd26}%</td>
+        <td class="num">${r.winRate26}%</td>
+        <td class="num ${r.edgeVsBaseline26>=0?'pos':'neg'}">${r.edgeVsBaseline26>=0?'+':''}${r.edgeVsBaseline26}pp</td>
+        <td class="num ${r.avgFwd52>=0?'pos':'neg'}">${r.avgFwd52>=0?'+':''}${r.avgFwd52}%</td>
+        <td class="num">${r.winRate52}%</td>
+        <td class="num ${r.edgeVsBaseline52>=0?'pos':'neg'}">${r.edgeVsBaseline52>=0?'+':''}${r.edgeVsBaseline52}pp</td>
+      </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+
+    document.getElementById('caveat').innerHTML = `<b>Einschränkungen, ehrlich benannt:</b><br>
+      • Gleicher 2016-2026-Zeitraum, überwiegend Bullenmarkt (Baseline-Trefferquote bereits ${d.baselineWin['52'].toFixed(1)}%
+      über 52 Wochen ohne jedes Signal).<br>
+      • Nur Large-Caps (S&amp;P500 + DAX40).<br>
+      • ${d.totalObs.toLocaleString('de-DE')} Beobachtungen sind NICHT unabhängig (überlappende Jahres-Fenster, gemeinsame
+      Marktbewegungen) -- deutlich weniger tatsächlich unabhängige Testfälle als die rohe Zahl suggeriert.<br>
+      • 10Y-Fenster nicht testbar mit diesem Datensatz (siehe oben) -- nur 1Y/3Y/5Y geprüft.`;
+  } catch (e) {
+    content.innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
