@@ -1,0 +1,23 @@
+{
+ "corrWindow": 52,
+ "rsLookback": 26,
+ "horizon": 13,
+ "corrMin": 0.5,
+ "topPairsPerWeek": 30,
+ "weeksTested": 197,
+ "pairStats": {
+  "n": 176,
+  "avg": 3.668,
+  "std": 17.869,
+  "winRate": 59.66,
+  "sharpeLike": 0.205
+ },
+ "controlStats": {
+  "n": 197,
+  "avg": 2.462,
+  "std": 8.745,
+  "winRate": 60.91,
+  "sharpeLike": 0.282
+ },
+ "generatedAt": "2026-10-16T17:25:04.270Z"
+}

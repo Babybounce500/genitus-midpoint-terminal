@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS PAIRS-TRADING LONG/SHORT</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.warn{background:rgba(185,28,28,.08);border-left:2px solid var(--red);padding:10px 14px;margin:14px 0;font-size:10.5px;line-height:1.7;}
+.stat-row{display:flex;gap:24px;flex-wrap:wrap;margin:14px 0 20px;}
+.stat b{font-family:var(--head);font-size:20px;color:var(--bright);display:block;}
+.stat span{font-size:8.5px;color:var(--muted);letter-spacing:1px;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;}
+th{font-family:var(--head);font-size:8px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:7px 6px;border-bottom:1px solid rgba(14,116,144,.15);}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;max-height:650px;overflow-y:auto;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.tag{font-family:var(--head);font-size:9px;padding:2px 7px;border-radius:3px;}
+.tag.long{background:rgba(21,128,61,.12);color:var(--green);}
+.tag.short{background:rgba(185,28,28,.12);color:var(--red);}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">PAIRS-TRADING LONG/SHORT</div><div class="logo-sub">KORRELATIONS-GEHEDGTE PAARE</div></div>
+  <div style="display:flex;gap:8px;">
+    <a class="back" href="relative-strength.html">📈 Relative Stärke</a>
+    <a class="back" href="index.html">⏱ Midpoint</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">Erweitert das <a href="relative-strength.html">Relative-Stärke-Terminal</a>: statt zwei unabhängige
+  Long/Short-Wetten zeigt dieses Tool PAARE, bei denen beide Seiten real korreliert sind (Return-Korrelation ≥0.5
+  über 52 Wochen) -- Long die relativ stärkere Seite, Short die relativ schwächere, Markt-/Sektor-Bewegung
+  dadurch teilweise herausgehebelt.</div>
+  <div class="warn" id="finding">Lade Backtest-Ergebnis…</div>
+  <div class="stat-row">
+    <div class="stat"><b id="stat-total">—</b><span>QUALIFIZIERENDE PAARE (KORR ≥0.5)</span></div>
+    <div class="stat"><b id="stat-asof">—</b><span>DATEN-STAND</span></div>
+  </div>
+  <div id="content" class="loading">Lade Paar-Kandidaten…</div>
+  <div class="source-note">Quelle: gecachte wöchentliche Kurshistorie, dividendenbereinigt. Korrelation = Pearson
+  über trailing 52 Wochen Log-Returns. RS-Gap = Differenz der Perzentil-Ränge (trailing 6M-Rendite) zwischen
+  den beiden Seiten. Score = Korrelation × RS-Gap.</div>
+</div>
+<script>
+async function load() {
+  const content = document.getElementById('content');
+  try {
+    const [snapRes, btRes] = await Promise.all([
+      fetch('data/pairs-snapshot.json', { signal: AbortSignal.timeout(20000) }),
+      fetch('data/pairs-backtest-result.json', { signal: AbortSignal.timeout(20000) }),
+    ]);
+    if (!snapRes.ok) throw new Error('Snapshot HTTP ' + snapRes.status);
+    const d = await snapRes.json();
+    const bt = btRes.ok ? await btRes.json() : null;
+
+    document.getElementById('stat-total').textContent = d.totalCandidatePairs.toLocaleString('de-DE');
+    document.getElementById('stat-asof').textContent = d.asOfDate;
+
+    if (bt) {
+      document.getElementById('finding').innerHTML = `<b>Validiert, bevor ausgeliefert:</b> Ein EINZELNES "bestes"
+        Paar ist zu verrauscht zum Handeln (Std.abw. der wöchentlichen Spread-Rendite >50% in unserem Test) --
+        das idiosynkratische Risiko von nur 2 Aktien ist zu hoch. Als diversifiziertes Korb aus ${bt.topPairsPerWeek}
+        Paaren gleichzeitig: Ø Spread-Rendite +${bt.pairStats.avg}% über 13 Wochen (höher als die einfache
+        Dezil-Spread-Strategie mit +${bt.controlStats.avg}%), aber auch deutlich volatiler
+        (Std.abw. ${bt.pairStats.std} vs. ${bt.controlStats.std}) -- Sharpe-ähnlich ${bt.pairStats.sharpeLike}
+        vs. ${bt.controlStats.sharpeLike} für die einfache Dezil-Spread. <b>Ehrliches Fazit: kein klarer Vorteil
+        ggü. der simplen Relative-Stärke-Strategie</b> auf risikoadjustierter Basis -- höhere Rohrendite, aber
+        auch höheres Risiko. Nur als diversifiziertes Korb aus vielen Paaren sinnvoll, nie als Einzelwette.`;
+    }
+
+    renderTable(d.rows);
+  } catch (e) {
+    content.innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+function renderTable(rows) {
+  document.getElementById('content').innerHTML = `<div class="table-wrap"><table>
+    <thead><tr><th>Long <span class="tag long">LONG</span></th><th class="num">6M-Rendite</th>
+    <th>Short <span class="tag short">SHORT</span></th><th class="num">6M-Rendite</th>
+    <th class="num">Korrelation</th><th class="num">RS-Gap</th><th class="num">Score</th></tr></thead>
+    <tbody>${rows.map(p => `<tr>
+      <td>${p.long} <span style="color:var(--muted);font-size:9px;">${p.longName}</span></td>
+      <td class="num pos">+${p.longRetPct}%</td>
+      <td>${p.short} <span style="color:var(--muted);font-size:9px;">${p.shortName}</span></td>
+      <td class="num neg">${p.shortRetPct}%</td>
+      <td class="num">${p.corr}</td>
+      <td class="num">${p.rsGap}</td>
+      <td class="num">${p.score}</td>
+    </tr>`).join('')}</tbody>
+  </table></div><div style="font-size:9px;color:var(--muted);margin-top:8px;">Top ${rows.length} Paare nach Score,
+  zum Diversifizieren über viele Paare gedacht, nicht als Einzelempfehlung.</div>`;
+}
+load();
+</script>
+</body>
+</html>
