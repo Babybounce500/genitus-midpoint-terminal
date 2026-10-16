@@ -1,0 +1,69 @@
+{
+ "lookbackWeeks": 26,
+ "horizonWeeks": 13,
+ "totalObs": 307071,
+ "results": [
+  {
+   "decile": 1,
+   "count": 30551,
+   "avgFwd13w": 4.385,
+   "winRate": 55.03
+  },
+  {
+   "decile": 2,
+   "count": 30551,
+   "avgFwd13w": 3.612,
+   "winRate": 57.16
+  },
+  {
+   "decile": 3,
+   "count": 30551,
+   "avgFwd13w": 3.266,
+   "winRate": 57.78
+  },
+  {
+   "decile": 4,
+   "count": 30551,
+   "avgFwd13w": 3.365,
+   "winRate": 58.37
+  },
+  {
+   "decile": 5,
+   "count": 30551,
+   "avgFwd13w": 3.231,
+   "winRate": 58.31
+  },
+  {
+   "decile": 6,
+   "count": 30551,
+   "avgFwd13w": 3.449,
+   "winRate": 59.19
+  },
+  {
+   "decile": 7,
+   "count": 30551,
+   "avgFwd13w": 3.437,
+   "winRate": 59.3
+  },
+  {
+   "decile": 8,
+   "count": 30551,
+   "avgFwd13w": 3.656,
+   "winRate": 59.13
+  },
+  {
+   "decile": 9,
+   "count": 30551,
+   "avgFwd13w": 4.085,
+   "winRate": 59.18
+  },
+  {
+   "decile": 10,
+   "count": 32112,
+   "avgFwd13w": 6.462,
+   "winRate": 58.26
+  }
+ ],
+ "longShortSpread13w": 2.077,
+ "generatedAt": "2026-10-16T14:45:14.875Z"
+}

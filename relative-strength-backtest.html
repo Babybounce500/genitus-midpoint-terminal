@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS RS-BACKTEST // Cross-Sectional Momentum</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1100px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:900px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.stat-row{display:flex;gap:24px;flex-wrap:wrap;margin:14px 0 20px;}
+.stat b{font-family:var(--head);font-size:20px;color:var(--bright);display:block;}
+.stat span{font-size:8.5px;color:var(--muted);letter-spacing:1px;}
+canvas{background:var(--card);border:1px solid var(--border);border-radius:6px;width:100%;height:auto;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:16px;}
+th{font-family:var(--head);font-size:8px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:7px 6px;border-bottom:1px solid rgba(14,116,144,.15);}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">RS-BACKTEST</div><div class="logo-sub">CROSS-SECTIONAL MOMENTUM, 2021-2026</div></div>
+  <a class="back" href="relative-strength.html">← Terminal</a>
+</header>
+<div class="wrap">
+  <div class="intro">Klassischer Jegadeesh/Titman-Momentum-Test: zu jedem Zeitpunkt alle Titel nach trailing
+  6-Monats-Rendite (dividendenbereinigt) in Dezile sortiert, dann die Vorwärtsrendite der nächsten 13 Wochen pro
+  Dezil gemessen. Lookahead-frei (Ranking nur aus Daten bis zum jeweiligen Zeitpunkt), gleicher Datensatz wie die
+  Midpoint-Backtests (S&amp;P500+DAX40, 5 Jahre wöchentlich).</div>
+  <div class="stat-row">
+    <div class="stat"><b id="stat-obs">—</b><span>BEOBACHTUNGEN</span></div>
+    <div class="stat"><b id="stat-spread">—</b><span>LONG-SHORT-SPREAD (D10-D1), 13W</span></div>
+  </div>
+  <div id="finding" class="finding"></div>
+  <canvas id="chart" width="900" height="380"></canvas>
+  <h2>Ergebnis nach Dezil</h2>
+  <div id="content" class="loading">Lade…</div>
+  <div class="caveat" id="caveat"></div>
+  <div class="source-note">Dezil 1 = schwächste 10% nach trailing 6M-Rendite, Dezil 10 = stärkste 10%.
+  Vorwärtsrendite = Total Return über die nächsten 13 Wochen.</div>
+</div>
+<script>
+async function load() {
+  const content = document.getElementById('content');
+  try {
+    const res = await fetch('data/rs-backtest-result.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    document.getElementById('stat-obs').textContent = d.totalObs.toLocaleString('de-DE');
+    document.getElementById('stat-spread').textContent = (d.longShortSpread13w>=0?'+':'')+d.longShortSpread13w+'pp';
+
+    const d1 = d.results.find(r=>r.decile===1), d10 = d.results.find(r=>r.decile===10);
+    const mid = d.results.filter(r=>r.decile>=3&&r.decile<=8);
+    const midAvg = +(mid.reduce((a,r)=>a+r.avgFwd13w,0)/mid.length).toFixed(2);
+
+    document.getElementById('finding').innerHTML = `<b>Befund:</b> Klassisches Momentum-Muster, nicht
+      Mean-Reversion wie bei den Midpoint-Terminals. <b>Dezil 10</b> (stärkste 6M-Performer,
+      ${d10.count.toLocaleString('de-DE')} Beobachtungen) zeigt die beste Vorwärtsrendite:
+      ${d10.avgFwd13w>=0?'+':''}${d10.avgFwd13w}% über 13 Wochen, Trefferquote ${d10.winRate}%. <b>Dezil 1</b>
+      (schwächste 10%) liegt bei ${d1.avgFwd13w>=0?'+':''}${d1.avgFwd13w}% -- auch über den mittleren Dezilen
+      (Ø ${midAvg}%), aber deutlich unter Dezil 10. Der <b>Long-Short-Spread</b> (D10 long, D1 short) beträgt
+      ${d.longShortSpread13w}pp über 13 Wochen -- der eigentliche Faktor-Edge ist relativ (stark vs. schwach),
+      nicht dass Dezil 1 absolut schlecht abschneidet (es war im Testzeitraum im Schnitt klar positiv).`;
+
+    const canvas = document.getElementById('chart');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height, pad = 50;
+    ctx.clearRect(0,0,W,H);
+    const sorted = d.results.slice().sort((a,b)=>a.decile-b.decile);
+    const vals = sorted.map(r=>r.avgFwd13w);
+    const minV = 0, maxV = Math.max(...vals);
+    const bw = (W-2*pad)/sorted.length;
+    const py = v => H-pad - (v-minV)/(maxV-minV) * (H-2*pad);
+    sorted.forEach((r,i) => {
+      const x = pad + i*bw + bw*0.15, w = bw*0.7;
+      const y0 = py(0), y1 = py(r.avgFwd13w);
+      ctx.fillStyle = r.decile===10 ? 'rgba(21,128,61,0.75)' : r.decile===1 ? 'rgba(185,28,28,0.6)' : 'rgba(95,114,119,0.5)';
+      ctx.fillRect(x, Math.min(y0,y1), w, Math.abs(y1-y0));
+      ctx.fillStyle = '#1c2e34'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'center';
+      ctx.fillText('D'+r.decile, x+w/2, H-pad+16);
+    });
+    ctx.fillStyle = '#5f7277'; ctx.font='9px JetBrains Mono'; ctx.textAlign='left';
+    ctx.fillText('Ø Vorwärtsrendite 13 Wochen nach Dezil (grün=stärkste/Long, rot=schwächste/Short)', pad, 20);
+
+    content.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Dezil</th><th class="num">N</th><th class="num">Ø Rendite 13W</th><th class="num">Trefferquote</th></tr></thead>
+      <tbody>${sorted.map(r => `<tr>
+        <td>${r.decile}${r.decile===10?' (LONG)':r.decile===1?' (SHORT)':''}</td>
+        <td class="num">${r.count.toLocaleString('de-DE')}</td>
+        <td class="num ${r.avgFwd13w>=0?'pos':'neg'}">${r.avgFwd13w>=0?'+':''}${r.avgFwd13w}%</td>
+        <td class="num">${r.winRate}%</td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+
+    document.getElementById('caveat').innerHTML = `<b>Einschränkungen, ehrlich benannt:</b><br>
+      • Bullenmarkt-Zeitraum 2021-2026 -- JEDES Dezil war im Schnitt positiv, der Spread ist das eigentliche
+      Ergebnis, nicht die absoluten Zahlen.<br>
+      • Reale Short-Kosten (Leihgebühr, Dividendenausgleich an Verleiher, Margin) sind NICHT eingerechnet --
+      der 2.08pp-Spread ist vor Kosten, reale Netto-Rendite eines Long-Short-Portfolios liegt darunter.<br>
+      • Nur Large-Caps (S&amp;P500+DAX40), nur dieser 5-Jahres-Zeitraum.<br>
+      • Akademische Literatur zeigt Momentum-Crashes in scharfen Markterholungen (z.B. 2009) -- diese Strategie
+      hat ein bekanntes Tail-Risiko, das in einem überwiegend ruhigen Bullenmarkt kaum sichtbar wird.`;
+  } catch (e) {
+    content.innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>

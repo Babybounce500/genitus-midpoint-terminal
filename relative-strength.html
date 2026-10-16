@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS RELATIVE-STRENGTH LONG/SHORT-TERMINAL</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+.warn{background:rgba(185,28,28,.08);border-left:2px solid var(--red);padding:10px 14px;margin:14px 0;font-size:10.5px;line-height:1.7;color:var(--text);}
+.stat-row{display:flex;gap:24px;flex-wrap:wrap;margin:14px 0 20px;}
+.stat b{font-family:var(--head);font-size:20px;color:var(--bright);display:block;}
+.stat span{font-size:8.5px;color:var(--muted);letter-spacing:1px;}
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+input[type=text]{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10.5px;padding:7px 10px;border-radius:4px;}
+.chip{font-family:var(--mono);font-size:10.5px;padding:7px 12px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;border-radius:4px;}
+.chip.active{border-color:var(--gold);color:var(--gold);background:rgba(240,192,64,.08);}
+.chip.long.active{border-color:var(--green);color:var(--green);background:rgba(21,128,61,.08);}
+.chip.short.active{border-color:var(--red);color:var(--red);background:rgba(185,28,28,.08);}
+table{width:100%;border-collapse:collapse;font-size:10.5px;}
+th{font-family:var(--head);font-size:8px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:7px 6px;border-bottom:1px solid rgba(14,116,144,.15);}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;max-height:650px;overflow-y:auto;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.tag{font-family:var(--head);font-size:9px;padding:2px 7px;border-radius:3px;letter-spacing:.5px;}
+.tag.long{background:rgba(21,128,61,.12);color:var(--green);}
+.tag.short{background:rgba(185,28,28,.12);color:var(--red);}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">RELATIVE-STRENGTH LONG/SHORT</div><div class="logo-sub">CROSS-SECTIONAL MOMENTUM-RANKING</div></div>
+  <div style="display:flex;gap:8px;">
+    <a class="back" href="relative-strength-backtest.html">📊 Backtest</a>
+    <a class="back" href="index.html">⏱ Kurzfrist-Midpoint</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">Anderer Signaltyp als die Midpoint-Terminals: hier wird JEDER Titel gegen das GESAMTE Universum
+  gerankt (nicht gegen seine eigene Historie) -- trailing 6-Monats-Rendite (dividendenbereinigt), perzentiliert von
+  0 (schwächster) bis 100 (stärkster). Das ist die klassische Jegadeesh/Titman-Cross-Sectional-Momentum-Definition,
+  nicht mean-reversion wie bei den Midpoint-Terminals. <b>Beide Signale widersprechen sich nicht</b> -- sie messen
+  unterschiedliche Dinge (eigene Historie vs. Rang im Feld).
+  <a href="relative-strength-backtest.html">Backtest</a> bestätigt den klassischen Befund: Top-Dezil (stärkste
+  6M-Performer) zeigt die beste 13-Wochen-Vorwärtsrendite (+6.46%), deutlich über dem Bottom-Dezil (+4.39%) und
+  den mittleren Dezilen (~3.2-3.7%) -- Long-Short-Spread von <b>+2.08 Prozentpunkte über 13 Wochen</b>.</div>
+  <div class="warn"><b>⚠ Erstes Tool in diesem Stack mit Short-Bezug:</b> die Short-Kandidaten-Liste ist eine
+  Rangliste, keine Ausführungsempfehlung. Der Backtest zeigt die Spread-Performance long/short, NICHT die
+  tatsächliche Short-Rendite -- reale Shorts haben Leihkosten, zu zahlende Dividenden an den Verleiher, theoretisch
+  unbegrenztes Verlustrisiko und Margin-Anforderungen, die hier nicht modelliert sind. Das Bottom-Dezil war im
+  Backtest-Zeitraum selbst im Schnitt POSITIV (+4.39%) -- ein Short darauf wäre vor Kosten ein Verlust gewesen,
+  nur die RELATIVE Differenz zum Top-Dezil war der Edge.</div>
+  <div class="stat-row">
+    <div class="stat"><b id="stat-total">—</b><span>TITEL GESAMT</span></div>
+    <div class="stat"><b id="stat-long">—</b><span>LONG-KANDIDATEN (TOP-DEZIL)</span></div>
+    <div class="stat"><b id="stat-short">—</b><span>SHORT-KANDIDATEN (BOTTOM-DEZIL)</span></div>
+    <div class="stat"><b id="stat-asof">—</b><span>DATEN-STAND</span></div>
+  </div>
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Symbol oder Name…">
+    <select id="indexFilter" style="background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10.5px;padding:7px 10px;border-radius:4px;"><option value="ALL">Alle Indizes</option></select>
+    <button class="chip long" id="longBtn">Nur LONG-Kandidaten (Dezil 10)</button>
+    <button class="chip short" id="shortBtn">Nur SHORT-Kandidaten (Dezil 1)</button>
+  </div>
+  <div id="content" class="loading">Lade Relative-Stärke-Ranking…</div>
+  <div class="source-note">Quelle: gecachte wöchentliche Kurshistorie (Yahoo Finance), dividendenbereinigt,
+  S&amp;P500+DAX40. Methodik und Backtest: <a href="relative-strength-backtest.html" style="color:var(--accent)">Relative-Strength-Backtest-Report</a>.</div>
+</div>
+<script>
+let rows = [], sortKey='percentile', sortDir='desc', longOnly=false, shortOnly=false;
+
+function tag(decile) {
+  if (decile===10) return '<span class="tag long">LONG</span>';
+  if (decile===1) return '<span class="tag short">SHORT</span>';
+  return '';
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const idx = document.getElementById('indexFilter').value;
+  let filtered = rows.filter(r => {
+    const mQ = !q || r.symbol.toLowerCase().includes(q) || r.name.toLowerCase().includes(q);
+    const mI = idx==='ALL' || r.index===idx;
+    const mL = !longOnly || r.decile===10;
+    const mS = !shortOnly || r.decile===1;
+    return mQ && mI && mL && mS;
+  });
+  filtered.sort((a,b) => {
+    let av=a[sortKey], bv=b[sortKey];
+    if (typeof av==='string') return sortDir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sortDir==='asc' ? av-bv : bv-av;
+  });
+  document.getElementById('content').innerHTML = `<div class="table-wrap"><table>
+    <thead><tr>
+      <th data-k="symbol">Symbol</th><th data-k="name">Name</th><th data-k="sector">Sektor</th>
+      <th class="num" data-k="price">Kurs</th>
+      <th class="num" data-k="trailingRetPct" title="Trailing 6-Monats-Rendite, dividendenbereinigt">6M-Rendite</th>
+      <th class="num" data-k="percentile" title="0 = schwächster Titel im Universum, 100 = stärkster">Perzentil</th>
+      <th data-k="decile">Dezil</th>
+      <th>Signal</th>
+    </tr></thead>
+    <tbody>${filtered.map(r => `<tr>
+      <td>${r.symbol}</td>
+      <td>${r.name}</td><td style="color:var(--muted);font-size:9.5px;">${r.sector}</td>
+      <td class="num">${r.price.toFixed(2)}</td>
+      <td class="num ${r.trailingRetPct>=0?'pos':'neg'}">${r.trailingRetPct>=0?'+':''}${r.trailingRetPct}%</td>
+      <td class="num">${r.percentile}</td>
+      <td class="num">${r.decile}</td>
+      <td>${tag(r.decile)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div><div style="font-size:9px;color:var(--muted);margin-top:8px;">${filtered.length} von ${rows.length} Titeln</div>`;
+  document.querySelectorAll('th[data-k]').forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.k;
+    if (sortKey===k) sortDir = sortDir==='asc'?'desc':'asc'; else { sortKey=k; sortDir='desc'; }
+    render();
+  }));
+}
+
+async function load() {
+  const content = document.getElementById('content');
+  try {
+    const res = await fetch('data/rs-snapshot.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    rows = d.rows;
+    document.getElementById('stat-total').textContent = rows.length.toLocaleString('de-DE');
+    document.getElementById('stat-long').textContent = rows.filter(r=>r.decile===10).length.toLocaleString('de-DE');
+    document.getElementById('stat-short').textContent = rows.filter(r=>r.decile===1).length.toLocaleString('de-DE');
+    document.getElementById('stat-asof').textContent = d.asOfDate;
+
+    const indices = [...new Set(rows.map(r=>r.index).filter(Boolean))].sort();
+    document.getElementById('indexFilter').innerHTML = '<option value="ALL">Alle Indizes</option>' + indices.map(i=>`<option value="${i}">${i}</option>`).join('');
+
+    document.getElementById('search').addEventListener('input', render);
+    document.getElementById('indexFilter').addEventListener('change', render);
+    document.getElementById('longBtn').addEventListener('click', () => { longOnly=!longOnly; if(longOnly){shortOnly=false;document.getElementById('shortBtn').classList.remove('active');} document.getElementById('longBtn').classList.toggle('active',longOnly); render(); });
+    document.getElementById('shortBtn').addEventListener('click', () => { shortOnly=!shortOnly; if(shortOnly){longOnly=false;document.getElementById('longBtn').classList.remove('active');} document.getElementById('shortBtn').classList.toggle('active',shortOnly); render(); });
+
+    render();
+  } catch (e) {
+    content.innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
