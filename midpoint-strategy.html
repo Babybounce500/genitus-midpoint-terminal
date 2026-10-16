@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS MIDPOINT-STRATEGY // Contrarian vs. Momentum Trade-Simulation</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:10px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:6px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.best{background:rgba(21,128,61,.08);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">MIDPOINT-STRATEGY</div><div class="logo-sub">CONTRARIAN VS. MOMENTUM, ECHTE TRADE-SIMULATION</div></div>
+  <div style="display:flex;gap:8px;">
+    <a class="back" href="index.html">← Terminal</a>
+    <a class="back" href="midpoint-backtest.html">📊 Bucket-Backtest</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">Der <a href="midpoint-backtest.html">Bucket-Backtest</a> mittelt die Vorwärtsrendite über JEDE
+  einzelne Woche mit einem bestimmten Score -- das überzählt lang anhaltende Phasen (eine 20-Wochen-Flaute liefert
+  20 überlappende, kaum unabhängige Beobachtungen). Hier stattdessen: echte, diskrete <b>Trades</b> -- ein Einstieg
+  nur beim ERSTEN Erreichen von Score -4 (Contrarian) bzw. +4 (Momentum) nach einer anderen Phase, dann Simulation
+  verschiedener Ausstiegsregeln bis zum tatsächlichen Exit. Alle Trades long-only, P&amp;L auf
+  dividendenbereinigtem Kurs (Total Return).</div>
+  <div id="finding" class="finding"></div>
+  <h2>Contrarian — Einstieg bei voller Bearish-Konfluenz (Score -4)</h2>
+  <div id="contrarianContent" class="loading">Lade…</div>
+  <h2>Momentum — Einstieg bei voller Bullish-Konfluenz (Score +4)</h2>
+  <div id="momentumContent" class="loading"></div>
+  <div class="caveat" id="caveat"></div>
+  <div class="source-note">Exit-Regeln: feste Haltedauer (4/13/26/52 Wochen) · Take-Profit/Stop-Loss (z.B. "TP +10% / SL -7%" =
+  Ausstieg bei +10% Gewinn ODER -7% Verlust, je nachdem was zuerst eintritt, max. 52 Wochen Haltedauer) · Trailing-Stop
+  (Ausstieg wenn der Kurs X% vom höchsten Stand seit Einstieg fällt) · Score-Umkehr (halten bis der Score zum
+  gegenteiligen Extrem kippt, max. 52 Wochen). Sharpe-ähnlich = Ø Rendite / Standardabweichung der Trade-Renditen
+  (höher = besseres Risiko-Rendite-Verhältnis innerhalb dieser Strategie, kein Vergleich zu einem echten Sharpe Ratio
+  mit risikofreiem Zins).</div>
+</div>
+<script>
+function fmtPct(v) { return (v>=0?'+':'') + v.toFixed(2) + '%'; }
+function renderStrategyTable(res) {
+  const rules = Object.entries(res.exitRules).filter(([,s]) => s && s.n !== undefined);
+  const bestKey = rules.slice().sort((a,b) => b[1].sharpeLike - a[1].sharpeLike)[0][0];
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Exit-Regel</th><th class="num">N</th><th class="num">Ø Rendite</th><th class="num">Median</th>
+    <th class="num">Trefferquote</th><th class="num">Std.abw.</th><th class="num">Sharpe-ähnlich</th>
+    <th class="num">Ø Haltedauer</th><th class="num">Schlechtester Trade</th></tr></thead>
+    <tbody>${rules.map(([key, s]) => `<tr class="${key===bestKey?'best':''}">
+      <td>${s.label}${key===bestKey?' ★':''}</td><td class="num">${s.n.toLocaleString('de-DE')}</td>
+      <td class="num ${s.avgRet>=0?'pos':'neg'}">${fmtPct(s.avgRet)}</td>
+      <td class="num ${s.medianRet>=0?'pos':'neg'}">${fmtPct(s.medianRet)}</td>
+      <td class="num">${s.winRate}%</td><td class="num">${s.stdDev}</td>
+      <td class="num">${s.sharpeLike}</td><td class="num">${s.avgHoldWeeks}W</td>
+      <td class="num neg">${s.worstTrade}%</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+async function load() {
+  try {
+    const res = await fetch('data/midpoint-strategy-backtest.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+
+    document.getElementById('contrarianContent').innerHTML = renderStrategyTable(d.contrarian);
+    document.getElementById('momentumContent').innerHTML = renderStrategyTable(d.momentum);
+
+    const cBest = Object.entries(d.contrarian.exitRules).filter(([,s])=>s&&s.n!==undefined).sort((a,b)=>b[1].sharpeLike-a[1].sharpeLike)[0];
+    const mBest = Object.entries(d.momentum.exitRules).filter(([,s])=>s&&s.n!==undefined).sort((a,b)=>b[1].sharpeLike-a[1].sharpeLike)[0];
+    const cTrail = d.contrarian.exitRules.trail10, mTrail = d.momentum.exitRules.trail10;
+
+    document.getElementById('finding').innerHTML = `<b>Wie die Score effektiv traden, laut dieser Simulation:</b><br>
+      <b>Contrarian</b> (${d.contrarian.totalEntries.toLocaleString('de-DE')} echte Einstiege): beste Sharpe-ähnliche
+      Kennzahl bei "<b>${cBest[1].label}</b>" (Ø ${fmtPct(cBest[1].avgRet)}, Trefferquote ${cBest[1].winRate}%,
+      Ø Haltedauer ${cBest[1].avgHoldWeeks} Wochen). <b>Enge Trailing-Stops schaden hier</b>: bei 10% Trailing-Stop
+      fällt der Median auf ${fmtPct(cTrail.medianRet)} trotz positivem Durchschnitt (${fmtPct(cTrail.avgRet)}) --
+      die meisten Trades werden klein ausgestoppt, einige wenige große Erholungen ziehen nur den Mittelwert hoch
+      (Trefferquote nur ${cTrail.winRate}%). Für Contrarian scheint "halten bis Score kippt oder 52 Wochen" besser
+      zu funktionieren als enges Risikomanagement.<br><br>
+      <b>Momentum</b> (${d.momentum.totalEntries.toLocaleString('de-DE')} echte Einstiege): beste Kennzahl bei
+      "<b>${mBest[1].label}</b>" (Ø ${fmtPct(mBest[1].avgRet)}, Trefferquote ${mBest[1].winRate}%). Hier ist
+      "bis Score-Umkehr halten" dagegen <b>schlecht</b> (Median ${fmtPct(d.momentum.exitRules.score_flip.medianRet)},
+      Trefferquote nur ${d.momentum.exitRules.score_flip.winRate}%) -- man gibt beim Warten auf die volle
+      Trendumkehr tendenziell schon wieder Gewinne ab. Eine feste Haltedauer funktioniert hier besser als beim
+      Contrarian-Setup.`;
+
+    document.getElementById('caveat').innerHTML = `<b>Einschränkungen, ehrlich benannt:</b><br>
+      • Gleicher 2021-2026-Bullenmarkt-Kontext wie beim Bucket-Backtest -- die "beste" Exit-Regel hier ist nicht
+      zwangsläufig die beste in einem anderen Marktregime.<br>
+      • "Schlechtester Trade" zeigt Einzelfälle mit -60% bis -85% -- das sind wahrscheinlich Unternehmen mit echten
+      fundamentalen Problemen (nicht nur zyklische Schwäche), die ein reines Kurssignal nicht von einer temporären
+      Delle unterscheiden kann. Vor jedem Trade: eigene Fundamentalprüfung, kein Blindsignal.<br>
+      • Transaktionskosten, Slippage, Steuern und Spreads sind NICHT eingerechnet -- reale Netto-Renditen liegen
+      darunter, besonders bei kürzeren Haltedauern mit mehr Trades.<br>
+      • "Sharpe-ähnlich" ist Ø/Std.abw. der Trade-Renditen, keine annualisierte, risikobereinigte Kennzahl im
+      klassischen Sinn -- nur zum Vergleich der Exit-Regeln INNERHALB dieser Simulation geeignet.`;
+  } catch (e) {
+    document.getElementById('contrarianContent').innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>

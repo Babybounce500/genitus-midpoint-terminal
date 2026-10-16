@@ -1,0 +1,240 @@
+{
+ "windows": [
+  4,
+  13,
+  26,
+  52
+ ],
+ "maxHoldWeeks": 52,
+ "contrarian": {
+  "totalEntries": 20181,
+  "exitRules": {
+   "horizon_4w": {
+    "label": "Fix 4 Wochen",
+    "n": 20181,
+    "avgRet": 1.604,
+    "medianRet": 1.041,
+    "winRate": 55.78,
+    "stdDev": 9.69,
+    "sharpeLike": 0.165,
+    "avgHoldWeeks": 4,
+    "worstTrade": -68.71
+   },
+   "horizon_13w": {
+    "label": "Fix 13 Wochen",
+    "n": 20181,
+    "avgRet": 4.647,
+    "medianRet": 3.001,
+    "winRate": 59.03,
+    "stdDev": 17.627,
+    "sharpeLike": 0.264,
+    "avgHoldWeeks": 12.6,
+    "worstTrade": -84.54
+   },
+   "horizon_26w": {
+    "label": "Fix 26 Wochen",
+    "n": 20181,
+    "avgRet": 7.581,
+    "medianRet": 4.432,
+    "winRate": 60.36,
+    "stdDev": 27.734,
+    "sharpeLike": 0.273,
+    "avgHoldWeeks": 24.2,
+    "worstTrade": -70.98
+   },
+   "horizon_52w": {
+    "label": "Fix 52 Wochen",
+    "n": 20181,
+    "avgRet": 14.844,
+    "medianRet": 7.044,
+    "winRate": 61.79,
+    "stdDev": 50.852,
+    "sharpeLike": 0.292,
+    "avgHoldWeeks": 45,
+    "worstTrade": -79.55
+   },
+   "tp10_sl7": {
+    "label": "TP +10% / SL -7%",
+    "n": 20181,
+    "avgRet": 2.335,
+    "medianRet": 10.061,
+    "winRate": 53.19,
+    "stdDev": 11.768,
+    "sharpeLike": 0.198,
+    "avgHoldWeeks": 8.8,
+    "worstTrade": -61.69
+   },
+   "tp15_sl10": {
+    "label": "TP +15% / SL -10%",
+    "n": 20181,
+    "avgRet": 3.676,
+    "medianRet": 7.404,
+    "winRate": 54.08,
+    "stdDev": 15.352,
+    "sharpeLike": 0.239,
+    "avgHoldWeeks": 14.7,
+    "worstTrade": -63.79
+   },
+   "tp20_sl15": {
+    "label": "TP +20% / SL -15%",
+    "n": 20181,
+    "avgRet": 5.415,
+    "medianRet": 8.521,
+    "winRate": 58.09,
+    "stdDev": 18.833,
+    "sharpeLike": 0.288,
+    "avgHoldWeeks": 22.1,
+    "worstTrade": -64.07
+   },
+   "trail10": {
+    "label": "Trailing-Stop 10%",
+    "n": 20181,
+    "avgRet": 4.761,
+    "medianRet": -1.438,
+    "winRate": 45.99,
+    "stdDev": 22.196,
+    "sharpeLike": 0.214,
+    "avgHoldWeeks": 18.3,
+    "worstTrade": -63.79
+   },
+   "trail15": {
+    "label": "Trailing-Stop 15%",
+    "n": 20181,
+    "avgRet": 7.055,
+    "medianRet": -0.617,
+    "winRate": 48.56,
+    "stdDev": 29.054,
+    "sharpeLike": 0.243,
+    "avgHoldWeeks": 27.1,
+    "worstTrade": -63.79
+   },
+   "score_flip": {
+    "label": "Bis Score-Umkehr (+4)",
+    "n": 20181,
+    "avgRet": 5.879,
+    "medianRet": 7.483,
+    "winRate": 76.01,
+    "stdDev": 18.412,
+    "sharpeLike": 0.319,
+    "avgHoldWeeks": 19,
+    "worstTrade": -79.55
+   }
+  }
+ },
+ "momentum": {
+  "totalEntries": 26915,
+  "exitRules": {
+   "horizon_4w": {
+    "label": "Fix 4 Wochen",
+    "n": 26915,
+    "avgRet": 1.173,
+    "medianRet": 0.847,
+    "winRate": 55.35,
+    "stdDev": 8.813,
+    "sharpeLike": 0.133,
+    "avgHoldWeeks": 4,
+    "worstTrade": -74.1
+   },
+   "horizon_13w": {
+    "label": "Fix 13 Wochen",
+    "n": 26915,
+    "avgRet": 3.772,
+    "medianRet": 2.415,
+    "winRate": 57.95,
+    "stdDev": 16.666,
+    "sharpeLike": 0.226,
+    "avgHoldWeeks": 12.7,
+    "worstTrade": -74.1
+   },
+   "horizon_26w": {
+    "label": "Fix 26 Wochen",
+    "n": 26915,
+    "avgRet": 8.248,
+    "medianRet": 5.161,
+    "winRate": 62.41,
+    "stdDev": 25.323,
+    "sharpeLike": 0.326,
+    "avgHoldWeeks": 24.6,
+    "worstTrade": -78.56
+   },
+   "horizon_52w": {
+    "label": "Fix 52 Wochen",
+    "n": 26915,
+    "avgRet": 17.48,
+    "medianRet": 9.735,
+    "winRate": 65.7,
+    "stdDev": 46.104,
+    "sharpeLike": 0.379,
+    "avgHoldWeeks": 46.2,
+    "worstTrade": -82.47
+   },
+   "tp10_sl7": {
+    "label": "TP +10% / SL -7%",
+    "n": 26915,
+    "avgRet": 2.282,
+    "medianRet": 10.053,
+    "winRate": 53.34,
+    "stdDev": 11.353,
+    "sharpeLike": 0.201,
+    "avgHoldWeeks": 10.2,
+    "worstTrade": -48.87
+   },
+   "tp15_sl10": {
+    "label": "TP +15% / SL -10%",
+    "n": 26915,
+    "avgRet": 3.893,
+    "medianRet": 9.916,
+    "winRate": 55.23,
+    "stdDev": 14.863,
+    "sharpeLike": 0.262,
+    "avgHoldWeeks": 16.8,
+    "worstTrade": -49.36
+   },
+   "tp20_sl15": {
+    "label": "TP +20% / SL -15%",
+    "n": 26915,
+    "avgRet": 6.151,
+    "medianRet": 11.686,
+    "winRate": 60.64,
+    "stdDev": 18.14,
+    "sharpeLike": 0.339,
+    "avgHoldWeeks": 24.6,
+    "worstTrade": -65.88
+   },
+   "trail10": {
+    "label": "Trailing-Stop 10%",
+    "n": 26915,
+    "avgRet": 5.617,
+    "medianRet": -1.522,
+    "winRate": 45.9,
+    "stdDev": 23.145,
+    "sharpeLike": 0.243,
+    "avgHoldWeeks": 20.3,
+    "worstTrade": -48.87
+   },
+   "trail15": {
+    "label": "Trailing-Stop 15%",
+    "n": 26915,
+    "avgRet": 9.038,
+    "medianRet": 0.63,
+    "winRate": 51.18,
+    "stdDev": 31.001,
+    "sharpeLike": 0.292,
+    "avgHoldWeeks": 29.6,
+    "worstTrade": -52.98
+   },
+   "score_flip": {
+    "label": "Bis Score-Umkehr (-4)",
+    "n": 26915,
+    "avgRet": 9.674,
+    "medianRet": -2.475,
+    "winRate": 43.41,
+    "stdDev": 40.587,
+    "sharpeLike": 0.238,
+    "avgHoldWeeks": 25,
+    "worstTrade": -66.19
+   }
+  }
+ },
+ "generatedAt": "2026-10-16T12:16:34.444Z"
+}
