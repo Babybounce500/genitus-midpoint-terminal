@@ -50,7 +50,9 @@ h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);m
   Midpoint-Analyse einig sind</b> (Kurs über/unter dem jeweiligen Hoch-Tief-Mittelpunkt)? Echter, lookahead-freier
   Backtest auf 5 Jahren wöchentlicher Kursdaten (S&amp;P500 + DAX40, bereits gecacht, keine neuen API-Calls):
   für jede Woche und jeden Titel wird das Konfluenz-Signal NUR aus Daten bis zu diesem Zeitpunkt berechnet, die
-  Vorwärtsrendite erst danach ausgewertet.</div>
+  Vorwärtsrendite erst danach ausgewertet. <b>Update:</b> Signal läuft jetzt auf dividendenbereinigtem statt rohem
+  Kurs (sonst sahen Ex-Dividenden-Abschläge wie bearish aus, obwohl ökonomisch neutral -- Details im
+  <a href="index.html">Terminal</a>). Befund bleibt nach der Korrektur bestehen.</div>
   <div class="stat-row">
     <div class="stat"><b id="stat-obs">—</b><span>BEOBACHTUNGEN (SYMBOL×WOCHE)</span></div>
     <div class="stat"><b id="stat-symbols">—</b><span>TITEL MIT AUSREICHEND HISTORIE</span></div>

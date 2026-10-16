@@ -81,8 +81,15 @@ canvas#modalChart{width:100%!important;height:220px!important;}
   knapp drunter) sowie Analysten-Konsens/Kursziel zur groben Value-Trap-Vorfilterung. Tabelle ist standardmäßig
   nach Tiefe sortiert (extremste Fälle zuerst). Zusätzlich, bewusst <b>getrennt</b> vom Midpoint-Score: <b>RSI(14
   Wochen)</b> als unabhängiger 5. Indikator (&lt;30 überverkauft, &gt;70 überkauft) -- nicht die übliche Tages-RSI,
-  sondern auf derselben Wochenbasis wie der Score, damit beide Signale zueinander passen. Snapshot, keine
-  Live-Kurse (Daten-Stand unten) -- im Detail-Chart kann der aktuelle Kurs live nachgeladen werden.</div>
+  sondern auf derselben Wochenbasis wie der Score, damit beide Signale zueinander passen.<br>
+  <b>Korrektur (auf Nachfrage getestet):</b> Signal/Tiefe/RSI laufen jetzt auf dem <b>dividendenbereinigten</b> Kurs,
+  nicht dem rohen Schlusskurs -- Ex-Dividenden-Kursabschläge sahen auf dem rohen Kurs wie ein bearishes Signal aus,
+  obwohl ökonomisch nichts Negatives passiert ist. Realer Fund beim Test: <b>Altria (MO)</b> stand auf Rohkurs-Basis
+  bei Score -2 (bearish), auf bereinigter Basis bei +4 (voll bullish) -- ein kompletter Vorzeichenwechsel. Betraf
+  100 von 1.420 Titeln (7%) mit unterschiedlichem Score je Basis. Der Backtest-Befund (Bearish-Konfluenz
+  outperformt) bleibt nach der Korrektur bestehen, wird sogar leicht stärker. Angezeigter "Kurs" ist weiterhin der
+  echte handelbare Kurs, nur die technische Auswertung läuft auf bereinigter Basis. Snapshot, keine Live-Kurse
+  (Daten-Stand unten) -- im Detail-Chart kann der aktuelle Kurs live nachgeladen werden.</div>
   <div class="stat-row">
     <div class="stat"><b id="stat-total">—</b><span>TITEL GESAMT</span></div>
     <div class="stat"><b id="stat-bear4">—</b><span>VOLLE BEARISH-KONFLUENZ (-4)</span></div>
@@ -245,7 +252,7 @@ function drawModalChart(sym) {
   const series = PRICEHIST[sym]?.series;
   if (!series) { document.getElementById('modalChart').style.display='none'; return; }
   const labels = series.map(r => r[0]);
-  const closes = series.map(r => r[1]);
+  const closes = series.map(r => r[2]); // dividend-adjusted -- same basis the score/depth/RSI use, see intro note
   const n = closes.length;
   const mid1y = (() => { const s = closes.slice(Math.max(0,n-52)); return (Math.max(...s)+Math.min(...s))/2; })();
   if (modalChart) modalChart.destroy();
@@ -253,7 +260,7 @@ function drawModalChart(sym) {
   modalChart = new Chart(ctx, {
     type: 'line',
     data: { labels, datasets: [
-      { label: 'Kurs', data: closes, borderColor: '#0e7490', borderWidth: 1.5, pointRadius: 0, tension: 0.15 },
+      { label: 'Kurs (dividendenbereinigt)', data: closes, borderColor: '#0e7490', borderWidth: 1.5, pointRadius: 0, tension: 0.15 },
       { label: '1Y-Mittelpunkt', data: labels.map(()=>mid1y), borderColor: '#b45309', borderWidth: 1, borderDash: [5,4], pointRadius: 0 },
     ]},
     options: { responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
@@ -276,8 +283,8 @@ async function refreshLive() {
     const live = parseFloat(j?.close);
     if (!isFinite(live) || live <= 0) throw new Error('keine gültige Live-Notiz');
     const series = PRICEHIST[modalSym]?.series;
-    const closes = series.map(r => r[1]);
-    const liveCloses = closes.slice(0, -1).concat([live]); // replace last cached point with live price
+    const closes = series.map(r => r[2]); // adjusted basis, same as the cached score; valid to splice the raw
+    const liveCloses = closes.slice(0, -1).concat([live]); // live quote in directly -- adj==raw at the current point by construction
     const n = liveCloses.length;
     const liveSignals = {};
     let liveScore = 0;
