@@ -78,7 +78,9 @@ canvas#modalChart{width:100%!important;height:220px!important;}
   Bullish-Konfluenz. Eine <a href="midpoint-strategy.html">Strategie-Simulation</a> (konkrete Ein-/Ausstiegsregeln,
   nicht nur Durchschnittsrenditen) steht separat zur Verfügung.<br><b>Score ist stumpf</b> -- bei 500+ Titeln mit
   Score -4 gleichzeitig hilft die Spalte <b>Tiefe</b> weiter (-1 = exakt am 1Y-Tief in jedem Fenster, nicht nur
-  knapp drunter) sowie Analysten-Konsens/Kursziel zur groben Value-Trap-Vorfilterung. Tabelle ist standardmäßig
+  knapp drunter) sowie Analysten-Kursziel-Upside als grobe Zusatzeinordnung (der kategorische Analysten-Konsens
+  selbst wurde bewusst entfernt -- bei diesem Universum sind &gt;80% ohnehin "buy"/"strong_buy", keine echte
+  Unterscheidung zwischen Titeln). Tabelle ist standardmäßig
   nach Tiefe sortiert (extremste Fälle zuerst). Zusätzlich, bewusst <b>getrennt</b> vom Midpoint-Score: <b>RSI(14
   Wochen)</b> als unabhängiger 5. Indikator (&lt;30 überverkauft, &gt;70 überkauft) -- nicht die übliche Tages-RSI,
   sondern auf derselben Wochenbasis wie der Score, damit beide Signale zueinander passen.<br>
@@ -101,7 +103,6 @@ canvas#modalChart{width:100%!important;height:220px!important;}
     <input type="text" id="search" placeholder="Symbol oder Name…">
     <select id="indexFilter"><option value="ALL">Alle Indizes</option></select>
     <button class="chip" id="fullOnlyBtn">Nur volle Konfluenz (±4)</button>
-    <button class="chip" id="noTrapBtn" title="Zeigt nur Titel mit Analysten-Konsens 'buy'/'strong_buy' (oder ohne Daten) -- grobe Value-Trap-Vorfilterung anhand externer Analystenmeinung, ersetzt keine eigene Prüfung.">Nur Analysten-Buy</button>
     <button class="chip" id="rsiExtremeBtn" title="RSI(14 Wochen) unter 30 oder über 70 -- unabhängig vom Midpoint-Score.">Nur RSI-Extreme</button>
   </div>
   <div id="content" class="loading">Lade Konfluenz-Snapshot…</div>
@@ -129,7 +130,7 @@ canvas#modalChart{width:100%!important;height:220px!important;}
 <script>
 const PROXY = 'https://theserver-open-ai.replit.app';
 const WINDOWS = [{key:'1M',w:4},{key:'3M',w:13},{key:'6M',w:26},{key:'1Y',w:52}];
-let SNAPSHOT = null, PRICEHIST = null, rows = [], sortKey='depth', sortDir='asc', fullOnly=false, noTrapOnly=false, rsiExtremeOnly=false;
+let SNAPSHOT = null, PRICEHIST = null, rows = [], sortKey='depth', sortDir='asc', fullOnly=false, rsiExtremeOnly=false;
 let modalChart = null, modalSym = null;
 
 function signalAt(closes, i, w) {
@@ -164,9 +165,8 @@ function render() {
     const mQ = !q || r.symbol.toLowerCase().includes(q) || r.name.toLowerCase().includes(q);
     const mI = idx==='ALL' || r.index===idx;
     const mF = !fullOnly || Math.abs(r.score)===4;
-    const mNT = !noTrapOnly || r.analystRec==='buy' || r.analystRec==='strong_buy' || r.analystRec==null;
     const mRSI = !rsiExtremeOnly || (r.rsi14w!=null && (r.rsi14w<30 || r.rsi14w>70));
-    return mQ && mI && mF && mNT && mRSI;
+    return mQ && mI && mF && mRSI;
   });
   filtered.sort((a,b) => {
     let av=a[sortKey], bv=b[sortKey];
@@ -183,7 +183,6 @@ function render() {
       <th title="6 Monate (26 Wochen)">6M</th><th title="1 Jahr (52 Wochen)">1Y</th>
       <th class="num" data-k="score">Score</th>
       <th class="num" data-k="depth" title="-1 = genau am Tief, 0 = am Mittelpunkt, +1 = genau am Hoch -- Durchschnitt über alle 4 Fenster. Trennt Kandidaten mit gleichem Score danach, WIE EXTREM sie wirklich sind." style="cursor:help">Tiefe ⓘ</th>
-      <th data-k="analystRec" title="Analysten-Konsens (Yahoo Finance), zur groben Einordnung ob ein bearish-Signal eher 'billig' oder ein Value-Trap sein könnte -- kein Ersatz für eigene Fundamentalanalyse." style="cursor:help">Analysten ⓘ</th>
       <th class="num" data-k="targetUpsidePct" title="Analysten-Kursziel (Mittelwert) ggü. aktuellem Kurs">Ziel-Upside</th>
       <th class="num" data-k="rsi14w" title="RSI(14) auf WOCHEN-Basis (nicht die üblichere Tages-RSI!) -- ein eigenständiger, vom Midpoint-Score unabhängiger 5. Indikator. <30 = überverkauft, >70 = überkauft." style="cursor:help">RSI(14W) ⓘ</th>
     </tr></thead>
@@ -195,7 +194,6 @@ function render() {
       <td>${sigIcon(r.signals['6M'])}</td><td>${sigIcon(r.signals['1Y'])}</td>
       <td class="num">${scoreBadge(r.score)}</td>
       <td class="num">${r.depth!=null?r.depth.toFixed(2):'—'}</td>
-      <td style="font-size:9.5px;color:var(--muted);">${r.analystRec||'—'}</td>
       <td class="num ${r.targetUpsidePct>0?'sig bull':r.targetUpsidePct<0?'sig bear':''}">${r.targetUpsidePct!=null?(r.targetUpsidePct>0?'+':'')+r.targetUpsidePct+'%':'—'}</td>
       <td class="num">${rsiBadge(r.rsi14w)}</td>
     </tr>`).join('')}</tbody>
@@ -332,7 +330,6 @@ async function load() {
     document.getElementById('search').addEventListener('input', render);
     document.getElementById('indexFilter').addEventListener('change', render);
     document.getElementById('fullOnlyBtn').addEventListener('click', () => { fullOnly=!fullOnly; document.getElementById('fullOnlyBtn').classList.toggle('active',fullOnly); render(); });
-    document.getElementById('noTrapBtn').addEventListener('click', () => { noTrapOnly=!noTrapOnly; document.getElementById('noTrapBtn').classList.toggle('active',noTrapOnly); render(); });
     document.getElementById('rsiExtremeBtn').addEventListener('click', () => { rsiExtremeOnly=!rsiExtremeOnly; document.getElementById('rsiExtremeBtn').classList.toggle('active',rsiExtremeOnly); render(); });
     loadPriceHist().catch(() => {}); // kick off now, in the background; errors handled when a chart is actually opened
 
