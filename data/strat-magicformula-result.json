@@ -1,0 +1,76 @@
+{
+ "totalObs": 1438,
+ "deciles": [
+  {
+   "bucket": 0,
+   "n": 143,
+   "avg": 18.581,
+   "std": 39.971,
+   "winRate": 68.53
+  },
+  {
+   "bucket": 1,
+   "n": 143,
+   "avg": 22.928,
+   "std": 47.819,
+   "winRate": 69.23
+  },
+  {
+   "bucket": 2,
+   "n": 143,
+   "avg": 23.853,
+   "std": 69.47,
+   "winRate": 64.34
+  },
+  {
+   "bucket": 3,
+   "n": 143,
+   "avg": 19.507,
+   "std": 35.573,
+   "winRate": 69.93
+  },
+  {
+   "bucket": 4,
+   "n": 143,
+   "avg": 26.485,
+   "std": 98.226,
+   "winRate": 63.64
+  },
+  {
+   "bucket": 5,
+   "n": 143,
+   "avg": 10.895,
+   "std": 34.816,
+   "winRate": 60.84
+  },
+  {
+   "bucket": 6,
+   "n": 143,
+   "avg": 12.968,
+   "std": 40.441,
+   "winRate": 65.03
+  },
+  {
+   "bucket": 7,
+   "n": 143,
+   "avg": 8.845,
+   "std": 27.429,
+   "winRate": 64.34
+  },
+  {
+   "bucket": 8,
+   "n": 143,
+   "avg": 11.468,
+   "std": 24.223,
+   "winRate": 65.73
+  },
+  {
+   "bucket": 9,
+   "n": 151,
+   "avg": 10.77,
+   "std": 35.547,
+   "winRate": 53.64
+  }
+ ],
+ "note": "decile 0 = best combined earnings yield + ROIC rank, decile 9 = worst"
+}

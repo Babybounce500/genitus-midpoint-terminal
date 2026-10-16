@@ -1,0 +1,15 @@
+{
+ "goldenCross": {
+  "n": 181,
+  "avg": 2.943,
+  "std": 20.538,
+  "winRate": 52.49
+ },
+ "deathCross": {
+  "n": 135,
+  "avg": 3.823,
+  "std": 18.08,
+  "winRate": 54.81
+ },
+ "horizonWeeks": 13
+}

@@ -1,0 +1,76 @@
+{
+ "totalObs": 1445,
+ "deciles": [
+  {
+   "bucket": 0,
+   "n": 144,
+   "avg": 20.896,
+   "std": 34.403,
+   "winRate": 68.06
+  },
+  {
+   "bucket": 1,
+   "n": 144,
+   "avg": 18.06,
+   "std": 45.154,
+   "winRate": 68.06
+  },
+  {
+   "bucket": 2,
+   "n": 144,
+   "avg": 22.305,
+   "std": 66.488,
+   "winRate": 68.06
+  },
+  {
+   "bucket": 3,
+   "n": 144,
+   "avg": 17.844,
+   "std": 37.097,
+   "winRate": 75
+  },
+  {
+   "bucket": 4,
+   "n": 144,
+   "avg": 18.293,
+   "std": 75.158,
+   "winRate": 61.11
+  },
+  {
+   "bucket": 5,
+   "n": 144,
+   "avg": 14.46,
+   "std": 33.403,
+   "winRate": 63.89
+  },
+  {
+   "bucket": 6,
+   "n": 144,
+   "avg": 11.417,
+   "std": 31.573,
+   "winRate": 61.11
+  },
+  {
+   "bucket": 7,
+   "n": 144,
+   "avg": 9.44,
+   "std": 36.614,
+   "winRate": 61.81
+  },
+  {
+   "bucket": 8,
+   "n": 144,
+   "avg": 22.947,
+   "std": 75.442,
+   "winRate": 61.81
+  },
+  {
+   "bucket": 9,
+   "n": 149,
+   "avg": 9.905,
+   "std": 35.774,
+   "winRate": 56.38
+  }
+ ],
+ "note": "decile 0 = cheapest (low P/E, P/B, EV/EBITDA composite rank), decile 9 = most expensive"
+}

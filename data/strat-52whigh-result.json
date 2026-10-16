@@ -1,0 +1,76 @@
+{
+ "horizonWeeks": 13,
+ "deciles": [
+  {
+   "bucket": 0,
+   "n": 26989,
+   "avg": 5.982,
+   "std": 28.622,
+   "winRate": 55.47
+  },
+  {
+   "bucket": 1,
+   "n": 26989,
+   "avg": 4.657,
+   "std": 19.573,
+   "winRate": 57.32
+  },
+  {
+   "bucket": 2,
+   "n": 26989,
+   "avg": 4.394,
+   "std": 17.823,
+   "winRate": 58.39
+  },
+  {
+   "bucket": 3,
+   "n": 26989,
+   "avg": 4.509,
+   "std": 16.359,
+   "winRate": 59.96
+  },
+  {
+   "bucket": 4,
+   "n": 26989,
+   "avg": 4.443,
+   "std": 15.457,
+   "winRate": 60.92
+  },
+  {
+   "bucket": 5,
+   "n": 26989,
+   "avg": 4.476,
+   "std": 14.902,
+   "winRate": 61.07
+  },
+  {
+   "bucket": 6,
+   "n": 26989,
+   "avg": 4.361,
+   "std": 14.546,
+   "winRate": 61.37
+  },
+  {
+   "bucket": 7,
+   "n": 26989,
+   "avg": 4.195,
+   "std": 14.035,
+   "winRate": 62.15
+  },
+  {
+   "bucket": 8,
+   "n": 26989,
+   "avg": 4.336,
+   "std": 15.385,
+   "winRate": 61.28
+  },
+  {
+   "bucket": 9,
+   "n": 28368,
+   "avg": 4.623,
+   "std": 16.114,
+   "winRate": 61.71
+  }
+ ],
+ "note": "decile 10 = closest to 52w high, decile 1 = furthest below"
+}

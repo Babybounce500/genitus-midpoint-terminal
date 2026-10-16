@@ -1,0 +1,10 @@
+{
+ "horizonWeeks": 13,
+ "qualifiedLong": {
+  "n": 30774,
+  "avg": 6.531,
+  "std": 24.304,
+  "winRate": 58.14
+ },
+ "relativelyStrongButAbsolutelyNegative": null
+}

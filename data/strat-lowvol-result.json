@@ -1,0 +1,76 @@
+{
+ "horizonWeeks": 13,
+ "deciles": [
+  {
+   "bucket": 0,
+   "n": 13563,
+   "avg": 2.769,
+   "std": 8.828,
+   "winRate": 61.91
+  },
+  {
+   "bucket": 1,
+   "n": 13563,
+   "avg": 3.087,
+   "std": 10.357,
+   "winRate": 61.77
+  },
+  {
+   "bucket": 2,
+   "n": 13563,
+   "avg": 2.968,
+   "std": 10.564,
+   "winRate": 60.48
+  },
+  {
+   "bucket": 3,
+   "n": 13563,
+   "avg": 3.37,
+   "std": 11.544,
+   "winRate": 61.12
+  },
+  {
+   "bucket": 4,
+   "n": 13563,
+   "avg": 3.862,
+   "std": 12.909,
+   "winRate": 61
+  },
+  {
+   "bucket": 5,
+   "n": 13563,
+   "avg": 4.218,
+   "std": 14.365,
+   "winRate": 60.47
+  },
+  {
+   "bucket": 6,
+   "n": 13563,
+   "avg": 4.028,
+   "std": 15.568,
+   "winRate": 58.64
+  },
+  {
+   "bucket": 7,
+   "n": 13563,
+   "avg": 5.375,
+   "std": 17.898,
+   "winRate": 59.57
+  },
+  {
+   "bucket": 8,
+   "n": 13563,
+   "avg": 5.892,
+   "std": 21.094,
+   "winRate": 58.25
+  },
+  {
+   "bucket": 9,
+   "n": 14256,
+   "avg": 10.472,
+   "std": 34.914,
+   "winRate": 57.96
+  }
+ ],
+ "note": "decile 0 = lowest realized vol (52w annualized), decile 9 = highest"
+}

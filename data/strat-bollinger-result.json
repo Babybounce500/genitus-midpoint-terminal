@@ -1,0 +1,21 @@
+{
+ "horizonWeeks": 13,
+ "belowLowerBand": {
+  "n": 13218,
+  "avg": 6.408,
+  "std": 17.571,
+  "winRate": 64.59
+ },
+ "insideBands": {
+  "n": 277942,
+  "avg": 3.538,
+  "std": 17.491,
+  "winRate": 57.29
+ },
+ "aboveUpperBand": {
+  "n": 24173,
+  "avg": 3.845,
+  "std": 18.612,
+  "winRate": 56.9
+ }
+}

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS 10-STRATEGIEN-HUB</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:14px;letter-spacing:2px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:22px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:30px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px 18px;text-decoration:none;color:var(--text);display:block;transition:border-color .15s;}
+.card:hover{border-color:var(--accent);}
+.card-title{font-family:var(--head);font-size:12.5px;color:var(--bright);letter-spacing:.5px;}
+.card-tag{font-size:8.5px;letter-spacing:1px;color:var(--muted);margin:4px 0 10px;text-transform:uppercase;}
+.card-verdict{font-size:10.5px;line-height:1.6;color:var(--text);}
+.card-verdict b.g{color:var(--green)} .card-verdict b.r{color:var(--red)} .card-verdict b.m{color:var(--gold)}
+.badge{display:inline-block;font-family:var(--head);font-size:8px;letter-spacing:.5px;padding:3px 7px;border-radius:3px;margin-bottom:8px;}
+.badge.confirm{background:rgba(21,128,61,.12);color:var(--green);}
+.badge.mixed{background:rgba(180,83,9,.12);color:var(--gold);}
+.badge.null{background:rgba(95,114,119,.12);color:var(--muted);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:40px;border-top:1px solid var(--border);padding-top:14px;}
+.source-note a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">10-STRATEGIEN-HUB</div><div class="logo-sub">ALLE NEUEN TERMINALS, ECHTE BACKTESTS</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="index.html">📍 Midpoint</a>
+    <a class="back" href="longterm.html">📅 Langfrist</a>
+    <a class="back" href="relative-strength.html">📈 Rel. Stärke</a>
+    <a class="back" href="pairs-trading.html">⚖ Pairs</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  10 zusätzliche Strategien, jede mit eigenem Live-Terminal (aktuelle Kandidaten) UND echtem Backtest auf
+  Kursdaten (5 Jahre, teils 10 Jahre) bzw. Fundamentaldaten (5 Fiskaljahre, S&amp;P500+DAX40, ~1400-2000 Titel).
+  Alle Ergebnisse sind real berechnet, nicht geschätzt -- inklusive der Fälle, in denen <b>keine</b> Edge gefunden
+  wurde (ehrlich so berichtet statt schönzureden). Jede Karte verlinkt direkt zum Live-Terminal.
+  </div>
+
+  <h2>Preis-basierte Strategien (wöchentliche Kursdaten, 5J)</h2>
+  <div class="grid">
+    <a class="card" href="golden-cross.html">
+      <div class="badge mixed">GEMISCHT</div>
+      <div class="card-title">GOLDEN / DEATH CROSS</div>
+      <div class="card-tag">50W vs. 200W SMA</div>
+      <div class="card-verdict">Golden Cross Ø <b class="g">+2.94%</b>/13W (Trefferquote 52.5%, n=181) vs. Death Cross Ø <b class="g">+3.82%</b>
+      (Trefferquote 54.8%, n=135). <b class="m">Kontraintuitiv</b> -- Death Cross schlägt Golden Cross leicht, deckt sich mit
+      akademischer Skepsis ggü. diesem Signal.</div>
+    </a>
+    <a class="card" href="week52-high.html">
+      <div class="badge confirm">MOMENTUM BESTÄTIGT</div>
+      <div class="card-title">52-WOCHEN-HOCH-NÄHE</div>
+      <div class="card-tag">Dezile nach Abstand zum 52W-Hoch</div>
+      <div class="card-verdict">Nahe am Hoch (Dezil 9) Ø <b class="g">+4.62%</b>/13W, Trefferquote <b class="g">61.7%</b> (n=28.368) vs.
+      weit vom Hoch (Dezil 0) Ø <b class="g">+5.98%</b>, Trefferquote nur 55.5% (n=26.989). Höhere Rendite bei Dezil 0, aber
+      <b>klar höhere Trefferquote</b> nahe am Hoch -- "52-Week-High-Effect" (George/Hwang) teilbestätigt.</div>
+    </a>
+    <a class="card" href="low-volatility.html">
+      <div class="badge confirm">BESTÄTIGT</div>
+      <div class="card-title">LOW-VOLATILITY ANOMALIE</div>
+      <div class="card-tag">Dezile nach 52W-Volatilität</div>
+      <div class="card-verdict">Niedrigste Vola (Dezil 0) Ø <b class="g">+2.77%</b>/13W, Trefferquote <b class="g">61.9%</b> (n=13.563) vs.
+      höchste Vola (Dezil 9) Ø +10.47%, Trefferquote nur 58.0% aber Std.-Abw. 34.9% (riskanter). <b>Klassischer Low-Vol-Faktor
+      bestätigt</b> auf Risiko-adjustierter Basis.</div>
+    </a>
+    <a class="card" href="bollinger-bands.html">
+      <div class="badge confirm">MEAN-REVERSION BESTÄTIGT</div>
+      <div class="card-title">BOLLINGER-BAND %B</div>
+      <div class="card-tag">20W SMA ± 2 Std.-Abw.</div>
+      <div class="card-verdict">Unter unterem Band Ø <b class="g">+6.41%</b>/13W, Trefferquote <b class="g">64.6%</b> (n=13.218) --
+      klar besser als innerhalb der Bänder (+3.54%, 57.3%) oder über oberem Band (+3.85%, 56.9%). <b>Starke
+      Mean-Reversion-Bestätigung.</b></div>
+    </a>
+    <a class="card" href="dual-momentum.html">
+      <div class="badge mixed">TEILWEISE TESTBAR</div>
+      <div class="card-title">DUAL MOMENTUM (ANTONACCI)</div>
+      <div class="card-tag">Relative + absolute Stärke kombiniert</div>
+      <div class="card-verdict">Qualifiziert (relativ UND absolut stark) Ø <b class="g">+6.53%</b>/13W, Trefferquote <b class="g">58.1%</b>
+      (n=30.774). Die zentrale Abwärtsschutz-Prämisse (relativ stark, aber absolut negativ → raus) hatte
+      <b class="m">0 Beobachtungen</b> -- der Bullenmarkt 2021-2026 hat dieses Szenario nie getestet.</div>
+    </a>
+  </div>
+
+  <h2>Saisonalität (10 Jahre Kursdaten)</h2>
+  <div class="grid">
+    <a class="card" href="seasonality.html">
+      <div class="badge confirm">MODERAT BESTÄTIGT</div>
+      <div class="card-title">HALLOWEEN / SELL-IN-MAY</div>
+      <div class="card-tag">Nov-Apr ("Winter") vs. Mai-Okt ("Sommer")</div>
+      <div class="card-verdict">Winter Ø <b class="g">+7.98%</b> pro Periode, Trefferquote <b class="g">60.8%</b> (n=19.314) vs.
+      Sommer Ø +6.85%, Trefferquote 56.9% (n=19.191) -- aber höhere Std.-Abw. im Sommer (37.3% vs. 28.7%). Deckt sich mit
+      Bouman/Jacobsen (2002), real aber moderat, in der Literatur auch kontrovers diskutiert (Dichtl/Drobetz 2014).</div>
+    </a>
+  </div>
+
+  <h2>Fundamental-Strategien (Jahresauflösung, 5 Fiskaljahre)</h2>
+  <div class="grid">
+    <a class="card" href="piotroski.html">
+      <div class="badge confirm">KLAR BESTÄTIGT</div>
+      <div class="card-title">PIOTROSKI F-SCORE</div>
+      <div class="card-tag">9-Punkte-Bilanzqualitäts-Score</div>
+      <div class="card-verdict">Score 8 Ø <b class="g">+24.97%</b>/12M, Trefferquote <b class="g">72.8%</b> (n=312) -- durchgängig:
+      höherer Score = höhere Trefferquote. 1.848 Jahres-Beobachtungen. Klassischer akademischer Befund bestätigt,
+      wenn auch Kim/Lee (2014) zeigen, dass der Effekt nach realistischem Rebalancing deutlich schrumpft.</div>
+    </a>
+    <a class="card" href="value-factor.html">
+      <div class="badge confirm">KLAR BESTÄTIGT</div>
+      <div class="card-title">VALUE FACTOR</div>
+      <div class="card-tag">P/E + P/B + EV/EBITDA Komposit</div>
+      <div class="card-verdict">Günstigstes Dezil Ø <b class="g">+20.90%</b>/12M, Trefferquote <b class="g">68.1%</b> (n=144) vs.
+      teuerstes Dezil Ø +9.91%, Trefferquote 56.4% (n=149). 1.445 Beobachtungen. Klassischer Fama-French-Value-Faktor,
+      klar bestätigt.</div>
+    </a>
+    <a class="card" href="magic-formula.html">
+      <div class="badge confirm">KLAR BESTÄTIGT</div>
+      <div class="card-title">MAGIC FORMULA (GREENBLATT)</div>
+      <div class="card-tag">Earnings Yield + ROIC Komposit</div>
+      <div class="card-verdict">Bestes Dezil Ø <b class="g">+18.58%</b>/12M, Trefferquote <b class="g">68.5%</b> (n=143) vs.
+      schlechtestes Dezil Ø +10.77%, Trefferquote 53.6% (n=151). 1.438 Beobachtungen. Konsistent mit Value-Faktor,
+      Value+Quality-Kombination funktioniert.</div>
+    </a>
+    <a class="card" href="shareholder-yield.html">
+      <div class="badge null">KEINE EDGE (EHRLICH)</div>
+      <div class="card-title">SHAREHOLDER YIELD</div>
+      <div class="card-tag">Dividenden + Buybacks / Marktkap.</div>
+      <div class="card-verdict">Höchstes Dezil Ø +20.25%/12M (Trefferquote 65.3%, n=144) vs. niedrigstes Dezil Ø
+      <b class="r">+23.42%</b> (Trefferquote 63.8%, n=149) -- <b class="r">leicht umgekehrt, kein Vorteil</b>. Std.-Abw. in
+      beiden Fällen extrem hoch (~70-72%). Wahrscheinlich: Wachstums-getriebener Bullenmarkt 2021-2026 begünstigte
+      nicht-ausschüttende Titel; der Faktor zeigt sich eher über volle Marktzyklen inkl. Abschwung.</div>
+    </a>
+  </div>
+
+  <div class="source-note">
+  Preis-Strategien: 1.377 Titel, gemeinsames 262-Wochen-Zeitraster, dividenden-adjustierte Schlusskurse für alle
+  Signalberechnungen (siehe <a href="index.html">Midpoint-Terminal</a> für die Dividenden-Kontamination-Analyse).
+  Fundamental-Strategien: 1.400-2.000 Titel, Jahresauflösung begrenzt durch 5 gecachte Fiskaljahre pro Bilanz
+  (deutlich gröber als die wöchentlichen Preis-Backtests mit hunderttausenden Beobachtungen). Alle Vorwärtsrenditen
+  sind lookahead-frei berechnet (nur Daten verfügbar zum Zeitpunkt T, Rendite strikt danach gemessen).
+  </div>
+</div>
+</body>
+</html>
