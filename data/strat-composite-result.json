@@ -1,0 +1,81 @@
+{
+ "totalObs": 1426,
+ "deciles": [
+  {
+   "bucket": 0,
+   "n": 142,
+   "avg": 31.649,
+   "std": 71.591,
+   "winRate": 74.65
+  },
+  {
+   "bucket": 1,
+   "n": 142,
+   "avg": 21.547,
+   "std": 42.35,
+   "winRate": 68.31
+  },
+  {
+   "bucket": 2,
+   "n": 142,
+   "avg": 20.278,
+   "std": 33.612,
+   "winRate": 74.65
+  },
+  {
+   "bucket": 3,
+   "n": 142,
+   "avg": 17.822,
+   "std": 33.996,
+   "winRate": 69.01
+  },
+  {
+   "bucket": 4,
+   "n": 142,
+   "avg": 22.558,
+   "std": 96.109,
+   "winRate": 66.2
+  },
+  {
+   "bucket": 5,
+   "n": 142,
+   "avg": 14.975,
+   "std": 43.816,
+   "winRate": 61.97
+  },
+  {
+   "bucket": 6,
+   "n": 142,
+   "avg": 11.221,
+   "std": 31.106,
+   "winRate": 62.68
+  },
+  {
+   "bucket": 7,
+   "n": 142,
+   "avg": 11.65,
+   "std": 36.341,
+   "winRate": 56.34
+  },
+  {
+   "bucket": 8,
+   "n": 142,
+   "avg": 6.934,
+   "std": 32.191,
+   "winRate": 57.04
+  },
+  {
+   "bucket": 9,
+   "n": 148,
+   "avg": 6.994,
+   "std": 36.313,
+   "winRate": 52.7
+  }
+ ],
+ "baseline": {
+  "avg": 16.522,
+  "winRate": 64.31
+ },
+ "note": "decile 0 = best overall (avg of 5 percentile ranks: Piotroski, Value P/E+P/B+EV/EBITDA, Magic Formula EY+ROIC, Bollinger %B oversold, 52W-High proximity), decile 9 = worst",
+ "generatedAt": "2026-10-17T09:44:14.327Z"
+}

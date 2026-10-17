@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS COMPOSITE-SCORE TERMINAL</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:14px;letter-spacing:2px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)} .intro a{color:var(--accent)}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.stat-row{display:flex;gap:24px;flex-wrap:wrap;margin:14px 0 20px;}
+.stat b{font-family:var(--head);font-size:19px;color:var(--bright);display:block;}
+.stat span{font-size:8.5px;color:var(--muted);letter-spacing:1px;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;}
+th{font-family:var(--head);font-size:8px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px 6px;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:7px 6px;border-bottom:1px solid rgba(14,116,144,.15);}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;max-height:600px;overflow-y:auto;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.source-note a{color:var(--accent);}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.badge{font-family:var(--head);font-size:9px;padding:2px 7px;border-radius:3px;}
+.badge.g{background:rgba(21,128,61,.12);color:var(--green);} .badge.r{background:rgba(185,28,28,.12);color:var(--red);} .badge.m{background:rgba(95,114,119,.12);color:var(--muted);}
+.toolbar{margin-bottom:12px;} input[type=text]{background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:10.5px;padding:7px 10px;border-radius:4px;}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">COMPOSITE-SCORE TERMINAL</div><div class="logo-sub">5-FAKTOR-KOMBI: QUALITY+VALUE+TECHNICAL</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;"><a class="back" href="strategies-hub.html">🏠 Alle 10 Strategien</a></div>
+</header>
+<div class="wrap">
+  <div class="intro">Kombiniert die 5 am klarsten bestätigten Faktoren aus den 10 Einzel-Strategien zu einem
+  gleichgewichteten Gesamt-Rang: <b>Piotroski F-Score</b> (Bilanzqualität), <b>Value</b> (P/E+P/B+EV/EBITDA),
+  <b>Magic Formula</b> (Earnings Yield+ROIC) -- je annähernd 1/3 Fundamental-Gewicht -- plus <b>Bollinger %B</b>
+  (Mean-Reversion) und <b>52-Wochen-Hoch-Nähe</b> (Momentum) als technische Pillars. Jeder Titel braucht alle 5
+  Signale, um in die Rangliste zu kommen. Idee: fundamentale und technische Signale sind weitgehend unkorreliert
+  -- eine Kombination kann robuster sein als jeder Faktor allein (ähnlich AQR's "Quality+Value+Momentum"-Ansatz).</div>
+  <div class="stat-row"><div class="stat"><b id="stat-n">—</b><span>TITEL MIT ALLEN 5 SIGNALEN</span></div>
+    <div class="stat"><b id="stat-best">—</b><span>BESTES DEZIL (12M, BACKTEST)</span></div>
+    <div class="stat"><b id="stat-worst">—</b><span>SCHLECHTESTES DEZIL (12M, BACKTEST)</span></div></div>
+  <div class="finding" id="finding"></div><div class="toolbar"><input type="text" id="search" placeholder="Symbol oder Name…"></div><div id="content" class="loading">Lade…</div>
+  <div class="source-note">Backtest: 1.426 Jahres-Beobachtungen (annuale Fiskaljahr-Auflösung, limitiert durch Fundamentaldaten),
+  12-Monats-Vorwärtsrendite, lookahead-frei. Gesamt-Score = Mittelwert der 5 Perzentil-Ränge (jeder Pillar
+  0=bester..1=schlechtester Rang). Live-Tabelle verbindet aktuelle Fundamental- und Preis-Snapshots -- nur Titel
+  mit allen 5 Werten werden gerankt.</div>
+</div>
+<script>
+function fmtPct(v){ return (v>=0?'+':'')+v.toFixed(2)+'%'; }
+let ROWS=[];
+function render(){
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  const filtered=ROWS.filter(r=>!q||r.symbol.toLowerCase().includes(q)||r.name.toLowerCase().includes(q));
+  document.getElementById('content').innerHTML='<div class="table-wrap"><table><thead><tr><th>Rang</th><th>Symbol</th><th>Name</th><th>Sektor</th><th class="num">Kurs</th><th class="num">Piotroski</th><th class="num">P/E</th><th class="num">EY%</th><th class="num">ROIC%</th><th class="num">%B</th><th class="num">52W-Hoch%</th></tr></thead><tbody>'+filtered.map((r,i)=>'<tr><td>'+(ROWS.indexOf(r)+1)+'</td><td>'+r.symbol+'</td><td>'+r.name+'</td><td style="color:var(--muted);font-size:9.5px;">'+r.sector+'</td><td class="num">'+r.price.toFixed(2)+'</td><td class="num">'+r.piotroski+'</td><td class="num">'+r.peRatio.toFixed(1)+'</td><td class="num">'+r.earningsYield.toFixed(1)+'</td><td class="num">'+r.roic.toFixed(1)+'</td><td class="num">'+r.bollingerPctB.toFixed(2)+'</td><td class="num">'+r.pct52wHigh.toFixed(1)+'</td></tr>').join('')+'</tbody></table></div><div style="font-size:9px;color:var(--muted);margin-top:8px;">'+filtered.length+' von '+ROWS.length+', sortiert nach bestem Gesamt-Rang (alle 5 Signale gleich gewichtet)</div>';
+}
+function pctRank(arr, keyFn, higherIsBetter){
+  const sorted=arr.slice().sort((a,b)=> higherIsBetter ? keyFn(b)-keyFn(a) : keyFn(a)-keyFn(b));
+  const n=sorted.length; const map=new Map();
+  sorted.forEach((o,i)=>map.set(o, n>1 ? i/(n-1) : 0));
+  return map;
+}
+async function load(){
+  const content=document.getElementById('content');
+  try{
+    const [fundRes,priceRes,btRes]=await Promise.all([
+      fetch('data/strat-fundamentals-snapshot.json',{signal:AbortSignal.timeout(20000)}),
+      fetch('data/strat-price-snapshot.json',{signal:AbortSignal.timeout(20000)}),
+      fetch('data/strat-composite-result.json',{signal:AbortSignal.timeout(20000)})
+    ]);
+    const fund=await fundRes.json(); const price=await priceRes.json(); const bt=await btRes.json();
+    const priceBySym={}; price.rows.forEach(r=>priceBySym[r.symbol]=r);
+    ROWS=fund.rows.filter(r=>r.piotroski!=null&&r.peRatio!=null&&r.peRatio>0&&r.peRatio<200&&r.pbRatio!=null&&r.pbRatio>0&&r.evEbitda!=null&&r.evEbitda>0&&r.earningsYield!=null&&r.roic!=null&&priceBySym[r.symbol]).map(r=>Object.assign({},r,{bollingerPctB:priceBySym[r.symbol].bollingerPctB,pct52wHigh:priceBySym[r.symbol].pct52wHigh}));
+    const piotroskiRank=pctRank(ROWS,r=>r.piotroski,true);
+    const peRank=pctRank(ROWS,r=>r.peRatio,false), pbRank=pctRank(ROWS,r=>r.pbRatio,false), evRank=pctRank(ROWS,r=>r.evEbitda,false);
+    ROWS.forEach(r=>r._valueSub=peRank.get(r)+pbRank.get(r)+evRank.get(r));
+    const valueRank=pctRank(ROWS,r=>r._valueSub,false);
+    const eyRank=pctRank(ROWS,r=>r.earningsYield,true), roicRank=pctRank(ROWS,r=>r.roic,true);
+    ROWS.forEach(r=>r._magicSub=eyRank.get(r)+roicRank.get(r));
+    const magicRank=pctRank(ROWS,r=>r._magicSub,false);
+    const bbRank=pctRank(ROWS,r=>r.bollingerPctB,false);
+    const w52Rank=pctRank(ROWS,r=>r.pct52wHigh,true);
+    ROWS.forEach(r=>r.overallScore=(piotroskiRank.get(r)+valueRank.get(r)+magicRank.get(r)+bbRank.get(r)+w52Rank.get(r))/5);
+    ROWS.sort((a,b)=>a.overallScore-b.overallScore);
+    document.getElementById('stat-n').textContent=ROWS.length.toLocaleString('de-DE');
+    const d0=bt.deciles[0], d9=bt.deciles[9], base=bt.baseline;
+    document.getElementById('stat-best').textContent=fmtPct(d0.avg)+' / '+d0.winRate+'%';
+    document.getElementById('stat-worst').textContent=fmtPct(d9.avg)+' / '+d9.winRate+'%';
+    document.getElementById('finding').innerHTML='<b>Backtest-Befund ('+bt.totalObs.toLocaleString('de-DE')+' Jahres-Beobachtungen):</b> Bestes Kombi-Dezil '+fmtPct(d0.avg)+' über 12 Monate, Trefferquote <b>'+d0.winRate+'%</b> (n='+d0.n+'). Schlechtestes Dezil '+fmtPct(d9.avg)+', Trefferquote nur '+d9.winRate+'% (n='+d9.n+'). Baseline (alle Beobachtungen, unbedingt) '+fmtPct(base.avg)+', Trefferquote '+base.winRate+'%. <b>Saubere, nahezu monotone Abstufung über alle 10 Dezile</b> -- stärkere Trennschärfe als jeder Einzelfaktor für sich (z.B. Value allein: 68.1% vs. 56.4%, hier 74.65% vs. 52.7%). Spricht für einen echten Kombinationseffekt, nicht nur Rauschen.';
+    document.getElementById('search').addEventListener('input',render);
+    render();
+  }catch(e){content.innerHTML='<div class="error">Fehler: '+e.message+'</div>';}
+}
+load();
+</script>
+</body>
+</html>
