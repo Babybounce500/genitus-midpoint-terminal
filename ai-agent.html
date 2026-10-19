@@ -63,18 +63,19 @@ header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border
   <div class="intro">
   Echter AI-Agent mit <b>Function-/Tool-Calling</b> (OpenAI-Schema, <code>gpt-4o-mini</code> via eigenem Proxy
   <code>theserver-open-ai.replit.app/api/chat</code>) -- kein Skript mit vorgefertigten Antworten. Das Modell
-  entscheidet selbst, welches der 5 Tools es aufruft, die Tool-Ausführung läuft <b>clientseitig im Browser</b>
+  entscheidet selbst, welches der 10 Tools es aufruft, die Tool-Ausführung läuft <b>clientseitig im Browser</b>
   gegen die echten gecachten Datensätze dieses Stacks (1.424 Titel über 21 globale Leitindizes -- S&amp;P500,
   DAX, CAC40, NASDAQ100, FTSE100, Hang Seng, ASX200, Nifty50 u.a., keine Halluzination, keine erfundenen Zahlen --
   jede Zahl in einer Antwort kommt aus einem echten Tool-Aufruf, sichtbar als 🔧-Chip im Chat). Tools:
-  <b>Symbol-Lookup</b> (Fundamentaldaten+Technik+Midpoint-Score), <b>Composite-Score-Ranking</b>,
-  <b>flexibler Screener</b> (Piotroski/KGV/Bollinger/Midpoint-Filter), <b>Symbolsuche</b>,
-  <b>Backtest-Abfrage</b> für alle 11 Strategien dieses Stacks.
+  <b>Symbol-Lookup</b>, <b>Composite-Score-Ranking</b>, <b>flexibler Screener</b> (Piotroski/KGV/Bollinger/
+  Midpoint-Filter), <b>Symbolsuche</b>, <b>Backtest-Abfrage</b> (alle 11 Strategien), <b>Direkt-Vergleich</b>
+  mehrerer Symbole, <b>Relative-Stärke-Rang</b> (Cross-Sectional-Momentum), <b>Langfrist-Signal</b> (1/3/5/10Y),
+  <b>korrelierte Long/Short-Paare</b> und <b>Sektor-Übersicht</b>.
   </div>
   <div class="stat-row">
     <div class="stat"><b id="stat-n">—</b><span>TITEL IN DER DATENBASIS</span></div>
     <div class="stat"><b id="stat-composite">—</b><span>MIT VOLLEM COMPOSITE-SCORE</span></div>
-    <div class="stat"><b>5</b><span>TOOLS VERFÜGBAR</span></div>
+    <div class="stat"><b>10</b><span>TOOLS VERFÜGBAR</span></div>
   </div>
 
   <div id="loadError"></div>
@@ -91,7 +92,8 @@ header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border
   Proxy: eigener Node/Express-Gateway auf Replit, Modell fest auf <code>gpt-4o-mini</code> gesperrt (keine
   API-Keys im Client-Code). Tool-Ausführung = reines clientseitiges JavaScript über bereits in diesem Repo
   gecachte JSON-Snapshots (<code>strat-fundamentals-snapshot.json</code>, <code>strat-price-snapshot.json</code>,
-  <code>midpoint-snapshot.json</code>, alle 11 Backtest-Resultate) -- keine neuen Live-API-Calls pro Chat-Nachricht
+  <code>midpoint-snapshot.json</code>, <code>rs-snapshot.json</code>, <code>longterm-snapshot.json</code>,
+  <code>pairs-snapshot.json</code>, alle 11 Backtest-Resultate) -- keine neuen Live-API-Calls pro Chat-Nachricht
   außer dem einen LLM-Call selbst. Agent-Loop: bis zu 5 Tool-Runden pro Nachricht, danach erzwungene finale Antwort.
   </div>
 </div>
@@ -103,6 +105,7 @@ const MODEL = 'gpt-4o-mini';
 let SYMBOLS = {};      // symbol -> consolidated profile
 let SYMBOL_LIST = [];  // array of profiles, for scanning/filtering
 let STRATEGIES = {};   // strategy key -> trimmed result object
+let PAIRS_LIST = [];   // correlated long/short pairs
 let DATA_READY = false;
 
 // Suffix -> currency, derived from each index's primary listing currency. No suffix = US listing (USD).
@@ -124,7 +127,7 @@ function pctRank(arr, keyFn, higherIsBetter){
 }
 
 async function loadData(){
-  const [fundRes, priceRes, midRes, gcRes, w52Res, lvRes, bbRes, dmRes, seaRes, piRes, valRes, mfRes, shyRes, compRes] = await Promise.all([
+  const [fundRes, priceRes, midRes, gcRes, w52Res, lvRes, bbRes, dmRes, seaRes, piRes, valRes, mfRes, shyRes, compRes, rsRes, ltRes, pairsRes] = await Promise.all([
     fetch('data/strat-fundamentals-snapshot.json', {signal:AbortSignal.timeout(20000)}),
     fetch('data/strat-price-snapshot.json', {signal:AbortSignal.timeout(20000)}),
     fetch('data/midpoint-snapshot.json', {signal:AbortSignal.timeout(20000)}),
@@ -139,15 +142,24 @@ async function loadData(){
     fetch('data/strat-magicformula-result.json', {signal:AbortSignal.timeout(20000)}),
     fetch('data/strat-shyield-result.json', {signal:AbortSignal.timeout(20000)}),
     fetch('data/strat-composite-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/rs-snapshot.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/longterm-snapshot.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/pairs-snapshot.json', {signal:AbortSignal.timeout(20000)}),
   ]);
   const fund = await fundRes.json(), price = await priceRes.json(), mid = await midRes.json();
+  const rs = await rsRes.json(), lt = await ltRes.json(), pairs = await pairsRes.json();
 
   const priceBySym = {}; price.rows.forEach(r => priceBySym[r.symbol] = r);
   const midBySym = {}; mid.rows.forEach(r => midBySym[r.symbol] = r);
+  const rsBySym = {}; rs.rows.forEach(r => rsBySym[r.symbol] = r);
+  const ltBySym = {}; lt.rows.forEach(r => ltBySym[r.symbol] = r);
+  PAIRS_LIST = pairs.rows;
 
   SYMBOL_LIST = fund.rows.map(f => {
     const p = priceBySym[f.symbol] || {};
     const m = midBySym[f.symbol] || {};
+    const r = rsBySym[f.symbol] || {};
+    const l = ltBySym[f.symbol] || {};
     return {
       symbol: f.symbol, name: f.name, sector: f.sector, index: f.index,
       price: f.price != null ? f.price : p.price, currency: currencyForSymbol(f.symbol),
@@ -156,6 +168,8 @@ async function loadData(){
       goldenCross: p.goldenCross, pct52wHigh: p.pct52wHigh, vol52w: p.vol52w,
       bollingerPctB: p.bollingerPctB, trailing6mRetPct: p.trailing6mRetPct,
       midpointScore: m.score, midpointDepth: m.depth, rsi14w: m.rsi14w, targetUpsidePct: m.targetUpsidePct,
+      rsTrailingRetPct: r.trailingRetPct, rsPercentile: r.percentile, rsDecile: r.decile,
+      longtermScore: l.score, longtermDepth: l.depth, rsi52w: l.rsi52w,
     };
   });
   SYMBOL_LIST.forEach(s => SYMBOLS[s.symbol] = s);
@@ -260,7 +274,6 @@ function tool_screen_symbols(args) {
   };
 }
 
-const STRATEGY_KEYS = Object.keys ? null : null; // placeholder, real list built after STRATEGIES loads
 function tool_get_strategy_backtest({ strategy }) {
   const keys = Object.keys(STRATEGIES);
   if (!strategy) return { error: 'strategy fehlt', valid_keys: keys };
@@ -268,12 +281,88 @@ function tool_get_strategy_backtest({ strategy }) {
   return { strategy, result: STRATEGIES[strategy] };
 }
 
+function tool_compare_symbols({ symbols }) {
+  if (!symbols || !symbols.length) return { error: 'symbols fehlt (Array von Tickern)' };
+  const results = symbols.map(sym => {
+    const s = sym.toUpperCase().trim();
+    return SYMBOLS[s] || { symbol: s, error: 'nicht gefunden' };
+  });
+  return { count: results.length, results };
+}
+
+function tool_get_relative_strength({ symbol }) {
+  if (!symbol) return { error: 'symbol fehlt' };
+  const s = SYMBOLS[symbol.toUpperCase().trim()];
+  if (!s) return { error: 'Symbol nicht gefunden' };
+  if (s.rsPercentile == null) return { error: 'keine Relative-Stärke-Daten für dieses Symbol' };
+  return {
+    symbol: s.symbol, name: s.name,
+    trailing13wReturnPct: s.rsTrailingRetPct, percentile_0to100: s.rsPercentile, decile_1to10: s.rsDecile,
+    interpretation: s.rsPercentile >= 90 ? 'Top-Momentum (oberstes Dezil, starkes Cross-Sectional Momentum)'
+      : s.rsPercentile <= 10 ? 'Schwächstes Momentum relativ zum Gesamtmarkt (unterstes Dezil)'
+      : 'mittleres Momentum relativ zum restlichen Universum',
+  };
+}
+
+function tool_get_longterm_signal({ symbol }) {
+  if (!symbol) return { error: 'symbol fehlt' };
+  const s = SYMBOLS[symbol.toUpperCase().trim()];
+  if (!s) return { error: 'Symbol nicht gefunden' };
+  if (s.longtermScore == null) return { error: 'keine Langfrist-Daten (1Y/3Y/5Y/10Y) für dieses Symbol' };
+  return {
+    symbol: s.symbol, name: s.name,
+    longtermConfluenceScore_neg4to4: s.longtermScore, longtermDepth_neg1to1: s.longtermDepth,
+    rsi_52week: s.rsi52w,
+    note: 'Score = Summe aus 4 Zeitfenstern (1Y/3Y/5Y/10Y), je +1 wenn Kurs über dem Hoch-Tief-Mittelpunkt des Fensters, -1 wenn darunter. Laut Backtest schlagen BEIDE Extreme (-3/+3) die Baseline etwa gleich gut, Score 0 ist historisch am schwächsten.',
+  };
+}
+
+function tool_get_correlated_pairs({ symbol, limit }) {
+  if (!symbol) return { error: 'symbol fehlt' };
+  const s = symbol.toUpperCase().trim();
+  const lim = limit || 5;
+  const hits = PAIRS_LIST.filter(p => p.long === s || p.short === s)
+    .sort((a,b) => b.score - a.score).slice(0, lim);
+  if (!hits.length) return { symbol: s, count: 0, note: 'keine korrelierte Long/Short-Paarung über dem Mindest-Korrelationsschwellwert gefunden' };
+  return {
+    symbol: s, count: hits.length,
+    results: hits.map(p => ({
+      long: p.long, longName: p.longName, short: p.short, shortName: p.shortName,
+      correlation: p.corr, relativeStrengthGapPct: p.rsGap, longReturnPct: p.longRetPct, shortReturnPct: p.shortRetPct,
+      role_of_queried_symbol: p.long === s ? 'long (relativ stark)' : 'short (relativ schwach)',
+    })),
+  };
+}
+
+function tool_get_sector_overview({ sector }) {
+  if (!sector) return { error: 'sector fehlt' };
+  const q = sector.toLowerCase();
+  const inSector = SYMBOL_LIST.filter(s => s.sector && s.sector.toLowerCase().includes(q));
+  if (!inSector.length) return { error: 'kein Sektor gefunden, der "' + sector + '" enthält' };
+  const withComposite = inSector.filter(s => s.compositeScore != null);
+  const avg = (arr, key) => { const v = arr.filter(x=>x[key]!=null).map(x=>x[key]); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  const sorted = withComposite.slice().sort((a,b) => a.compositeScore - b.compositeScore);
+  return {
+    sector_match: sector, count: inSector.length, count_with_composite_score: withComposite.length,
+    avg_piotroski: avg(inSector, 'piotroski') != null ? +avg(inSector, 'piotroski').toFixed(2) : null,
+    avg_peRatio: avg(inSector, 'peRatio') != null ? +avg(inSector, 'peRatio').toFixed(2) : null,
+    avg_compositeScore_0best_1worst: avg(withComposite, 'compositeScore') != null ? +avg(withComposite, 'compositeScore').toFixed(3) : null,
+    best_in_sector: sorted[0] ? { symbol: sorted[0].symbol, name: sorted[0].name, compositeScore: +sorted[0].compositeScore.toFixed(3) } : null,
+    worst_in_sector: sorted.length ? { symbol: sorted[sorted.length-1].symbol, name: sorted[sorted.length-1].name, compositeScore: +sorted[sorted.length-1].compositeScore.toFixed(3) } : null,
+  };
+}
+
 const TOOLS = [
-  { type:'function', function:{ name:'lookup_symbol', description:'Vollständiges Profil eines einzelnen Symbols: Fundamentaldaten (Piotroski, P/E, P/B, EV/EBITDA, Earnings Yield, ROIC), technische Werte (Bollinger %B, 52W-Hoch-Nähe, Golden Cross), Midpoint-Konfluenz-Score/Tiefe, RSI(14W), Analysten-Kursziel-Upside.', parameters:{ type:'object', properties:{ symbol:{type:'string', description:'Tickersymbol, z.B. AAPL, MSFT, SAP'} }, required:['symbol'] } } },
+  { type:'function', function:{ name:'lookup_symbol', description:'Vollständiges Profil eines einzelnen Symbols: Fundamentaldaten (Piotroski, P/E, P/B, EV/EBITDA, Earnings Yield, ROIC), technische Werte (Bollinger %B, 52W-Hoch-Nähe, Golden Cross), Midpoint-Konfluenz-Score/Tiefe, RSI(14W), Relative-Stärke-Dezil, Langfrist-Score, Analysten-Kursziel-Upside.', parameters:{ type:'object', properties:{ symbol:{type:'string', description:'Tickersymbol, z.B. AAPL, MSFT, SAP'} }, required:['symbol'] } } },
   { type:'function', function:{ name:'search_symbols', description:'Sucht Symbole/Firmennamen per Teilstring, falls der exakte Ticker nicht bekannt ist.', parameters:{ type:'object', properties:{ query:{type:'string'}, limit:{type:'integer'} }, required:['query'] } } },
   { type:'function', function:{ name:'rank_by_composite_score', description:'Top-N Titel nach dem 5-Faktor-Composite-Score (Piotroski+Value+Magic-Formula+Bollinger+52W-Hoch, gleichgewichtet). direction=best (Standard) oder worst.', parameters:{ type:'object', properties:{ direction:{type:'string', enum:['best','worst']}, limit:{type:'integer'} } } } },
   { type:'function', function:{ name:'screen_symbols', description:'Flexibler Screener mit mehreren optionalen Filtern gleichzeitig (Piotroski-Minimum, max. KGV, max. P/B, min. Midpoint-Score -4..+4, max. Bollinger %B, min. 52W-Hoch-Nähe in %, Sektor-Teilstring).', parameters:{ type:'object', properties:{ min_piotroski:{type:'integer'}, max_pe:{type:'number'}, max_pb:{type:'number'}, min_midpoint_score:{type:'integer'}, max_bollinger_pctb:{type:'number'}, min_52w_high_pct:{type:'number'}, sector:{type:'string'}, limit:{type:'integer'} } } } },
-  { type:'function', function:{ name:'get_strategy_backtest', description:'Echte Backtest-Ergebnisse einer der 11 im Stack getesteten Strategien abrufen.', parameters:{ type:'object', properties:{ strategy:{type:'string', enum:['golden-cross','52w-high','low-volatility','bollinger-bands','dual-momentum','seasonality','piotroski','value-factor','magic-formula','shareholder-yield','composite-score']} }, required:['strategy'] } } },
+  { type:'function', function:{ name:'get_strategy_backtest', description:'Echte Backtest-Ergebnisse einer der 11 im Stack getesteten Strategien abrufen. WICHTIG: strategy muss exakt einer der enum-Werte sein -- wenn der User einen anderen Namen nennt, ordne ihn der am besten passenden gültigen Strategie zu UND sag dem User explizit, welche echte Strategie du dafür verwendet hast.', parameters:{ type:'object', properties:{ strategy:{type:'string', enum:['golden-cross','52w-high','low-volatility','bollinger-bands','dual-momentum','seasonality','piotroski','value-factor','magic-formula','shareholder-yield','composite-score']} }, required:['strategy'] } } },
+  { type:'function', function:{ name:'compare_symbols', description:'Vergleicht 2 oder mehr Symbole direkt nebeneinander -- liefert für jedes das volle Profil in einem Aufruf statt mehrerer lookup_symbol-Aufrufe.', parameters:{ type:'object', properties:{ symbols:{type:'array', items:{type:'string'}, description:'Liste von Tickersymbolen, z.B. ["AAPL","MSFT"]'} }, required:['symbols'] } } },
+  { type:'function', function:{ name:'get_relative_strength', description:'Cross-sectional Relative-Stärke-Rang eines Symbols ggü. dem gesamten Universum (13-Wochen-Momentum-Perzentil/Dezil) -- unterscheidet sich vom Midpoint-Score: das ist Rang im Feld, nicht Stand vs. eigene Historie.', parameters:{ type:'object', properties:{ symbol:{type:'string'} }, required:['symbol'] } } },
+  { type:'function', function:{ name:'get_longterm_signal', description:'Langfrist-Konfluenz-Score eines Symbols über 1/3/5/10 Jahre (separat vom kurzfristigen 1M/3M/6M/1Y Midpoint-Score).', parameters:{ type:'object', properties:{ symbol:{type:'string'} }, required:['symbol'] } } },
+  { type:'function', function:{ name:'get_correlated_pairs', description:'Findet statistisch korrelierte Long/Short-Paar-Partner für ein Symbol (aus dem Pairs-Trading-Backtest: Long = relativ stark, Short = relativ schwach, beide korreliert).', parameters:{ type:'object', properties:{ symbol:{type:'string'}, limit:{type:'integer'} }, required:['symbol'] } } },
+  { type:'function', function:{ name:'get_sector_overview', description:'Aggregierte Kennzahlen für einen Sektor (Anzahl Titel, Durchschnitts-Piotroski/KGV/Composite-Score, bester und schlechtester Titel im Sektor).', parameters:{ type:'object', properties:{ sector:{type:'string', description:'Sektor-Teilstring, z.B. "Financials", "Information Technology", "Health Care"'} }, required:['sector'] } } },
 ];
 
 const TOOL_FNS = {
@@ -282,6 +371,11 @@ const TOOL_FNS = {
   rank_by_composite_score: tool_rank_by_composite_score,
   screen_symbols: tool_screen_symbols,
   get_strategy_backtest: tool_get_strategy_backtest,
+  compare_symbols: tool_compare_symbols,
+  get_relative_strength: tool_get_relative_strength,
+  get_longterm_signal: tool_get_longterm_signal,
+  get_correlated_pairs: tool_get_correlated_pairs,
+  get_sector_overview: tool_get_sector_overview,
 };
 
 const SYSTEM_PROMPT = `Du bist der GENITUS AI-Agent, ein Finanz-Analyse-Assistent mit echtem Tool-Zugriff auf eine
@@ -289,7 +383,10 @@ gecachte Datenbasis von 1.424 Titeln über 21 globale Leitindizes (S&P500, DAX, 
 Hang Seng, ASX200, Nifty50 u.a. -- Fundamentaldaten, technische Signale, Backtest-Ergebnisse von 11
 validierten Strategien). Antworte IMMER auf Deutsch.
 REGELN:
-1. Beantworte Zahlen-Fragen NIEMALS aus eigenem Wissen -- rufe IMMER zuerst das passende Tool auf.
+1. Beantworte Zahlen-Fragen NIEMALS aus eigenem Wissen -- rufe IMMER zuerst das passende Tool auf. Das gilt
+   AUSNAHMSLOS auch dann, wenn du im Text zuerst einen Namens-Mismatch erklären willst (siehe Regel 8): der
+   Tool-Aufruf passiert in JEDEM Fall zuerst, noch bevor du irgendeinen Satz formulierst -- nie Zahlen nennen,
+   ohne dass in dieser Runde tatsächlich ein Tool aufgerufen wurde.
 2. Erfinde niemals Zahlen, Symbole oder Firmen, die nicht aus einem Tool-Ergebnis stammen.
 3. Wenn ein Tool "error" zurückgibt (z.B. Symbol nicht gefunden), nutze "did_you_mean" oder frage nach, statt zu raten.
 4. Sei präzise und knapp, nenne konkrete Zahlen aus den Tool-Ergebnissen.
@@ -298,7 +395,18 @@ REGELN:
 7. Jedes Tool-Ergebnis mit "price" liefert ein eigenes "currency"-Feld (USD/EUR/GBP/CHF/HKD/AUD/INR/SGD/...) --
    nutze IMMER genau diese Währung pro Titel, nimm NIE automatisch € oder $ an, nur weil der vorherige Titel
    diese Währung hatte (die Datenbasis ist global über 21 Börsen, Titel in derselben Antwort haben oft
-   unterschiedliche Währungen).`;
+   unterschiedliche Währungen).
+8. get_strategy_backtest akzeptiert NUR die 11 exakten enum-Werte. Wenn der User einen Strategienamen nennt,
+   der nicht exakt passt (z.B. erfundener oder ungenauer Name): RUFE TROTZDEM SOFORT get_strategy_backtest MIT
+   dem inhaltlich nächstliegenden echten enum-Wert AUF (Pflicht, nicht optional -- ohne diesen Tool-Call darfst
+   du in dieser Antwort keine einzige Zahl nennen). Baue die Antwort danach, mit den ECHTEN Zahlen aus dem
+   Tool-Ergebnis, so auf: "Du meintest vermutlich nicht X, sondern die echte Strategie Y -- hier die echten
+   Zahlen dazu:". Tu NIE so, als hätte der User exakt den richtigen Namen genannt, und erfinde NIE Zahlen, nur
+   um die Mismatch-Erklärung schneller fertigzustellen.
+9. get_relative_strength (Rang ggü. Universum) und get_longterm_signal/midpointScore (Stand vs. eigene
+   Historie) sind unterschiedliche, unkorrelierte Signale -- verwechsle sie nicht und erkläre bei Bedarf kurz
+   den Unterschied.
+10. Bei Vergleichsfragen zu 2+ Symbolen nutze compare_symbols statt mehrerer einzelner lookup_symbol-Aufrufe.`;
 
 let messages = [{ role: 'system', content: SYSTEM_PROMPT }];
 
@@ -386,8 +494,11 @@ const STARTERS = [
   'Zeig mir alles zu AAPL',
   'Value-Aktien mit Piotroski über 7 und KGV unter 15',
   'Was sagt der Bollinger-Bands-Backtest aus?',
-  'Welche Titel sind überverkauft laut Midpoint-Score?',
-  'Vergleiche den Composite-Score-Backtest mit dem Value-Backtest',
+  'Vergleiche AAPL und MSFT direkt',
+  'Wie ist die relative Stärke von NVDA ggü. dem Markt?',
+  'Gibt es ein korreliertes Short-Paar zu NVDA?',
+  'Gib mir eine Sektor-Übersicht für Financials',
+  'Wie sieht SAP auf lange Sicht (1-10 Jahre) aus?',
 ];
 
 async function init() {
