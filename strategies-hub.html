@@ -41,14 +41,29 @@ h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);m
     <a class="back" href="longterm.html">📅 Langfrist</a>
     <a class="back" href="relative-strength.html">📈 Rel. Stärke</a>
     <a class="back" href="pairs-trading.html">⚖ Pairs</a>
+    <a class="back" href="ai-agent.html">🤖 AI-Agent</a>
   </div>
 </header>
 <div class="wrap">
   <div class="intro">
   11 zusätzliche Strategien, jede mit eigenem Live-Terminal (aktuelle Kandidaten) UND echtem Backtest auf
-  Kursdaten (5 Jahre, teils 10 Jahre) bzw. Fundamentaldaten (5 Fiskaljahre, S&amp;P500+DAX40, ~1400-2000 Titel).
+  Kursdaten (5 Jahre, teils 10 Jahre) bzw. Fundamentaldaten (5 Fiskaljahre, 1.424 Titel über 21 globale
+  Leitindizes -- S&amp;P500, DAX, CAC40, NASDAQ100, FTSE100, Hang Seng, ASX200, Nifty50 u.a.).
   Alle Ergebnisse sind real berechnet, nicht geschätzt -- inklusive der Fälle, in denen <b>keine</b> Edge gefunden
   wurde (ehrlich so berichtet statt schönzureden). Jede Karte verlinkt direkt zum Live-Terminal.
+  </div>
+
+  <h2>🤖 AI-Agent (echtes LLM-Tool-Calling über die gesamte Datenbasis)</h2>
+  <div class="grid">
+    <a class="card" href="ai-agent.html">
+      <div class="badge confirm">NEU -- ECHTES FUNCTION-CALLING</div>
+      <div class="card-title">AI-AGENT TERMINAL</div>
+      <div class="card-tag">gpt-4o-mini, 5 Tools, clientseitige Ausführung über alle 11 Strategien + Fundamentaldaten</div>
+      <div class="card-verdict">Chat-Interface mit echtem OpenAI-Function-Calling (kein Skript) über den eigenen
+      <code>theserver-open-ai.replit.app</code>-Proxy. Das Modell entscheidet selbst, welches Tool es aufruft
+      (Symbol-Lookup, Composite-Ranking, flexibler Screener, Symbolsuche, Backtest-Abfrage) -- jede Zahl in einer
+      Antwort kommt aus einem echten, sichtbaren Tool-Aufruf, keine Halluzination.</div>
+    </a>
   </div>
 
   <h2>⭐ Kombi-Strategie (die stärkste Trennschärfe im gesamten Sweep)</h2>

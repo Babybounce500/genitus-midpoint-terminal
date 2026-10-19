@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS AI-AGENT TERMINAL</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:14px;letter-spacing:2px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:900px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)} .intro a{color:var(--accent)}
+.stat-row{display:flex;gap:24px;flex-wrap:wrap;margin:14px 0 18px;}
+.stat b{font-family:var(--head);font-size:17px;color:var(--bright);display:block;}
+.stat span{font-size:8.5px;color:var(--muted);letter-spacing:1px;}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.source-note a{color:var(--accent);}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;}
+.chip{font-family:var(--mono);font-size:10px;padding:7px 11px;border:1px solid var(--border);background:var(--surface);color:var(--accent);cursor:pointer;border-radius:999px;transition:.15s;}
+.chip:hover{border-color:var(--accent);background:var(--panel);}
+
+#chatBox{background:var(--card);border:1px solid var(--border);border-radius:8px;min-height:360px;max-height:58vh;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.msg{max-width:88%;padding:10px 13px;border-radius:8px;font-size:11.5px;line-height:1.65;white-space:pre-wrap;}
+.msg.user{align-self:flex-end;background:var(--panel);border:1px solid var(--border);color:var(--text);}
+.msg.assistant{align-self:flex-start;background:var(--surface);border-left:3px solid var(--accent);color:var(--text);}
+.msg.system-note{align-self:center;color:var(--muted);font-size:9.5px;font-style:italic;}
+.tool-chip{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:9px;color:var(--gold);background:rgba(180,83,9,.08);border:1px solid rgba(180,83,9,.25);padding:4px 9px;border-radius:999px;}
+.msg b{color:var(--bright);}
+.msg table{border-collapse:collapse;margin-top:6px;font-size:10.5px;}
+.msg td,.msg th{padding:3px 8px;border-bottom:1px solid var(--border);text-align:left;}
+
+#inputRow{display:flex;gap:8px;margin-top:12px;}
+#chatInput{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11.5px;padding:11px 14px;border-radius:6px;resize:none;}
+#chatInput:focus{outline:none;border-color:var(--accent);}
+#sendBtn{background:var(--accent);color:#fff;border:none;padding:0 20px;border-radius:6px;font-family:var(--head);font-size:10px;letter-spacing:1px;cursor:pointer;}
+#sendBtn:disabled{opacity:.5;cursor:default;}
+#sendBtn:hover:not(:disabled){background:#0b5b6e;}
+
+.typing{align-self:flex-start;color:var(--muted);font-size:10.5px;}
+.typing::after{content:'●●●';letter-spacing:2px;animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+
+.error-box{background:rgba(185,28,28,.08);border:1px solid rgba(185,28,28,.3);color:var(--red);padding:12px 14px;border-radius:6px;font-size:11px;margin-bottom:12px;}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">AI-AGENT TERMINAL</div><div class="logo-sub">LLM MIT ECHTEM TOOL-USE ÜBER DIE GENITUS-DATENBASIS</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="index.html">⏱ Midpoint</a>
+    <a class="back" href="strategies-hub.html">🏠 11 Strategien</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  Echter AI-Agent mit <b>Function-/Tool-Calling</b> (OpenAI-Schema, <code>gpt-4o-mini</code> via eigenem Proxy
+  <code>theserver-open-ai.replit.app/api/chat</code>) -- kein Skript mit vorgefertigten Antworten. Das Modell
+  entscheidet selbst, welches der 5 Tools es aufruft, die Tool-Ausführung läuft <b>clientseitig im Browser</b>
+  gegen die echten gecachten Datensätze dieses Stacks (1.424 Titel über 21 globale Leitindizes -- S&amp;P500,
+  DAX, CAC40, NASDAQ100, FTSE100, Hang Seng, ASX200, Nifty50 u.a., keine Halluzination, keine erfundenen Zahlen --
+  jede Zahl in einer Antwort kommt aus einem echten Tool-Aufruf, sichtbar als 🔧-Chip im Chat). Tools:
+  <b>Symbol-Lookup</b> (Fundamentaldaten+Technik+Midpoint-Score), <b>Composite-Score-Ranking</b>,
+  <b>flexibler Screener</b> (Piotroski/KGV/Bollinger/Midpoint-Filter), <b>Symbolsuche</b>,
+  <b>Backtest-Abfrage</b> für alle 11 Strategien dieses Stacks.
+  </div>
+  <div class="stat-row">
+    <div class="stat"><b id="stat-n">—</b><span>TITEL IN DER DATENBASIS</span></div>
+    <div class="stat"><b id="stat-composite">—</b><span>MIT VOLLEM COMPOSITE-SCORE</span></div>
+    <div class="stat"><b>5</b><span>TOOLS VERFÜGBAR</span></div>
+  </div>
+
+  <div id="loadError"></div>
+
+  <div class="chips" id="starterChips"></div>
+
+  <div id="chatBox"></div>
+  <div id="inputRow">
+    <textarea id="chatInput" rows="1" placeholder="Frag etwas über die GENITUS-Datenbasis… z.B. 'Top 5 Composite-Score Kandidaten mit Piotroski über 6'"></textarea>
+    <button id="sendBtn">SENDEN</button>
+  </div>
+
+  <div class="source-note">
+  Proxy: eigener Node/Express-Gateway auf Replit, Modell fest auf <code>gpt-4o-mini</code> gesperrt (keine
+  API-Keys im Client-Code). Tool-Ausführung = reines clientseitiges JavaScript über bereits in diesem Repo
+  gecachte JSON-Snapshots (<code>strat-fundamentals-snapshot.json</code>, <code>strat-price-snapshot.json</code>,
+  <code>midpoint-snapshot.json</code>, alle 11 Backtest-Resultate) -- keine neuen Live-API-Calls pro Chat-Nachricht
+  außer dem einen LLM-Call selbst. Agent-Loop: bis zu 5 Tool-Runden pro Nachricht, danach erzwungene finale Antwort.
+  </div>
+</div>
+
+<script>
+const PROXY = 'https://theserver-open-ai.replit.app/api/chat';
+const MODEL = 'gpt-4o-mini';
+
+let SYMBOLS = {};      // symbol -> consolidated profile
+let SYMBOL_LIST = [];  // array of profiles, for scanning/filtering
+let STRATEGIES = {};   // strategy key -> trimmed result object
+let DATA_READY = false;
+
+// Suffix -> currency, derived from each index's primary listing currency. No suffix = US listing (USD).
+const CURRENCY_BY_SUFFIX = {
+  '': 'USD', DE: 'EUR', PA: 'EUR', AS: 'EUR', SW: 'CHF', MC: 'EUR', L: 'GBP', ST: 'SEK',
+  BR: 'EUR', CO: 'DKK', TO: 'CAD', MI: 'EUR', HK: 'HKD', LS: 'EUR', AX: 'AUD', NS: 'INR',
+  BO: 'INR', SI: 'SGD', NZ: 'NZD',
+};
+function currencyForSymbol(symbol) {
+  const m = symbol.match(/\.([A-Z]+)$/);
+  return CURRENCY_BY_SUFFIX[m ? m[1] : ''] || 'USD';
+}
+
+function pctRank(arr, keyFn, higherIsBetter){
+  const sorted = arr.slice().sort((a,b)=> higherIsBetter ? keyFn(b)-keyFn(a) : keyFn(a)-keyFn(b));
+  const n = sorted.length; const map = new Map();
+  sorted.forEach((o,i)=>map.set(o, n>1 ? i/(n-1) : 0));
+  return map;
+}
+
+async function loadData(){
+  const [fundRes, priceRes, midRes, gcRes, w52Res, lvRes, bbRes, dmRes, seaRes, piRes, valRes, mfRes, shyRes, compRes] = await Promise.all([
+    fetch('data/strat-fundamentals-snapshot.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-price-snapshot.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/midpoint-snapshot.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-goldencross-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-52whigh-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-lowvol-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-bollinger-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-dualmomentum-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-seasonality-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-piotroski-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-value-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-magicformula-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-shyield-result.json', {signal:AbortSignal.timeout(20000)}),
+    fetch('data/strat-composite-result.json', {signal:AbortSignal.timeout(20000)}),
+  ]);
+  const fund = await fundRes.json(), price = await priceRes.json(), mid = await midRes.json();
+
+  const priceBySym = {}; price.rows.forEach(r => priceBySym[r.symbol] = r);
+  const midBySym = {}; mid.rows.forEach(r => midBySym[r.symbol] = r);
+
+  SYMBOL_LIST = fund.rows.map(f => {
+    const p = priceBySym[f.symbol] || {};
+    const m = midBySym[f.symbol] || {};
+    return {
+      symbol: f.symbol, name: f.name, sector: f.sector, index: f.index,
+      price: f.price != null ? f.price : p.price, currency: currencyForSymbol(f.symbol),
+      piotroski: f.piotroski, peRatio: f.peRatio, pbRatio: f.pbRatio, evEbitda: f.evEbitda,
+      earningsYield: f.earningsYield, roic: f.roic, shYield: f.shYield,
+      goldenCross: p.goldenCross, pct52wHigh: p.pct52wHigh, vol52w: p.vol52w,
+      bollingerPctB: p.bollingerPctB, trailing6mRetPct: p.trailing6mRetPct,
+      midpointScore: m.score, midpointDepth: m.depth, rsi14w: m.rsi14w, targetUpsidePct: m.targetUpsidePct,
+    };
+  });
+  SYMBOL_LIST.forEach(s => SYMBOLS[s.symbol] = s);
+
+  // composite score: same 5-pillar percentile-rank method as composite-score.html
+  const eligible = SYMBOL_LIST.filter(r =>
+    r.piotroski != null && r.peRatio != null && r.peRatio > 0 && r.peRatio < 200 &&
+    r.pbRatio != null && r.pbRatio > 0 && r.evEbitda != null && r.evEbitda > 0 &&
+    r.earningsYield != null && r.roic != null &&
+    r.bollingerPctB != null && r.pct52wHigh != null
+  );
+  const piotroskiRank = pctRank(eligible, r=>r.piotroski, true);
+  const peRank = pctRank(eligible, r=>r.peRatio, false), pbRank = pctRank(eligible, r=>r.pbRatio, false), evRank = pctRank(eligible, r=>r.evEbitda, false);
+  eligible.forEach(r => r._valueSub = peRank.get(r)+pbRank.get(r)+evRank.get(r));
+  const valueRank = pctRank(eligible, r=>r._valueSub, false);
+  const eyRank = pctRank(eligible, r=>r.earningsYield, true), roicRank = pctRank(eligible, r=>r.roic, true);
+  eligible.forEach(r => r._magicSub = eyRank.get(r)+roicRank.get(r));
+  const magicRank = pctRank(eligible, r=>r._magicSub, false);
+  const bbRank = pctRank(eligible, r=>r.bollingerPctB, false);
+  const w52Rank = pctRank(eligible, r=>r.pct52wHigh, true);
+  eligible.forEach(r => {
+    r.compositeScore = (piotroskiRank.get(r)+valueRank.get(r)+magicRank.get(r)+bbRank.get(r)+w52Rank.get(r))/5;
+  });
+  document.getElementById('stat-n').textContent = SYMBOL_LIST.length.toLocaleString('de-DE');
+  document.getElementById('stat-composite').textContent = eligible.length.toLocaleString('de-DE');
+
+  const seaFull = await seaRes.json();
+  STRATEGIES = {
+    'golden-cross': await gcRes.json(),
+    '52w-high': await w52Res.json(),
+    'low-volatility': await lvRes.json(),
+    'bollinger-bands': await bbRes.json(),
+    'dual-momentum': await dmRes.json(),
+    'seasonality': { winterStat: seaFull.winterStat, summerStat: seaFull.summerStat },
+    'piotroski': await piRes.json(),
+    'value-factor': await valRes.json(),
+    'magic-formula': await mfRes.json(),
+    'shareholder-yield': await shyRes.json(),
+    'composite-score': await compRes.json(),
+  };
+
+  DATA_READY = true;
+}
+
+// ---------------- TOOL IMPLEMENTATIONS (pure client-side lookups) ----------------
+
+function tool_lookup_symbol({ symbol }) {
+  if (!symbol) return { error: 'symbol fehlt' };
+  const sym = symbol.toUpperCase().trim();
+  const hit = SYMBOLS[sym];
+  if (hit) return hit;
+  const fuzzy = SYMBOL_LIST.filter(s => s.symbol.includes(sym) || s.name.toUpperCase().includes(sym)).slice(0, 5);
+  return { error: 'Symbol "' + symbol + '" nicht exakt gefunden', did_you_mean: fuzzy.map(s=>({symbol:s.symbol,name:s.name})) };
+}
+
+function tool_search_symbols({ query, limit }) {
+  if (!query) return { error: 'query fehlt' };
+  const q = query.toUpperCase().trim();
+  const lim = limit || 10;
+  const hits = SYMBOL_LIST.filter(s => s.symbol.includes(q) || s.name.toUpperCase().includes(q)).slice(0, lim);
+  return { count: hits.length, results: hits.map(s => ({ symbol: s.symbol, name: s.name, sector: s.sector })) };
+}
+
+function tool_rank_by_composite_score({ direction, limit }) {
+  const lim = limit || 10;
+  const ranked = SYMBOL_LIST.filter(s => s.compositeScore != null).slice();
+  ranked.sort((a,b) => direction === 'worst' ? b.compositeScore - a.compositeScore : a.compositeScore - b.compositeScore);
+  return {
+    direction: direction === 'worst' ? 'worst' : 'best',
+    total_eligible: ranked.length,
+    results: ranked.slice(0, lim).map(s => ({
+      symbol: s.symbol, name: s.name, sector: s.sector, price: s.price, currency: s.currency,
+      compositeScore_0best_1worst: +s.compositeScore.toFixed(3),
+      piotroski: s.piotroski, peRatio: s.peRatio, bollingerPctB: s.bollingerPctB, pct52wHigh: s.pct52wHigh,
+    })),
+  };
+}
+
+function tool_screen_symbols(args) {
+  const { min_piotroski, max_pe, max_pb, min_midpoint_score, max_bollinger_pctb, min_52w_high_pct, sector, limit } = args || {};
+  const lim = limit || 15;
+  let matches = SYMBOL_LIST.filter(s => {
+    if (min_piotroski != null && (s.piotroski == null || s.piotroski < min_piotroski)) return false;
+    if (max_pe != null && (s.peRatio == null || s.peRatio > max_pe)) return false;
+    if (max_pb != null && (s.pbRatio == null || s.pbRatio > max_pb)) return false;
+    if (min_midpoint_score != null && (s.midpointScore == null || s.midpointScore < min_midpoint_score)) return false;
+    if (max_bollinger_pctb != null && (s.bollingerPctB == null || s.bollingerPctB > max_bollinger_pctb)) return false;
+    if (min_52w_high_pct != null && (s.pct52wHigh == null || s.pct52wHigh < min_52w_high_pct)) return false;
+    if (sector && (!s.sector || !s.sector.toLowerCase().includes(sector.toLowerCase()))) return false;
+    return true;
+  });
+  matches.sort((a,b) => (a.compositeScore ?? 1) - (b.compositeScore ?? 1));
+  return {
+    total_matches: matches.length,
+    shown: Math.min(lim, matches.length),
+    results: matches.slice(0, lim).map(s => ({
+      symbol: s.symbol, name: s.name, sector: s.sector, price: s.price, currency: s.currency,
+      piotroski: s.piotroski, peRatio: s.peRatio, pbRatio: s.pbRatio,
+      bollingerPctB: s.bollingerPctB, pct52wHigh: s.pct52wHigh, midpointScore: s.midpointScore,
+      compositeScore_0best_1worst: s.compositeScore != null ? +s.compositeScore.toFixed(3) : null,
+    })),
+  };
+}
+
+const STRATEGY_KEYS = Object.keys ? null : null; // placeholder, real list built after STRATEGIES loads
+function tool_get_strategy_backtest({ strategy }) {
+  const keys = Object.keys(STRATEGIES);
+  if (!strategy) return { error: 'strategy fehlt', valid_keys: keys };
+  if (!STRATEGIES[strategy]) return { error: 'unbekannte Strategie "' + strategy + '"', valid_keys: keys };
+  return { strategy, result: STRATEGIES[strategy] };
+}
+
+const TOOLS = [
+  { type:'function', function:{ name:'lookup_symbol', description:'Vollständiges Profil eines einzelnen Symbols: Fundamentaldaten (Piotroski, P/E, P/B, EV/EBITDA, Earnings Yield, ROIC), technische Werte (Bollinger %B, 52W-Hoch-Nähe, Golden Cross), Midpoint-Konfluenz-Score/Tiefe, RSI(14W), Analysten-Kursziel-Upside.', parameters:{ type:'object', properties:{ symbol:{type:'string', description:'Tickersymbol, z.B. AAPL, MSFT, SAP'} }, required:['symbol'] } } },
+  { type:'function', function:{ name:'search_symbols', description:'Sucht Symbole/Firmennamen per Teilstring, falls der exakte Ticker nicht bekannt ist.', parameters:{ type:'object', properties:{ query:{type:'string'}, limit:{type:'integer'} }, required:['query'] } } },
+  { type:'function', function:{ name:'rank_by_composite_score', description:'Top-N Titel nach dem 5-Faktor-Composite-Score (Piotroski+Value+Magic-Formula+Bollinger+52W-Hoch, gleichgewichtet). direction=best (Standard) oder worst.', parameters:{ type:'object', properties:{ direction:{type:'string', enum:['best','worst']}, limit:{type:'integer'} } } } },
+  { type:'function', function:{ name:'screen_symbols', description:'Flexibler Screener mit mehreren optionalen Filtern gleichzeitig (Piotroski-Minimum, max. KGV, max. P/B, min. Midpoint-Score -4..+4, max. Bollinger %B, min. 52W-Hoch-Nähe in %, Sektor-Teilstring).', parameters:{ type:'object', properties:{ min_piotroski:{type:'integer'}, max_pe:{type:'number'}, max_pb:{type:'number'}, min_midpoint_score:{type:'integer'}, max_bollinger_pctb:{type:'number'}, min_52w_high_pct:{type:'number'}, sector:{type:'string'}, limit:{type:'integer'} } } } },
+  { type:'function', function:{ name:'get_strategy_backtest', description:'Echte Backtest-Ergebnisse einer der 11 im Stack getesteten Strategien abrufen.', parameters:{ type:'object', properties:{ strategy:{type:'string', enum:['golden-cross','52w-high','low-volatility','bollinger-bands','dual-momentum','seasonality','piotroski','value-factor','magic-formula','shareholder-yield','composite-score']} }, required:['strategy'] } } },
+];
+
+const TOOL_FNS = {
+  lookup_symbol: tool_lookup_symbol,
+  search_symbols: tool_search_symbols,
+  rank_by_composite_score: tool_rank_by_composite_score,
+  screen_symbols: tool_screen_symbols,
+  get_strategy_backtest: tool_get_strategy_backtest,
+};
+
+const SYSTEM_PROMPT = `Du bist der GENITUS AI-Agent, ein Finanz-Analyse-Assistent mit echtem Tool-Zugriff auf eine
+gecachte Datenbasis von 1.424 Titeln über 21 globale Leitindizes (S&P500, DAX, CAC40, NASDAQ100, FTSE100,
+Hang Seng, ASX200, Nifty50 u.a. -- Fundamentaldaten, technische Signale, Backtest-Ergebnisse von 11
+validierten Strategien). Antworte IMMER auf Deutsch.
+REGELN:
+1. Beantworte Zahlen-Fragen NIEMALS aus eigenem Wissen -- rufe IMMER zuerst das passende Tool auf.
+2. Erfinde niemals Zahlen, Symbole oder Firmen, die nicht aus einem Tool-Ergebnis stammen.
+3. Wenn ein Tool "error" zurückgibt (z.B. Symbol nicht gefunden), nutze "did_you_mean" oder frage nach, statt zu raten.
+4. Sei präzise und knapp, nenne konkrete Zahlen aus den Tool-Ergebnissen.
+5. compositeScore ist 0=bester..1=schlechtester Rang (nicht Prozent) -- erkläre das kurz, wenn du ihn nennst.
+6. Bei Backtest-Fragen: nenne die echten Kennzahlen (avg/winRate/n) aus dem Tool, keine Schätzung.
+7. Jedes Tool-Ergebnis mit "price" liefert ein eigenes "currency"-Feld (USD/EUR/GBP/CHF/HKD/AUD/INR/SGD/...) --
+   nutze IMMER genau diese Währung pro Titel, nimm NIE automatisch € oder $ an, nur weil der vorherige Titel
+   diese Währung hatte (die Datenbasis ist global über 21 Börsen, Titel in derselben Antwort haben oft
+   unterschiedliche Währungen).`;
+
+let messages = [{ role: 'system', content: SYSTEM_PROMPT }];
+
+function addMsg(role, text, cls) {
+  const box = document.getElementById('chatBox');
+  const div = document.createElement('div');
+  div.className = 'msg ' + (cls || role);
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  return div;
+}
+function addToolChip(name, args) {
+  const box = document.getElementById('chatBox');
+  const div = document.createElement('div');
+  div.className = 'tool-chip';
+  div.textContent = '🔧 ' + name + '(' + JSON.stringify(args) + ')';
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function callProxy(msgsForApi) {
+  const res = await fetch(PROXY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, stream: false, messages: msgsForApi, tools: TOOLS, tool_choice: 'auto' }),
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!res.ok) throw new Error('Proxy HTTP ' + res.status);
+  return res.json();
+}
+
+async function runAgent(userText) {
+  messages.push({ role: 'user', content: userText });
+  const typingEl = document.createElement('div');
+  typingEl.className = 'typing';
+  typingEl.textContent = 'Agent denkt nach';
+  document.getElementById('chatBox').appendChild(typingEl);
+  document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+
+  try {
+    for (let round = 0; round < 5; round++) {
+      const data = await callProxy(messages);
+      const choice = data.choices && data.choices[0];
+      if (!choice) throw new Error('Keine Antwort vom Proxy');
+      const msg = choice.message;
+      messages.push(msg);
+
+      if (msg.tool_calls && msg.tool_calls.length) {
+        for (const tc of msg.tool_calls) {
+          let args = {};
+          try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) {}
+          addToolChip(tc.function.name, args);
+          const fn = TOOL_FNS[tc.function.name];
+          const result = fn ? fn(args) : { error: 'unbekanntes Tool: ' + tc.function.name };
+          messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
+        }
+        continue; // let the model see tool results and respond again
+      }
+
+      typingEl.remove();
+      addMsg('assistant', msg.content || '(keine Textantwort)');
+      return;
+    }
+    typingEl.remove();
+    addMsg('system-note', 'Zu viele Tool-Runden -- abgebrochen.');
+  } catch (e) {
+    typingEl.remove();
+    addMsg('system-note', 'Fehler: ' + e.message);
+  }
+}
+
+function send() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || !DATA_READY) return;
+  addMsg('user', text);
+  input.value = '';
+  document.getElementById('sendBtn').disabled = true;
+  runAgent(text).finally(() => { document.getElementById('sendBtn').disabled = false; input.focus(); });
+}
+
+const STARTERS = [
+  'Top 5 Composite-Score Kandidaten',
+  'Zeig mir alles zu AAPL',
+  'Value-Aktien mit Piotroski über 7 und KGV unter 15',
+  'Was sagt der Bollinger-Bands-Backtest aus?',
+  'Welche Titel sind überverkauft laut Midpoint-Score?',
+  'Vergleiche den Composite-Score-Backtest mit dem Value-Backtest',
+];
+
+async function init() {
+  try {
+    await loadData();
+  } catch (e) {
+    document.getElementById('loadError').innerHTML = '<div class="error-box">Daten konnten nicht geladen werden: ' + e.message + '</div>';
+    return;
+  }
+  document.getElementById('starterChips').innerHTML = STARTERS.map(s => '<span class="chip" data-q="' + s.replace(/"/g,'&quot;') + '">' + s + '</span>').join('');
+  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    document.getElementById('chatInput').value = c.dataset.q;
+    send();
+  }));
+  addMsg('system-note', 'Verbunden -- ' + SYMBOL_LIST.length + ' Titel geladen, Tool-Use bereit.');
+}
+
+document.getElementById('sendBtn').addEventListener('click', send);
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+
+init();
+</script>
+</body>
+</html>
