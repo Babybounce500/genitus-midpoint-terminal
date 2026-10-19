@@ -63,19 +63,22 @@ header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border
   <div class="intro">
   Echter AI-Agent mit <b>Function-/Tool-Calling</b> (OpenAI-Schema, <code>gpt-4o-mini</code> via eigenem Proxy
   <code>theserver-open-ai.replit.app/api/chat</code>) -- kein Skript mit vorgefertigten Antworten. Das Modell
-  entscheidet selbst, welches der 10 Tools es aufruft, die Tool-Ausführung läuft <b>clientseitig im Browser</b>
+  entscheidet selbst, welches der 12 Tools es aufruft, die Tool-Ausführung läuft <b>clientseitig im Browser</b>
   gegen die echten gecachten Datensätze dieses Stacks (1.424 Titel über 21 globale Leitindizes -- S&amp;P500,
   DAX, CAC40, NASDAQ100, FTSE100, Hang Seng, ASX200, Nifty50 u.a., keine Halluzination, keine erfundenen Zahlen --
   jede Zahl in einer Antwort kommt aus einem echten Tool-Aufruf, sichtbar als 🔧-Chip im Chat). Tools:
   <b>Symbol-Lookup</b>, <b>Composite-Score-Ranking</b>, <b>flexibler Screener</b> (Piotroski/KGV/Bollinger/
   Midpoint-Filter), <b>Symbolsuche</b>, <b>Backtest-Abfrage</b> (alle 11 Strategien), <b>Direkt-Vergleich</b>
   mehrerer Symbole, <b>Relative-Stärke-Rang</b> (Cross-Sectional-Momentum), <b>Langfrist-Signal</b> (1/3/5/10Y),
-  <b>korrelierte Long/Short-Paare</b> und <b>Sektor-Übersicht</b>.
+  <b>korrelierte Long/Short-Paare</b>, <b>Sektor-Übersicht</b>, <b>Dividenden-Info</b> (separate 63k-Symbol
+  Cache-DB, strikt über Börsen-Kennung gematcht statt nacktem Ticker -- vermeidet Verwechslungen gleichnamiger
+  Ticker auf unterschiedlichen Börsen) und <b>Research-Report</b> (orchestriert 6 Tools zu einem kompletten
+  Bericht in einem Aufruf).
   </div>
   <div class="stat-row">
     <div class="stat"><b id="stat-n">—</b><span>TITEL IN DER DATENBASIS</span></div>
     <div class="stat"><b id="stat-composite">—</b><span>MIT VOLLEM COMPOSITE-SCORE</span></div>
-    <div class="stat"><b>10</b><span>TOOLS VERFÜGBAR</span></div>
+    <div class="stat"><b>12</b><span>TOOLS VERFÜGBAR</span></div>
   </div>
 
   <div id="loadError"></div>
@@ -93,7 +96,10 @@ header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border
   API-Keys im Client-Code). Tool-Ausführung = reines clientseitiges JavaScript über bereits in diesem Repo
   gecachte JSON-Snapshots (<code>strat-fundamentals-snapshot.json</code>, <code>strat-price-snapshot.json</code>,
   <code>midpoint-snapshot.json</code>, <code>rs-snapshot.json</code>, <code>longterm-snapshot.json</code>,
-  <code>pairs-snapshot.json</code>, alle 11 Backtest-Resultate) -- keine neuen Live-API-Calls pro Chat-Nachricht
+  <code>pairs-snapshot.json</code>, alle 11 Backtest-Resultate) -- einzige Ausnahme: <code>get_dividend_info</code>
+  lädt <code>dividend-summary.csv</code> (63k Zeilen) bei Bedarf einmalig aus dem separaten
+  <code>genitus-ticker-cache</code>-Repo nach, danach gecacht für die restliche Session -- keine sonstigen neuen
+  Live-API-Calls pro Chat-Nachricht
   außer dem einen LLM-Call selbst. Agent-Loop: bis zu 5 Tool-Runden pro Nachricht, danach erzwungene finale Antwort.
   </div>
 </div>
@@ -117,6 +123,69 @@ const CURRENCY_BY_SUFFIX = {
 function currencyForSymbol(symbol) {
   const m = symbol.match(/\.([A-Z]+)$/);
   return CURRENCY_BY_SUFFIX[m ? m[1] : ''] || 'USD';
+}
+
+// Maps our Yahoo-style suffix (bilanz/price data) to the exchange code used in
+// genitus-ticker-cache's dividend-summary.csv -- the two repos use DIFFERENT exchange
+// taxonomies for the same market. This mapping is deliberately conservative: only
+// suffixes verified to exist in the real CSV are included. Picking the WRONG exchange
+// code is not just a formatting miss -- real ticker collisions exist across unrelated
+// companies (e.g. "SAP.TO" in the CSV is Saputo Inc, a Canadian dairy company, totally
+// unrelated to "SAP.DE" = SAP SE). Relying on the explicit suffix mapping instead of a
+// bare ticker match is what prevents that kind of wrong-company answer.
+const DIV_EXCHANGE_BY_SUFFIX = {
+  '': 'US', DE: 'XETRA', PA: 'PA', AS: 'AS', SW: 'SW', MC: 'MC', L: 'LSE', ST: 'ST',
+  BR: 'BR', CO: 'CO', TO: 'TO', HK: 'HK', LS: 'LS', AX: 'AU', NS: 'NSE',
+  // MI (Milan), BO (India BSE), SI (Singapore), NZ (New Zealand) have no confirmed
+  // match in the CSV's exchange set -- intentionally left unmapped (honest "not found"
+  // beats a guessed, possibly wrong, exchange code).
+};
+let DIV_INDEX = null;     // base ticker -> array of {exchange,...} rows, lazy-loaded
+let DIV_LOADING = null;
+
+function parseCSVLine(line) {
+  const out = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQ) {
+      if (c === '"') { if (line[i+1] === '"') { cur += '"'; i++; } else inQ = false; }
+      else cur += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ',') { out.push(cur); cur = ''; }
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+async function loadDividendIndex() {
+  if (DIV_INDEX) return DIV_INDEX;
+  if (DIV_LOADING) return DIV_LOADING;
+  DIV_LOADING = fetch('https://raw.githubusercontent.com/Babybounce500/genitus-ticker-cache/main/dividend-summary.csv', { signal: AbortSignal.timeout(25000) })
+    .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
+    .then(text => {
+      const lines = text.split('\n').filter(Boolean);
+      const idx = new Map();
+      for (let i = 1; i < lines.length; i++) {
+        const [fullSymbol, name, , exchange, count, streakYears, streakDir, yieldPct, price, lastDate, lastAmount, lastCurrency] = parseCSVLine(lines[i]);
+        if (!fullSymbol) continue;
+        const dot = fullSymbol.lastIndexOf('.');
+        const base = dot > 0 ? fullSymbol.slice(0, dot) : fullSymbol;
+        if (!idx.has(base)) idx.set(base, []);
+        idx.get(base).push({
+          fullSymbol, name, exchange,
+          yieldPct: parseFloat(yieldPct) || 0, streakYears: parseInt(streakYears) || 1,
+          streakDirection: streakDir || 'new', paymentCount: parseInt(count) || 0,
+          lastDate: lastDate || '', lastAmount: parseFloat(lastAmount) || 0, lastCurrency: lastCurrency || '',
+        });
+      }
+      DIV_INDEX = idx;
+      return idx;
+    })
+    .catch(e => { DIV_INDEX = new Map(); return DIV_INDEX; });
+  return DIV_LOADING;
 }
 
 function pctRank(arr, keyFn, higherIsBetter){
@@ -164,7 +233,7 @@ async function loadData(){
       symbol: f.symbol, name: f.name, sector: f.sector, index: f.index,
       price: f.price != null ? f.price : p.price, currency: currencyForSymbol(f.symbol),
       piotroski: f.piotroski, peRatio: f.peRatio, pbRatio: f.pbRatio, evEbitda: f.evEbitda,
-      earningsYield: f.earningsYield, roic: f.roic, shYield: f.shYield,
+      earningsYield: f.earningsYield, roic: f.roic, shareholderYieldPct: f.shYield,
       goldenCross: p.goldenCross, pct52wHigh: p.pct52wHigh, vol52w: p.vol52w,
       bollingerPctB: p.bollingerPctB, trailing6mRetPct: p.trailing6mRetPct,
       midpointScore: m.score, midpointDepth: m.depth, rsi14w: m.rsi14w, targetUpsidePct: m.targetUpsidePct,
@@ -352,6 +421,52 @@ function tool_get_sector_overview({ sector }) {
   };
 }
 
+async function tool_get_dividend_info({ symbol }) {
+  if (!symbol) return { error: 'symbol fehlt' };
+  const sym = symbol.toUpperCase().trim();
+  const dot = sym.lastIndexOf('.');
+  const base = dot > 0 ? sym.slice(0, dot) : sym;
+  const ourSuffix = dot > 0 ? sym.slice(dot + 1) : '';
+  const wantExchange = DIV_EXCHANGE_BY_SUFFIX[ourSuffix];
+  if (wantExchange === undefined) {
+    return { error: 'Für die Börse von "' + symbol + '" gibt es keine verifizierte Zuordnung zur Dividenden-Cache-Datenbank -- keine Rückschlüsse möglich, um eine Verwechslung mit einer falschen Firma zu vermeiden.' };
+  }
+  const idx = await loadDividendIndex();
+  const candidates = idx.get(base) || [];
+  const hit = candidates.find(c => c.exchange === wantExchange);
+  if (!hit) {
+    return { symbol: sym, count_other_listings_found: candidates.length, note: candidates.length
+      ? 'Keine Dividendendaten für die exakte Börse dieses Symbols gefunden, obwohl der Ticker auf anderen Börsen existiert (evtl. eine andere Firma mit gleichem Ticker-Kürzel) -- aus Sicherheitsgründen nicht als Treffer gewertet.'
+      : 'Keine Dividendendaten für dieses Symbol gefunden (möglicherweise kein Dividendenzahler oder nicht im Cache).' };
+  }
+  return {
+    symbol: sym, matchedAgainst: hit.fullSymbol, companyNameInDividendCache: hit.name,
+    currentYieldPct: hit.yieldPct, yieldUnreliable: hit.yieldPct > 50,
+    streakYears: hit.streakYears, streakDirection: hit.streakDirection,
+    totalPaymentsOnRecord: hit.paymentCount,
+    lastPayment: { date: hit.lastDate, amount: hit.lastAmount, currency: hit.lastCurrency },
+  };
+}
+
+async function tool_generate_research_report({ symbol }) {
+  if (!symbol) return { error: 'symbol fehlt' };
+  const sym = symbol.toUpperCase().trim();
+  const profile = tool_lookup_symbol({ symbol: sym });
+  if (profile.error) return profile;
+  const [dividend, relStrength, longterm, pairs] = await Promise.all([
+    tool_get_dividend_info({ symbol: sym }),
+    Promise.resolve(tool_get_relative_strength({ symbol: sym })),
+    Promise.resolve(tool_get_longterm_signal({ symbol: sym })),
+    Promise.resolve(tool_get_correlated_pairs({ symbol: sym, limit: 3 })),
+  ]);
+  const sectorOverview = profile.sector ? tool_get_sector_overview({ sector: profile.sector }) : null;
+  return {
+    symbol: sym, generated_from: 'generate_research_report (orchestriert 6 Einzel-Tools in einem Aufruf)',
+    profile, dividend, relative_strength: relStrength, longterm_signal: longterm,
+    correlated_pairs: pairs, sector_overview: sectorOverview,
+  };
+}
+
 const TOOLS = [
   { type:'function', function:{ name:'lookup_symbol', description:'Vollständiges Profil eines einzelnen Symbols: Fundamentaldaten (Piotroski, P/E, P/B, EV/EBITDA, Earnings Yield, ROIC), technische Werte (Bollinger %B, 52W-Hoch-Nähe, Golden Cross), Midpoint-Konfluenz-Score/Tiefe, RSI(14W), Relative-Stärke-Dezil, Langfrist-Score, Analysten-Kursziel-Upside.', parameters:{ type:'object', properties:{ symbol:{type:'string', description:'Tickersymbol, z.B. AAPL, MSFT, SAP'} }, required:['symbol'] } } },
   { type:'function', function:{ name:'search_symbols', description:'Sucht Symbole/Firmennamen per Teilstring, falls der exakte Ticker nicht bekannt ist.', parameters:{ type:'object', properties:{ query:{type:'string'}, limit:{type:'integer'} }, required:['query'] } } },
@@ -363,6 +478,8 @@ const TOOLS = [
   { type:'function', function:{ name:'get_longterm_signal', description:'Langfrist-Konfluenz-Score eines Symbols über 1/3/5/10 Jahre (separat vom kurzfristigen 1M/3M/6M/1Y Midpoint-Score).', parameters:{ type:'object', properties:{ symbol:{type:'string'} }, required:['symbol'] } } },
   { type:'function', function:{ name:'get_correlated_pairs', description:'Findet statistisch korrelierte Long/Short-Paar-Partner für ein Symbol (aus dem Pairs-Trading-Backtest: Long = relativ stark, Short = relativ schwach, beide korreliert).', parameters:{ type:'object', properties:{ symbol:{type:'string'}, limit:{type:'integer'} }, required:['symbol'] } } },
   { type:'function', function:{ name:'get_sector_overview', description:'Aggregierte Kennzahlen für einen Sektor (Anzahl Titel, Durchschnitts-Piotroski/KGV/Composite-Score, bester und schlechtester Titel im Sektor).', parameters:{ type:'object', properties:{ sector:{type:'string', description:'Sektor-Teilstring, z.B. "Financials", "Information Technology", "Health Care"'} }, required:['sector'] } } },
+  { type:'function', function:{ name:'get_dividend_info', description:'Dividendenrendite, Streak (Jahre in Folge erhöht/gleich/gekürzt) und letzte Zahlung für ein Symbol, aus der separaten 63k-Symbol Dividenden-Cache-Datenbank (genitus-ticker-cache). Matcht strikt über die Börsen-Kennung des Symbols, nicht nur über das nackte Ticker-Kürzel -- vermeidet Verwechslungen zwischen gleichnamigen Tickern auf verschiedenen Börsen (z.B. SAP SE vs. ein unrelated Ticker-Zwilling an einer anderen Börse).', parameters:{ type:'object', properties:{ symbol:{type:'string'} }, required:['symbol'] } } },
+  { type:'function', function:{ name:'generate_research_report', description:'Erstellt einen vollständigen Research-Report für ein Symbol in EINEM Aufruf, indem es intern lookup_symbol, get_dividend_info, get_relative_strength, get_longterm_signal, get_correlated_pairs und get_sector_overview kombiniert. Nutze das für "vollständige Analyse"/"Research-Report"/"gib mir alles zu X"-Anfragen statt mehrerer einzelner Tool-Aufrufe.', parameters:{ type:'object', properties:{ symbol:{type:'string'} }, required:['symbol'] } } },
 ];
 
 const TOOL_FNS = {
@@ -376,6 +493,8 @@ const TOOL_FNS = {
   get_longterm_signal: tool_get_longterm_signal,
   get_correlated_pairs: tool_get_correlated_pairs,
   get_sector_overview: tool_get_sector_overview,
+  get_dividend_info: tool_get_dividend_info,
+  generate_research_report: tool_generate_research_report,
 };
 
 const SYSTEM_PROMPT = `Du bist der GENITUS AI-Agent, ein Finanz-Analyse-Assistent mit echtem Tool-Zugriff auf eine
@@ -406,7 +525,20 @@ REGELN:
 9. get_relative_strength (Rang ggü. Universum) und get_longterm_signal/midpointScore (Stand vs. eigene
    Historie) sind unterschiedliche, unkorrelierte Signale -- verwechsle sie nicht und erkläre bei Bedarf kurz
    den Unterschied.
-10. Bei Vergleichsfragen zu 2+ Symbolen nutze compare_symbols statt mehrerer einzelner lookup_symbol-Aufrufe.`;
+10. Bei Vergleichsfragen zu 2+ Symbolen nutze compare_symbols statt mehrerer einzelner lookup_symbol-Aufrufe.
+11. Bei "vollständige Analyse"/"Research-Report"/"gib mir alles zu X"-Anfragen nutze generate_research_report
+   (ein Aufruf, kombiniert 6 Tools) statt mehrerer einzelner Tool-Aufrufe. Formatiere die Antwort danach als
+   strukturierten Report mit kurzen Abschnitts-Überschriften (Fundamentaldaten, Dividende, Relative Stärke,
+   Langfrist-Signal, korrelierte Paare, Sektor-Einordnung) -- nur Abschnitte mit echten Daten, lass leere/
+   fehlende Abschnitte (error oder null) einfach weg, statt sie zu erwähnen oder zu füllen.
+12. get_dividend_info kann "error" oder "note" zurückgeben, wenn kein sicherer Treffer über die Börsen-Kennung
+   gefunden wurde (z.B. weil der Ticker auf einer anderen Börse einer ANDEREN Firma gehört). Das ist Absicht,
+   kein Fehler im System -- sag dem User ehrlich, dass keine verlässlichen Dividendendaten für genau dieses
+   Listing gefunden wurden, rate NIE eine andere Börse oder Firma als Ersatz.
+13. "shareholderYieldPct" (aus lookup_symbol) und "currentYieldPct" (aus get_dividend_info) sind ZWEI
+   VERSCHIEDENE Kennzahlen -- Shareholder Yield = Dividenden PLUS Aktienrückkäufe/Marktkap., die echte
+   Dividendenrendite kommt NUR aus get_dividend_info. Nenne "shareholderYieldPct" explizit als "Shareholder
+   Yield (inkl. Buybacks)", niemals als "Dividendenrendite", um Verwechslung zu vermeiden.`;
 
 let messages = [{ role: 'system', content: SYSTEM_PROMPT }];
 
@@ -461,7 +593,7 @@ async function runAgent(userText) {
           try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) {}
           addToolChip(tc.function.name, args);
           const fn = TOOL_FNS[tc.function.name];
-          const result = fn ? fn(args) : { error: 'unbekanntes Tool: ' + tc.function.name };
+          const result = fn ? await fn(args) : { error: 'unbekanntes Tool: ' + tc.function.name };
           messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
         }
         continue; // let the model see tool results and respond again
@@ -490,15 +622,14 @@ function send() {
 }
 
 const STARTERS = [
+  'Erstelle einen vollständigen Research-Report für NVDA',
+  'Wie ist die Dividendenrendite und Streak von SAP.DE?',
   'Top 5 Composite-Score Kandidaten',
-  'Zeig mir alles zu AAPL',
   'Value-Aktien mit Piotroski über 7 und KGV unter 15',
   'Was sagt der Bollinger-Bands-Backtest aus?',
   'Vergleiche AAPL und MSFT direkt',
-  'Wie ist die relative Stärke von NVDA ggü. dem Markt?',
   'Gibt es ein korreliertes Short-Paar zu NVDA?',
   'Gib mir eine Sektor-Übersicht für Financials',
-  'Wie sieht SAP auf lange Sicht (1-10 Jahre) aus?',
 ];
 
 async function init() {
