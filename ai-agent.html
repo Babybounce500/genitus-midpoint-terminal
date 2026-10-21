@@ -77,7 +77,7 @@ header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border
   <div class="intro">
   Echter AI-Agent mit <b>Function-/Tool-Calling</b> (OpenAI-Schema, <code>gpt-4o-mini</code> via eigenem Proxy
   <code>theserver-open-ai.replit.app/api/chat</code>) -- kein Skript mit vorgefertigten Antworten. Das Modell
-  entscheidet selbst, welches der 12 Tools es aufruft, die Tool-Ausführung läuft <b>clientseitig im Browser</b>
+  entscheidet selbst, welches der 16 Tools es aufruft, die Tool-Ausführung läuft <b>clientseitig im Browser</b>
   gegen die echten gecachten Datensätze dieses Stacks (1.424 Titel über 21 globale Leitindizes -- S&amp;P500,
   DAX, CAC40, NASDAQ100, FTSE100, Hang Seng, ASX200, Nifty50 u.a., keine Halluzination, keine erfundenen Zahlen --
   jede Zahl in einer Antwort kommt aus einem echten Tool-Aufruf, sichtbar als 🔧-Chip im Chat). Tools:
@@ -86,13 +86,15 @@ header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border
   mehrerer Symbole, <b>Relative-Stärke-Rang</b> (Cross-Sectional-Momentum), <b>Langfrist-Signal</b> (1/3/5/10Y),
   <b>korrelierte Long/Short-Paare</b>, <b>Sektor-Übersicht</b>, <b>Dividenden-Info</b> (separate 63k-Symbol
   Cache-DB, strikt über Börsen-Kennung gematcht statt nacktem Ticker -- vermeidet Verwechslungen gleichnamiger
-  Ticker auf unterschiedlichen Börsen) und <b>Research-Report</b> (orchestriert 6 Tools zu einem kompletten
-  Bericht in einem Aufruf).
+  Ticker auf unterschiedlichen Börsen), <b>Research-Report</b> (orchestriert 6 Tools zu einem kompletten
+  Bericht), <b>Markt-Übersicht</b> (Marktbreite über die gesamte Datenbasis) und eine persistente
+  <b>Watchlist</b> (hinzufügen/entfernen/Zusammenfassung -- echter Agent-Zustand über mehrere Nachrichten UND
+  Browser-Reloads hinweg, kein Einmal-Query).
   </div>
   <div class="stat-row">
     <div class="stat"><b id="stat-n">—</b><span>TITEL IN DER DATENBASIS</span></div>
     <div class="stat"><b id="stat-composite">—</b><span>MIT VOLLEM COMPOSITE-SCORE</span></div>
-    <div class="stat"><b>12</b><span>TOOLS VERFÜGBAR</span></div>
+    <div class="stat"><b>16</b><span>TOOLS VERFÜGBAR</span></div>
   </div>
 
   <div id="loadError"></div>
@@ -128,6 +130,16 @@ let SYMBOL_LIST = [];  // array of profiles, for scanning/filtering
 let STRATEGIES = {};   // strategy key -> trimmed result object
 let PAIRS_LIST = [];   // correlated long/short pairs
 let DATA_READY = false;
+let ASOF_DATE = null;
+
+// Watchlist: genuine cross-turn agent state, not just stateless Q&A -- the model can
+// build it up across several messages ("add AAPL", "add MSFT", "how does it look?").
+// Per-browser only (localStorage), same honest-degradation pattern as the chat history.
+const WATCHLIST_KEY = 'genitus-agent-watchlist';
+let WATCHLIST = [];
+function loadWatchlist() { try { return JSON.parse(localStorage.getItem(WATCHLIST_KEY) || '[]'); } catch (e) { return []; } }
+function saveWatchlist() { try { localStorage.setItem(WATCHLIST_KEY, JSON.stringify(WATCHLIST)); } catch (e) {} }
+WATCHLIST = loadWatchlist();
 
 // Suffix -> currency, derived from each index's primary listing currency. No suffix = US listing (USD).
 const CURRENCY_BY_SUFFIX = {
@@ -232,6 +244,7 @@ async function loadData(){
   ]);
   const fund = await fundRes.json(), price = await priceRes.json(), mid = await midRes.json();
   const rs = await rsRes.json(), lt = await ltRes.json(), pairs = await pairsRes.json();
+  ASOF_DATE = mid.asOfDate || price.asOfDate || null;
 
   const priceBySym = {}; price.rows.forEach(r => priceBySym[r.symbol] = r);
   const midBySym = {}; mid.rows.forEach(r => midBySym[r.symbol] = r);
@@ -482,6 +495,64 @@ async function tool_generate_research_report({ symbol }) {
   };
 }
 
+function tool_add_to_watchlist({ symbol }) {
+  if (!symbol) return { error: 'symbol fehlt' };
+  const sym = symbol.toUpperCase().trim();
+  if (!SYMBOLS[sym]) return { error: 'Symbol "' + symbol + '" nicht in der Datenbasis gefunden -- nicht zur Watchlist hinzugefügt.' };
+  if (!WATCHLIST.includes(sym)) { WATCHLIST.push(sym); saveWatchlist(); }
+  return { watchlist: WATCHLIST.slice(), count: WATCHLIST.length };
+}
+
+function tool_remove_from_watchlist({ symbol }) {
+  if (!symbol) return { error: 'symbol fehlt' };
+  const sym = symbol.toUpperCase().trim();
+  const before = WATCHLIST.length;
+  WATCHLIST = WATCHLIST.filter(s => s !== sym);
+  saveWatchlist();
+  return { watchlist: WATCHLIST.slice(), count: WATCHLIST.length, removed: before !== WATCHLIST.length };
+}
+
+function tool_get_watchlist_summary() {
+  if (!WATCHLIST.length) return { count: 0, note: 'Watchlist ist leer -- noch keine Symbole mit add_to_watchlist hinzugefügt.' };
+  const items = WATCHLIST.map(sym => SYMBOLS[sym]).filter(Boolean);
+  const avg = (arr, key) => { const v = arr.filter(x => x[key] != null).map(x => x[key]); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  const withComposite = items.filter(i => i.compositeScore != null);
+  const sectorBreakdown = {};
+  items.forEach(i => { const sec = i.sector || 'Unbekannt'; sectorBreakdown[sec] = (sectorBreakdown[sec] || 0) + 1; });
+  return {
+    count: WATCHLIST.length,
+    items: items.map(s => ({
+      symbol: s.symbol, name: s.name, sector: s.sector, price: s.price, currency: s.currency,
+      compositeScore_0best_1worst: s.compositeScore != null ? +s.compositeScore.toFixed(3) : null,
+      midpointScore: s.midpointScore, piotroski: s.piotroski,
+    })),
+    avg_compositeScore_0best_1worst: withComposite.length ? +avg(withComposite, 'compositeScore').toFixed(3) : null,
+    sector_breakdown: sectorBreakdown,
+  };
+}
+
+function tool_get_market_overview() {
+  const n = SYMBOL_LIST.length;
+  const avg = (arr, key) => { const v = arr.filter(x => x[key] != null).map(x => x[key]); return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null; };
+  const goldenCrossCount = SYMBOL_LIST.filter(s => s.goldenCross === true).length;
+  const bullishMidpointCount = SYMBOL_LIST.filter(s => s.midpointScore != null && s.midpointScore > 0).length;
+  const bearishMidpointCount = SYMBOL_LIST.filter(s => s.midpointScore != null && s.midpointScore < 0).length;
+  const fullBullishCount = SYMBOL_LIST.filter(s => s.midpointScore === 4).length;
+  const fullBearishCount = SYMBOL_LIST.filter(s => s.midpointScore === -4).length;
+  const oversoldRsiCount = SYMBOL_LIST.filter(s => s.rsi14w != null && s.rsi14w < 30).length;
+  const overboughtRsiCount = SYMBOL_LIST.filter(s => s.rsi14w != null && s.rsi14w > 70).length;
+  return {
+    as_of_date: ASOF_DATE, total_symbols_in_database: n,
+    goldenCrossPct: +(goldenCrossCount / n * 100).toFixed(1),
+    bullishMidpointCount, bearishMidpointCount,
+    fullBullishMidpointCount_score4: fullBullishCount, fullBearishMidpointCount_scoreNeg4: fullBearishCount,
+    rsiOversoldCount_below30: oversoldRsiCount, rsiOverboughtCount_above70: overboughtRsiCount,
+    avg_piotroski: avg(SYMBOL_LIST, 'piotroski') != null ? +avg(SYMBOL_LIST, 'piotroski').toFixed(2) : null,
+    avg_peRatio: avg(SYMBOL_LIST, 'peRatio') != null ? +avg(SYMBOL_LIST, 'peRatio').toFixed(2) : null,
+    note: 'Marktbreite ueber die gesamte 1.424-Titel-Datenbasis, nicht nur einen Sektor -- fuer "wie steht der Markt insgesamt" / "ist der Markt ueberhitzt"-Fragen.',
+  };
+}
+
 const TOOLS = [
   { type:'function', function:{ name:'lookup_symbol', description:'Vollständiges Profil eines einzelnen Symbols: Fundamentaldaten (Piotroski, P/E, P/B, EV/EBITDA, Earnings Yield, ROIC), technische Werte (Bollinger %B, 52W-Hoch-Nähe, Golden Cross), Midpoint-Konfluenz-Score/Tiefe, RSI(14W), Relative-Stärke-Dezil, Langfrist-Score, Analysten-Kursziel-Upside.', parameters:{ type:'object', properties:{ symbol:{type:'string', description:'Tickersymbol, z.B. AAPL, MSFT, SAP'} }, required:['symbol'] } } },
   { type:'function', function:{ name:'search_symbols', description:'Sucht Symbole/Firmennamen per Teilstring, falls der exakte Ticker nicht bekannt ist.', parameters:{ type:'object', properties:{ query:{type:'string'}, limit:{type:'integer'} }, required:['query'] } } },
@@ -495,6 +566,10 @@ const TOOLS = [
   { type:'function', function:{ name:'get_sector_overview', description:'Aggregierte Kennzahlen für einen Sektor (Anzahl Titel, Durchschnitts-Piotroski/KGV/Composite-Score, bester und schlechtester Titel im Sektor).', parameters:{ type:'object', properties:{ sector:{type:'string', description:'Sektor-Teilstring, z.B. "Financials", "Information Technology", "Health Care"'} }, required:['sector'] } } },
   { type:'function', function:{ name:'get_dividend_info', description:'Dividendenrendite, Streak (Jahre in Folge erhöht/gleich/gekürzt) und letzte Zahlung für ein Symbol, aus der separaten 63k-Symbol Dividenden-Cache-Datenbank (genitus-ticker-cache). Matcht strikt über die Börsen-Kennung des Symbols, nicht nur über das nackte Ticker-Kürzel -- vermeidet Verwechslungen zwischen gleichnamigen Tickern auf verschiedenen Börsen (z.B. SAP SE vs. ein unrelated Ticker-Zwilling an einer anderen Börse).', parameters:{ type:'object', properties:{ symbol:{type:'string'} }, required:['symbol'] } } },
   { type:'function', function:{ name:'generate_research_report', description:'Erstellt einen vollständigen Research-Report für ein Symbol in EINEM Aufruf, indem es intern lookup_symbol, get_dividend_info, get_relative_strength, get_longterm_signal, get_correlated_pairs und get_sector_overview kombiniert. Nutze das für "vollständige Analyse"/"Research-Report"/"gib mir alles zu X"-Anfragen statt mehrerer einzelner Tool-Aufrufe.', parameters:{ type:'object', properties:{ symbol:{type:'string'} }, required:['symbol'] } } },
+  { type:'function', function:{ name:'add_to_watchlist', description:'Fügt ein Symbol zur persistenten Watchlist des Users hinzu (bleibt über mehrere Chat-Nachrichten UND Browser-Reloads erhalten). Nutze das, wenn der User sagt "merk dir X", "füge X zur Watchlist hinzu" o.ä.', parameters:{ type:'object', properties:{ symbol:{type:'string'} }, required:['symbol'] } } },
+  { type:'function', function:{ name:'remove_from_watchlist', description:'Entfernt ein Symbol von der Watchlist.', parameters:{ type:'object', properties:{ symbol:{type:'string'} }, required:['symbol'] } } },
+  { type:'function', function:{ name:'get_watchlist_summary', description:'Zeigt die aktuelle Watchlist mit aggregierten Kennzahlen (Ø Composite-Score, Sektor-Verteilung). Nutze das bei "zeig meine Watchlist", "wie sieht mein Portfolio aus" o.ä.', parameters:{ type:'object', properties:{} } } },
+  { type:'function', function:{ name:'get_market_overview', description:'Marktbreite über die GESAMTE Datenbasis (nicht nur einen Sektor): % Golden Cross, Anzahl bullish/bearish Midpoint-Scores, Anzahl RSI-überverkauft/überkauft, Ø Piotroski/KGV. Nutze das für "wie steht der Markt insgesamt", "ist der Markt überhitzt" o.ä.', parameters:{ type:'object', properties:{} } } },
 ];
 
 const TOOL_FNS = {
@@ -510,6 +585,10 @@ const TOOL_FNS = {
   get_sector_overview: tool_get_sector_overview,
   get_dividend_info: tool_get_dividend_info,
   generate_research_report: tool_generate_research_report,
+  add_to_watchlist: tool_add_to_watchlist,
+  remove_from_watchlist: tool_remove_from_watchlist,
+  get_watchlist_summary: tool_get_watchlist_summary,
+  get_market_overview: tool_get_market_overview,
 };
 
 const SYSTEM_PROMPT = `Du bist der GENITUS AI-Agent, ein Finanz-Analyse-Assistent mit echtem Tool-Zugriff auf eine
@@ -553,7 +632,13 @@ REGELN:
 13. "shareholderYieldPct" (aus lookup_symbol) und "currentYieldPct" (aus get_dividend_info) sind ZWEI
    VERSCHIEDENE Kennzahlen -- Shareholder Yield = Dividenden PLUS Aktienrückkäufe/Marktkap., die echte
    Dividendenrendite kommt NUR aus get_dividend_info. Nenne "shareholderYieldPct" explizit als "Shareholder
-   Yield (inkl. Buybacks)", niemals als "Dividendenrendite", um Verwechslung zu vermeiden.`;
+   Yield (inkl. Buybacks)", niemals als "Dividendenrendite", um Verwechslung zu vermeiden.
+14. Die Watchlist (add_to_watchlist/remove_from_watchlist/get_watchlist_summary) ist ECHTER Zustand, der über
+   die gesamte Browser-Session hinweg bestehen bleibt -- wenn der User "meine Watchlist"/"mein Portfolio" sagt,
+   ist das immer die EINE geteilte Watchlist, nicht pro Nachricht neu. add_to_watchlist gibt bei unbekanntem
+   Symbol "error" zurück -- füge es dann NICHT trotzdem hinzu, sag dem User warum es nicht ging.
+15. get_market_overview bezieht sich auf die GESAMTE Datenbasis (alle 1.424 Titel) -- verwechsle das nicht mit
+   get_sector_overview (ein einzelner Sektor) oder der Watchlist (nur die vom User gewählten Titel).`;
 
 let messages = [{ role: 'system', content: SYSTEM_PROMPT }];
 
@@ -725,14 +810,14 @@ function send() {
 }
 
 const STARTERS = [
+  'Wie steht der Markt insgesamt gerade?',
+  'Füge AAPL und NVDA zu meiner Watchlist hinzu',
   'Erstelle einen vollständigen Research-Report für NVDA',
   'Wie ist die Dividendenrendite und Streak von SAP.DE?',
   'Top 5 Composite-Score Kandidaten',
   'Value-Aktien mit Piotroski über 7 und KGV unter 15',
   'Was sagt der Bollinger-Bands-Backtest aus?',
   'Vergleiche AAPL und MSFT direkt',
-  'Gibt es ein korreliertes Short-Paar zu NVDA?',
-  'Gib mir eine Sektor-Übersicht für Financials',
 ];
 
 async function init() {
