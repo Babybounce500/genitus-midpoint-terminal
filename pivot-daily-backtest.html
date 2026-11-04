@@ -61,7 +61,11 @@ h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);m
   <b>(3)</b> Konfluenz-Stärke: halten Zonen, in denen mehrere Methoden übereinstimmen, besser als Einzel-Level?
   Datenbasis: 52 liquide Standardwerte (Vereinigung der S&amp;P-500-/Nasdaq-100-Stichproben aus dem
   <a href="../goldshield-ai-analysis-archive/wochenreport-2026-10-26.html">Wochenreport</a>), 3 Jahre tägliche
-  OHLC-Daten, roh (nicht split-bereinigt -- siehe Einschränkungen).
+  OHLC-Daten, roh (nicht split-bereinigt -- siehe Einschränkungen). <b>Alle drei Tests laufen jetzt mit einem
+  -4%-Preis-Stop</b>, derselben Konvention wie bei den Wochenkanal-Strategien im Archiv: reißt die Tagesspanne
+  (Hoch/Tief) den Stop, wird der Trade mit -4% statt mit dem tatsächlichen Tagesschluss verbucht -- ohne Intraday-
+  Reihenfolge wird dabei konservativ unterstellt, dass eine im Markt liegende Stop-Order ausgelöst hätte, sobald
+  der Kurs diesen Preis während des Tages überhaupt berührt.
   </div>
 
   <div id="findingBox" class="loading">Lade Backtest-Ergebnis…</div>
@@ -72,7 +76,8 @@ function fmtPct(v, dp) { dp = dp == null ? 3 : dp; return (v>=0?'+':'') + v.toFi
 function breakoutRow(label, s, cls) {
   return `<tr class="${cls||''}"><td><b>${label}</b></td><td class="num">${s.n.toLocaleString('de-DE')}</td>
     <td class="num ${s.avgRet>=0?'pos':'neg'}">${fmtPct(s.avgRet)}</td><td class="num">${s.winRate}%</td>
-    <td class="num">${s.sharpeLike}</td><td class="num pos">${fmtPct(s.bestTrade,2)}</td><td class="num neg">${fmtPct(s.worstTrade,2)}</td></tr>`;
+    <td class="num">${s.sharpeLike}</td><td class="num">${s.stopRate}%</td>
+    <td class="num pos">${fmtPct(s.bestTrade,2)}</td><td class="num neg">${fmtPct(s.worstTrade,2)}</td></tr>`;
 }
 
 function bounceRows(bounce) {
@@ -86,6 +91,7 @@ function bounceRows(bounce) {
   return rows.map(r => `<tr><td>${r.method}</td><td><b>${r.lvl}</b></td><td class="num">${r.n.toLocaleString('de-DE')}</td>
     <td class="num ${r.bounceRate>=50?'pos':'neg'}">${r.bounceRate}%</td>
     <td class="num ${r.avgRet>=0?'pos':'neg'}">${fmtPct(r.avgRet)}</td>
+    <td class="num">${r.stopRate}%</td>
     <td class="num">${r.olderHalf.winRate}%</td><td class="num">${r.newerHalf.winRate}%</td></tr>`).join('');
 }
 
@@ -116,9 +122,13 @@ async function load() {
       ${fmtPct(c.newerHalf.short.avgRet)}), aber die LONG-Seite ist hier <b>nicht</b> robust -- sie kippt von
       ${fmtPct(c.olderHalf.long.avgRet)} (ältere Hälfte) auf ${fmtPct(c.newerHalf.long.avgRet)} (neuere Hälfte).
       Fazit: derselbe "Pivot-Breakout"-Grundgedanke funktioniert auf Monats-Skala robuster als auf Tages-Skala.
+      Mit -4%-Stop wurden ${c.overall.stopRate}% (Classic) bzw. ${w.overall.stopRate}% (Woodie) aller Trades
+      ausgestoppt -- das kappt vor allem die extremsten SHORT-Verlusttage (ohne Stop lag der schlechteste Trade
+      bei -22.2%, siehe Werte unten).
       </div>
       <div class="table-wrap"><table><thead><tr><th>Methode</th><th class="num">N Trades</th><th class="num">Ø Rendite</th>
-      <th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th><th class="num">Bester Trade</th><th class="num">Schlechtester Trade</th></tr></thead>
+      <th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th><th class="num">-4%-Stop gerissen</th>
+      <th class="num">Bester Trade</th><th class="num">Schlechtester Trade</th></tr></thead>
       <tbody>
         ${breakoutRow('Classic — Gesamt', c.overall)}
         ${breakoutRow('Classic — LONG', c.long, 'best')}
@@ -141,7 +151,8 @@ async function load() {
       als LONG/SHORT-Asymmetrie zeigte.
       </div>
       <div class="table-wrap"><table><thead><tr><th>Methode</th><th>Level</th><th class="num">N Berührungen</th>
-      <th class="num">Abprall-Rate</th><th class="num">Ø Rendite</th><th class="num">Trefferquote ältere Hälfte</th>
+      <th class="num">Abprall-Rate</th><th class="num">Ø Rendite</th><th class="num">-4%-Stop gerissen</th>
+      <th class="num">Trefferquote ältere Hälfte</th>
       <th class="num">Trefferquote neuere Hälfte</th></tr></thead><tbody>${bounceRows(d.bounce)}</tbody></table></div>
 
       <h2>③ Konfluenz-Stärke (mehrere Methoden einig)</h2>
@@ -152,16 +163,18 @@ async function load() {
       <b class="pos">${tier4.bounceRate}%</b> ab, bei deutlich geringerer Streuung (Std.-Abw. ${tier4.stdDev} vs.
       ${tier1.stdDev}) und fast doppelter Sharpe-ähnlicher Kennzahl (${tier4.sharpeLike} vs. ${tier1.sharpeLike}).
       Robust über beide Zeithälften: Tier 4+ ${tier4.olderHalf.bounceRate}% → ${tier4.newerHalf.bounceRate}%.
-      Die Cluster-Logik aus dem Original-Entwurf ist damit die am klarsten
-      bestätigte der drei Hypothesen.
+      Die Cluster-Logik aus dem Original-Entwurf ist damit die am klarsten bestätigte der drei Hypothesen --
+      bestätigt auch die <b>Stop-Rate selbst</b>: starke Konfluenz-Zonen reißen den -4%-Stop nur zu
+      ${tier4.stopRate}% der Fälle, einzelne Level (Tier 1) dagegen zu ${tier1.stopRate}% -- stärkere Zonen halten
+      nicht nur häufiger, sie werden auch seltener klar durchbrochen.
       </div>
       <div class="table-wrap"><table><thead><tr><th>Konfluenz-Tier</th><th class="num">N Berührungen</th>
       <th class="num">Ø Methoden/Zone</th><th class="num">Abprall-Rate</th><th class="num">Sharpe-ähnlich</th>
-      <th class="num">Std.-Abw.</th><th class="num">Abprall älter → neuer</th></tr></thead><tbody>
-        <tr><td>Tier 1 (1 Methode)</td><td class="num">${tier1.n.toLocaleString('de-DE')}</td><td class="num">${tier1.avgMethods}</td><td class="num">${tier1.bounceRate}%</td><td class="num">${tier1.sharpeLike}</td><td class="num">${tier1.stdDev}</td><td class="num">${tier1.olderHalf.bounceRate}% → ${tier1.newerHalf.bounceRate}%</td></tr>
-        <tr><td>Tier 2</td><td class="num">${d.cluster.tier2.n.toLocaleString('de-DE')}</td><td class="num">${d.cluster.tier2.avgMethods}</td><td class="num">${d.cluster.tier2.bounceRate}%</td><td class="num">${d.cluster.tier2.sharpeLike}</td><td class="num">${d.cluster.tier2.stdDev}</td><td class="num">${d.cluster.tier2.olderHalf.bounceRate}% → ${d.cluster.tier2.newerHalf.bounceRate}%</td></tr>
-        <tr><td>Tier 3</td><td class="num">${d.cluster.tier3.n.toLocaleString('de-DE')}</td><td class="num">${d.cluster.tier3.avgMethods}</td><td class="num">${d.cluster.tier3.bounceRate}%</td><td class="num">${d.cluster.tier3.sharpeLike}</td><td class="num">${d.cluster.tier3.stdDev}</td><td class="num">${d.cluster.tier3.olderHalf.bounceRate}% → ${d.cluster.tier3.newerHalf.bounceRate}%</td></tr>
-        <tr class="best"><td><b>Tier 4+ (≥4 Methoden)</b></td><td class="num">${tier4.n.toLocaleString('de-DE')}</td><td class="num">${tier4.avgMethods}</td><td class="num pos"><b>${tier4.bounceRate}%</b></td><td class="num">${tier4.sharpeLike}</td><td class="num">${tier4.stdDev}</td><td class="num">${tier4.olderHalf.bounceRate}% → ${tier4.newerHalf.bounceRate}%</td></tr>
+      <th class="num">-4%-Stop gerissen</th><th class="num">Abprall älter → neuer</th></tr></thead><tbody>
+        <tr><td>Tier 1 (1 Methode)</td><td class="num">${tier1.n.toLocaleString('de-DE')}</td><td class="num">${tier1.avgMethods}</td><td class="num">${tier1.bounceRate}%</td><td class="num">${tier1.sharpeLike}</td><td class="num">${tier1.stopRate}%</td><td class="num">${tier1.olderHalf.bounceRate}% → ${tier1.newerHalf.bounceRate}%</td></tr>
+        <tr><td>Tier 2</td><td class="num">${d.cluster.tier2.n.toLocaleString('de-DE')}</td><td class="num">${d.cluster.tier2.avgMethods}</td><td class="num">${d.cluster.tier2.bounceRate}%</td><td class="num">${d.cluster.tier2.sharpeLike}</td><td class="num">${d.cluster.tier2.stopRate}%</td><td class="num">${d.cluster.tier2.olderHalf.bounceRate}% → ${d.cluster.tier2.newerHalf.bounceRate}%</td></tr>
+        <tr><td>Tier 3</td><td class="num">${d.cluster.tier3.n.toLocaleString('de-DE')}</td><td class="num">${d.cluster.tier3.avgMethods}</td><td class="num">${d.cluster.tier3.bounceRate}%</td><td class="num">${d.cluster.tier3.sharpeLike}</td><td class="num">${d.cluster.tier3.stopRate}%</td><td class="num">${d.cluster.tier3.olderHalf.bounceRate}% → ${d.cluster.tier3.newerHalf.bounceRate}%</td></tr>
+        <tr class="best"><td><b>Tier 4+ (≥4 Methoden)</b></td><td class="num">${tier4.n.toLocaleString('de-DE')}</td><td class="num">${tier4.avgMethods}</td><td class="num pos"><b>${tier4.bounceRate}%</b></td><td class="num">${tier4.sharpeLike}</td><td class="num pos">${tier4.stopRate}%</td><td class="num">${tier4.olderHalf.bounceRate}% → ${tier4.newerHalf.bounceRate}%</td></tr>
       </tbody></table></div>
 
       <div class="caveat">
@@ -173,8 +186,11 @@ async function load() {
       bereinigten Schlusskurs (<code>adjusted_close</code>), keine bereinigten Hoch-/Tiefkurse. Bei einem Split
       innerhalb der letzten 3 Jahre würde genau der Split-Tag einen verzerrten Pivot liefern (ein einzelner
       Tagesausreißer unter ~750 Handelstagen pro Titel, kein systemischer Fehler).<br>
-      • "Abprall" heißt hier: Tagesschluss liegt auf der günstigen Seite des berührten Levels -- keine echte
-      Intraday-Simulation mit Limit-Entry, Stop und Teil-Exits.<br>
+      • "Abprall" heißt hier: Exit (Tagesschluss oder -4%-Stop) liegt auf der günstigen Seite des Entry-Levels --
+      kein echtes Limit-Order-Fill, keine Teil-Exits. Da nur Tages-O/H/L/C vorliegen, nicht die Intraday-Reihenfolge,
+      wird bei jeder Berührung des Stop-Preises <b>konservativ</b> unterstellt, dass er auch tatsächlich ausgelöst
+      hätte -- auch wenn der Kurs sich bis Handelsschluss wieder erholt hätte. Das drückt die Durchschnittsrenditen
+      eher nach unten als sie zu beschönigen.<br>
       • Berührungstoleranz ${d.meta.touchTolerancePct}%, Cluster-Toleranz ${d.meta.clusterTolerancePct}% -- andere
       Toleranzwerte würden leicht andere N und Raten liefern, das Gesamtmuster (weiter draußen = höhere Abprall-Rate,
       mehr Methoden = höhere Abprall-Rate) ist aber stabil gegenüber kleinen Toleranz-Änderungen.<br>
