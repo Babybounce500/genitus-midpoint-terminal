@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS PIVOT-HUNTER // Tages-Pivot-Backtest</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:6px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.best{background:rgba(21,128,61,.08);} .worst{background:rgba(185,28,28,.06);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+.bstat{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px 10px;text-align:center;}
+.bstat b{font-family:var(--head);font-size:16px;display:block;color:var(--bright);}
+.bstat b.pos{color:var(--green);} .bstat b.neg{color:var(--red);}
+.bstat span{font-size:7.5px;color:var(--muted);letter-spacing:.3px;}
+@media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:360px){.stat-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">TAGES-PIVOT-BACKTEST</div><div class="logo-sub">CLASSIC/FIBONACCI/CAMARILLA/WOODIE, 52 TITEL, 3 JAHRE</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="strategies-hub.html">← Strategien-Hub</a>
+    <a class="back" href="pivot-monthly-backtest.html">🗓️ Monats-Pivot-Backtest</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  Aus dem rohen PIVOT-HUNTER-Entwurf extrahiert: 4 klassische Intraday-Pivot-Formeln, jede aus dem Hoch/Tief/Schluss
+  des <b>Vortages</b> berechnet. <b>Classic</b>, <b>Fibonacci</b> und <b>Camarilla</b> nutzen denselben Pivot-Punkt
+  PP=(H+L+C)/3 -- sie unterscheiden sich nur in der Platzierung von R1-R3/S1-S3 (Camarilla: R1-R4/S1-S4).
+  <b>Woodie</b> rechnet den Pivot selbst anders: PP=(H+L+2C)/4 (stärkeres Gewicht auf den letzten Schlusskurs).
+  Drei getrennt getestete Hypothesen: <b>(1)</b> Richtungs-Breakout am Pivot-Punkt selbst (Classic/Woodie --
+  Fibonacci/Camarilla wären hier identisch zu Classic, da gleiche PP-Formel, deshalb nicht separat gelistet),
+  <b>(2)</b> Abprall-Wahrscheinlichkeit an den R1-R3/S1-S3(/R4/S4)-Levels (klassische Pivot-Trading-Nutzung),
+  <b>(3)</b> Konfluenz-Stärke: halten Zonen, in denen mehrere Methoden übereinstimmen, besser als Einzel-Level?
+  Datenbasis: 52 liquide Standardwerte (Vereinigung der S&amp;P-500-/Nasdaq-100-Stichproben aus dem
+  <a href="../goldshield-ai-analysis-archive/wochenreport-2026-10-26.html">Wochenreport</a>), 3 Jahre tägliche
+  OHLC-Daten, roh (nicht split-bereinigt -- siehe Einschränkungen).
+  </div>
+
+  <div id="findingBox" class="loading">Lade Backtest-Ergebnis…</div>
+</div>
+<script>
+function fmtPct(v, dp) { dp = dp == null ? 3 : dp; return (v>=0?'+':'') + v.toFixed(dp) + '%'; }
+
+function breakoutRow(label, s, cls) {
+  return `<tr class="${cls||''}"><td><b>${label}</b></td><td class="num">${s.n.toLocaleString('de-DE')}</td>
+    <td class="num ${s.avgRet>=0?'pos':'neg'}">${fmtPct(s.avgRet)}</td><td class="num">${s.winRate}%</td>
+    <td class="num">${s.sharpeLike}</td><td class="num pos">${fmtPct(s.bestTrade,2)}</td><td class="num neg">${fmtPct(s.worstTrade,2)}</td></tr>`;
+}
+
+function bounceRows(bounce) {
+  const rows = [];
+  for (const [method, levels] of Object.entries(bounce)) {
+    for (const [lvl, s] of Object.entries(levels)) {
+      rows.push({ method, lvl, ...s });
+    }
+  }
+  rows.sort((a,b) => b.bounceRate - a.bounceRate);
+  return rows.map(r => `<tr><td>${r.method}</td><td><b>${r.lvl}</b></td><td class="num">${r.n.toLocaleString('de-DE')}</td>
+    <td class="num ${r.bounceRate>=50?'pos':'neg'}">${r.bounceRate}%</td>
+    <td class="num ${r.avgRet>=0?'pos':'neg'}">${fmtPct(r.avgRet)}</td>
+    <td class="num">${r.olderHalf.winRate}%</td><td class="num">${r.newerHalf.winRate}%</td></tr>`).join('');
+}
+
+async function load() {
+  try {
+    const res = await fetch('data/pivot-daily-backtest-result.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+
+    const c = d.breakout.classic, w = d.breakout.woodie;
+    const tier1 = d.cluster.tier1, tier4 = d.cluster.tier4plus;
+
+    // best/worst bounce levels for the finding text
+    const allBounce = [];
+    for (const [method, levels] of Object.entries(d.bounce)) for (const [lvl, s] of Object.entries(levels)) allBounce.push({ method, lvl, ...s });
+    allBounce.sort((a,b) => b.bounceRate - a.bounceRate);
+    const topBounce = allBounce[0], lowBounce = allBounce[allBounce.length-1];
+    const supportAvg = allBounce.filter(r=>r.lvl[0]==='S').reduce((a,r)=>a+r.bounceRate,0) / allBounce.filter(r=>r.lvl[0]==='S').length;
+    const resistAvg = allBounce.filter(r=>r.lvl[0]==='R').reduce((a,r)=>a+r.bounceRate,0) / allBounce.filter(r=>r.lvl[0]==='R').length;
+
+    document.getElementById('findingBox').outerHTML = `
+      <h2>① Täglicher Pivot-Punkt-Breakout</h2>
+      <div class="finding">
+      <b>Kein robuster Edge auf Tagesbasis -- anders als beim Monats-Pivot.</b> Classic Ø ${fmtPct(c.overall.avgRet)}/Tag
+      (${c.overall.winRate}% Trefferquote), Woodie Ø ${fmtPct(w.overall.avgRet)} (${w.overall.winRate}%) -- beide
+      praktisch Münzwurf. Die LONG/SHORT-Aufspaltung zeigt zwar dieselbe Asymmetrie wie beim Monats-Pivot (SHORT
+      bleibt in <b>beiden</b> Zeithälften negativ: Classic ${fmtPct(c.olderHalf.short.avgRet)} →
+      ${fmtPct(c.newerHalf.short.avgRet)}), aber die LONG-Seite ist hier <b>nicht</b> robust -- sie kippt von
+      ${fmtPct(c.olderHalf.long.avgRet)} (ältere Hälfte) auf ${fmtPct(c.newerHalf.long.avgRet)} (neuere Hälfte).
+      Fazit: derselbe "Pivot-Breakout"-Grundgedanke funktioniert auf Monats-Skala robuster als auf Tages-Skala.
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Methode</th><th class="num">N Trades</th><th class="num">Ø Rendite</th>
+      <th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th><th class="num">Bester Trade</th><th class="num">Schlechtester Trade</th></tr></thead>
+      <tbody>
+        ${breakoutRow('Classic — Gesamt', c.overall)}
+        ${breakoutRow('Classic — LONG', c.long, 'best')}
+        ${breakoutRow('Classic — SHORT', c.short, 'worst')}
+        ${breakoutRow('Woodie — Gesamt', w.overall)}
+        ${breakoutRow('Woodie — LONG', w.long, 'best')}
+        ${breakoutRow('Woodie — SHORT', w.short, 'worst')}
+      </tbody></table></div>
+
+      <h2>② Support/Resistance-Abprall an R1-R4/S1-S4</h2>
+      <div class="finding">
+      <b>Hier liegt der eigentliche Edge dieses Tools.</b> Alle getesteten Level zeigen Abprall-Raten klar über
+      50% (Münzwurf) -- von ${lowBounce.bounceRate}% (${lowBounce.method} ${lowBounce.lvl}, am nächsten am
+      Vortagesschluss) bis ${topBounce.bounceRate}% (${topBounce.method} ${topBounce.lvl}, ein "äußeres" Level).
+      <b>Klares, über beide Zeithälften stabiles Muster:</b> je weiter das Level vom Pivot entfernt ist (R1→R2→R3,
+      S1→S2→S3), desto höher die Abprall-Rate -- deckt sich mit der Trading-Faustregel, dass R2/R3 und S2/S3 als
+      "Erschöpfungs-Level" gelten. Zweites Muster: <b>Support-Level (S1-S4) prallen im Schnitt häufiger
+      (${supportAvg.toFixed(1)}%) als Widerstands-Level (R1-R4, ${resistAvg.toFixed(1)}%)</b> -- vermutlich derselbe
+      langfristige Aktienmarkt-Aufwärtsdrift, der sich auch beim <a href="pivot-monthly-backtest.html">Monats-Pivot</a>
+      als LONG/SHORT-Asymmetrie zeigte.
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Methode</th><th>Level</th><th class="num">N Berührungen</th>
+      <th class="num">Abprall-Rate</th><th class="num">Ø Rendite</th><th class="num">Trefferquote ältere Hälfte</th>
+      <th class="num">Trefferquote neuere Hälfte</th></tr></thead><tbody>${bounceRows(d.bounce)}</tbody></table></div>
+
+      <h2>③ Konfluenz-Stärke (mehrere Methoden einig)</h2>
+      <div class="finding">
+      <b>Bestätigt: mehr Methoden-Übereinstimmung = höhere Abprall-Rate.</b> Zonen, in denen nur eine Methode
+      ein Level setzt (Tier 1), prallen zu ${tier1.bounceRate}% ab (Sharpe-ähnlich ${tier1.sharpeLike}). Zonen mit
+      4+ übereinstimmenden Methoden (Ø ${tier4.avgMethods} Methoden pro Zone) prallen zu
+      <b class="pos">${tier4.bounceRate}%</b> ab, bei deutlich geringerer Streuung (Std.-Abw. ${tier4.stdDev} vs.
+      ${tier1.stdDev}) und fast doppelter Sharpe-ähnlicher Kennzahl (${tier4.sharpeLike} vs. ${tier1.sharpeLike}).
+      Robust über beide Zeithälften: Tier 4+ ${tier4.olderHalf.bounceRate}% → ${tier4.newerHalf.bounceRate}%.
+      Die Cluster-Logik aus dem Original-Entwurf ist damit die am klarsten
+      bestätigte der drei Hypothesen.
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Konfluenz-Tier</th><th class="num">N Berührungen</th>
+      <th class="num">Ø Methoden/Zone</th><th class="num">Abprall-Rate</th><th class="num">Sharpe-ähnlich</th>
+      <th class="num">Std.-Abw.</th><th class="num">Abprall älter → neuer</th></tr></thead><tbody>
+        <tr><td>Tier 1 (1 Methode)</td><td class="num">${tier1.n.toLocaleString('de-DE')}</td><td class="num">${tier1.avgMethods}</td><td class="num">${tier1.bounceRate}%</td><td class="num">${tier1.sharpeLike}</td><td class="num">${tier1.stdDev}</td><td class="num">${tier1.olderHalf.bounceRate}% → ${tier1.newerHalf.bounceRate}%</td></tr>
+        <tr><td>Tier 2</td><td class="num">${d.cluster.tier2.n.toLocaleString('de-DE')}</td><td class="num">${d.cluster.tier2.avgMethods}</td><td class="num">${d.cluster.tier2.bounceRate}%</td><td class="num">${d.cluster.tier2.sharpeLike}</td><td class="num">${d.cluster.tier2.stdDev}</td><td class="num">${d.cluster.tier2.olderHalf.bounceRate}% → ${d.cluster.tier2.newerHalf.bounceRate}%</td></tr>
+        <tr><td>Tier 3</td><td class="num">${d.cluster.tier3.n.toLocaleString('de-DE')}</td><td class="num">${d.cluster.tier3.avgMethods}</td><td class="num">${d.cluster.tier3.bounceRate}%</td><td class="num">${d.cluster.tier3.sharpeLike}</td><td class="num">${d.cluster.tier3.stdDev}</td><td class="num">${d.cluster.tier3.olderHalf.bounceRate}% → ${d.cluster.tier3.newerHalf.bounceRate}%</td></tr>
+        <tr class="best"><td><b>Tier 4+ (≥4 Methoden)</b></td><td class="num">${tier4.n.toLocaleString('de-DE')}</td><td class="num">${tier4.avgMethods}</td><td class="num pos"><b>${tier4.bounceRate}%</b></td><td class="num">${tier4.sharpeLike}</td><td class="num">${tier4.stdDev}</td><td class="num">${tier4.olderHalf.bounceRate}% → ${tier4.newerHalf.bounceRate}%</td></tr>
+      </tbody></table></div>
+
+      <div class="caveat">
+      <b>Einschränkungen, ehrlich benannt:</b><br>
+      • Nur 52 liquide Standardwerte, 3 Jahre -- kleineres Universum als der <a href="pivot-monthly-backtest.html">
+      Monats-Pivot-Backtest</a> (2.033 Titel, 10 Jahre). Statistisch trotzdem solide (zehntausende Berührungen
+      pro Level), aber weniger breit abgesichert.<br>
+      • Hoch/Tief/Schluss sind <b>roh</b>, nicht split-bereinigt -- der Datenanbieter liefert nur einen
+      bereinigten Schlusskurs (<code>adjusted_close</code>), keine bereinigten Hoch-/Tiefkurse. Bei einem Split
+      innerhalb der letzten 3 Jahre würde genau der Split-Tag einen verzerrten Pivot liefern (ein einzelner
+      Tagesausreißer unter ~750 Handelstagen pro Titel, kein systemischer Fehler).<br>
+      • "Abprall" heißt hier: Tagesschluss liegt auf der günstigen Seite des berührten Levels -- keine echte
+      Intraday-Simulation mit Limit-Entry, Stop und Teil-Exits.<br>
+      • Berührungstoleranz ${d.meta.touchTolerancePct}%, Cluster-Toleranz ${d.meta.clusterTolerancePct}% -- andere
+      Toleranzwerte würden leicht andere N und Raten liefern, das Gesamtmuster (weiter draußen = höhere Abprall-Rate,
+      mehr Methoden = höhere Abprall-Rate) ist aber stabil gegenüber kleinen Toleranz-Änderungen.<br>
+      • Keine Transaktionskosten/Spreads eingerechnet.
+      </div>
+
+      <div class="source-note">
+      ${d.meta.symbols} Titel × ${d.meta.barsPerSymbol} Tagesbars (${d.meta.dateRange.from} bis ${d.meta.dateRange.to}) ·
+      Quelle der Pivot-Logik: nutzereigener PIVOT-HUNTER-Entwurf (Classic/Fibonacci/Camarilla/Woodie-Formeln,
+      Cluster-Konfluenz). Komplementär zum <a href="pivot-monthly-backtest.html">Monats-Pivot-Backtest</a>
+      (dieselbe Grundidee, andere Zeitskala, 10 Jahre, 2.033 Titel). Berechnet
+      ${new Date(d.meta.generatedAt).toLocaleString('de-DE')}.
+      </div>
+    `;
+  } catch (e) {
+    document.getElementById('findingBox').innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>

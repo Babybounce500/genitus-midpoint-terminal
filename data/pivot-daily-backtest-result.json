@@ -1,0 +1,1155 @@
+{
+ "meta": {
+  "symbols": 52,
+  "barsPerSymbol": 751,
+  "dateRange": {
+   "from": "2023-11-06",
+   "to": "2026-11-03"
+  },
+  "touchTolerancePct": 0.15,
+  "clusterTolerancePct": 0.3,
+  "generatedAt": "2026-11-04T12:43:10.026Z"
+ },
+ "breakout": {
+  "classic": {
+   "overall": {
+    "n": 38975,
+    "avgRet": -0.0194,
+    "medianRet": -0.0192,
+    "winRate": 49.29,
+    "stdDev": 1.7201,
+    "sharpeLike": -0.179,
+    "worstTrade": -22.24,
+    "bestTrade": 15.61
+   },
+   "long": {
+    "n": 20825,
+    "avgRet": 0.0079,
+    "medianRet": 0.0187,
+    "winRate": 50.48,
+    "stdDev": 1.6674,
+    "sharpeLike": 0.075,
+    "worstTrade": -12.54,
+    "bestTrade": 15.61
+   },
+   "short": {
+    "n": 18150,
+    "avgRet": -0.0507,
+    "medianRet": -0.0646,
+    "winRate": 47.92,
+    "stdDev": 1.778,
+    "sharpeLike": -0.453,
+    "worstTrade": -22.24,
+    "bestTrade": 12.03
+   },
+   "olderHalf": {
+    "n": 19488,
+    "avgRet": -0.0479,
+    "medianRet": -0.0313,
+    "winRate": 48.81,
+    "stdDev": 1.6754,
+    "sharpeLike": -0.454,
+    "worstTrade": -22.24,
+    "bestTrade": 15.61,
+    "long": {
+     "n": 10640,
+     "avgRet": -0.0129,
+     "medianRet": 0.0354,
+     "winRate": 51.04,
+     "stdDev": 1.558,
+     "sharpeLike": -0.131,
+     "worstTrade": -11,
+     "bestTrade": 15.61
+    },
+    "short": {
+     "n": 8848,
+     "avgRet": -0.09,
+     "medianRet": -0.1072,
+     "winRate": 46.12,
+     "stdDev": 1.8058,
+     "sharpeLike": -0.791,
+     "worstTrade": -22.24,
+     "bestTrade": 12.03
+    }
+   },
+   "newerHalf": {
+    "n": 19487,
+    "avgRet": 0.0091,
+    "medianRet": -0.0015,
+    "winRate": 49.77,
+    "stdDev": 1.7631,
+    "sharpeLike": 0.082,
+    "worstTrade": -12.54,
+    "bestTrade": 11.73,
+    "long": {
+     "n": 10185,
+     "avgRet": 0.0296,
+     "medianRet": 0,
+     "winRate": 49.9,
+     "stdDev": 1.7744,
+     "sharpeLike": 0.265,
+     "worstTrade": -12.54,
+     "bestTrade": 11.73
+    },
+    "short": {
+     "n": 9302,
+     "avgRet": -0.0134,
+     "medianRet": -0.0083,
+     "winRate": 49.63,
+     "stdDev": 1.7505,
+     "sharpeLike": -0.121,
+     "worstTrade": -11.27,
+     "bestTrade": 11.72
+    }
+   },
+   "splitDate": "2025-05-08"
+  },
+  "woodie": {
+   "overall": {
+    "n": 38972,
+    "avgRet": -0.0226,
+    "medianRet": -0.0282,
+    "winRate": 48.97,
+    "stdDev": 1.7201,
+    "sharpeLike": -0.209,
+    "worstTrade": -22.24,
+    "bestTrade": 15.61
+   },
+   "long": {
+    "n": 20875,
+    "avgRet": 0.0048,
+    "medianRet": 0.0088,
+    "winRate": 50.18,
+    "stdDev": 1.6688,
+    "sharpeLike": 0.046,
+    "worstTrade": -12.54,
+    "bestTrade": 15.61
+   },
+   "short": {
+    "n": 18097,
+    "avgRet": -0.0542,
+    "medianRet": -0.0745,
+    "winRate": 47.57,
+    "stdDev": 1.7768,
+    "sharpeLike": -0.484,
+    "worstTrade": -22.24,
+    "bestTrade": 12.03
+   },
+   "olderHalf": {
+    "n": 19484,
+    "avgRet": -0.048,
+    "medianRet": -0.0371,
+    "winRate": 48.57,
+    "stdDev": 1.6756,
+    "sharpeLike": -0.455,
+    "worstTrade": -22.24,
+    "bestTrade": 15.61,
+    "long": {
+     "n": 10635,
+     "avgRet": -0.0132,
+     "medianRet": 0.027,
+     "winRate": 50.8,
+     "stdDev": 1.5564,
+     "sharpeLike": -0.134,
+     "worstTrade": -11,
+     "bestTrade": 15.61
+    },
+    "short": {
+     "n": 8849,
+     "avgRet": -0.0899,
+     "medianRet": -0.1165,
+     "winRate": 45.88,
+     "stdDev": 1.8076,
+     "sharpeLike": -0.79,
+     "worstTrade": -22.24,
+     "bestTrade": 12.03
+    }
+   },
+   "newerHalf": {
+    "n": 19488,
+    "avgRet": 0.0029,
+    "medianRet": -0.0176,
+    "winRate": 49.37,
+    "stdDev": 1.7631,
+    "sharpeLike": 0.026,
+    "worstTrade": -12.54,
+    "bestTrade": 11.73,
+    "long": {
+     "n": 10240,
+     "avgRet": 0.0235,
+     "medianRet": -0.0112,
+     "winRate": 49.54,
+     "stdDev": 1.778,
+     "sharpeLike": 0.21,
+     "worstTrade": -12.54,
+     "bestTrade": 11.73
+    },
+    "short": {
+     "n": 9248,
+     "avgRet": -0.02,
+     "medianRet": -0.027,
+     "winRate": 49.18,
+     "stdDev": 1.7463,
+     "sharpeLike": -0.182,
+     "worstTrade": -11.27,
+     "bestTrade": 11.72
+    }
+   },
+   "splitDate": "2025-05-08"
+  }
+ },
+ "bounce": {
+  "classic": {
+   "R1": {
+    "n": 19910,
+    "avgRet": 0.0831,
+    "medianRet": 0.1,
+    "winRate": 54.3,
+    "stdDev": 1.431,
+    "sharpeLike": 0.922,
+    "worstTrade": -12.69,
+    "bestTrade": 11.45,
+    "bounceRate": 54.3,
+    "olderHalf": {
+     "n": 10208,
+     "avgRet": 0.0877,
+     "medianRet": 0.0832,
+     "winRate": 54,
+     "stdDev": 1.3655,
+     "sharpeLike": 1.02,
+     "worstTrade": -12.69,
+     "bestTrade": 10.23
+    },
+    "newerHalf": {
+     "n": 9702,
+     "avgRet": 0.0782,
+     "medianRet": 0.1261,
+     "winRate": 54.63,
+     "stdDev": 1.4968,
+     "sharpeLike": 0.83,
+     "worstTrade": -10.64,
+     "bestTrade": 11.45
+    }
+   },
+   "R2": {
+    "n": 9765,
+    "avgRet": 0.1193,
+    "medianRet": 0.14,
+    "winRate": 56.92,
+    "stdDev": 1.3393,
+    "sharpeLike": 1.414,
+    "worstTrade": -9.68,
+    "bestTrade": 9.42,
+    "bounceRate": 56.92,
+    "olderHalf": {
+     "n": 4996,
+     "avgRet": 0.1292,
+     "medianRet": 0.1325,
+     "winRate": 57.47,
+     "stdDev": 1.2229,
+     "sharpeLike": 1.677,
+     "worstTrade": -7.39,
+     "bestTrade": 9.42
+    },
+    "newerHalf": {
+     "n": 4769,
+     "avgRet": 0.1089,
+     "medianRet": 0.1504,
+     "winRate": 56.34,
+     "stdDev": 1.4514,
+     "sharpeLike": 1.191,
+     "worstTrade": -9.68,
+     "bestTrade": 7.98
+    }
+   },
+   "R3": {
+    "n": 4012,
+    "avgRet": 0.1534,
+    "medianRet": 0.1651,
+    "winRate": 58.28,
+    "stdDev": 1.363,
+    "sharpeLike": 1.787,
+    "worstTrade": -8.96,
+    "bestTrade": 9.69,
+    "bounceRate": 58.28,
+    "olderHalf": {
+     "n": 1995,
+     "avgRet": 0.1917,
+     "medianRet": 0.1815,
+     "winRate": 59.8,
+     "stdDev": 1.2569,
+     "sharpeLike": 2.421,
+     "worstTrade": -6.63,
+     "bestTrade": 9.69
+    },
+    "newerHalf": {
+     "n": 2017,
+     "avgRet": 0.1156,
+     "medianRet": 0.1434,
+     "winRate": 56.77,
+     "stdDev": 1.4597,
+     "sharpeLike": 1.258,
+     "worstTrade": -8.96,
+     "bestTrade": 8.37
+    }
+   },
+   "S1": {
+    "n": 18234,
+    "avgRet": 0.1182,
+    "medianRet": 0.1754,
+    "winRate": 57.27,
+    "stdDev": 1.4048,
+    "sharpeLike": 1.336,
+    "worstTrade": -12.37,
+    "bestTrade": 18.08,
+    "bounceRate": 57.27,
+    "olderHalf": {
+     "n": 9042,
+     "avgRet": 0.1355,
+     "medianRet": 0.2004,
+     "winRate": 58.71,
+     "stdDev": 1.3702,
+     "sharpeLike": 1.57,
+     "worstTrade": -12.37,
+     "bestTrade": 18.08
+    },
+    "newerHalf": {
+     "n": 9192,
+     "avgRet": 0.1012,
+     "medianRet": 0.1509,
+     "winRate": 55.85,
+     "stdDev": 1.438,
+     "sharpeLike": 1.117,
+     "worstTrade": -12.23,
+     "bestTrade": 7.75
+    }
+   },
+   "S2": {
+    "n": 8548,
+    "avgRet": 0.1437,
+    "medianRet": 0.1876,
+    "winRate": 58.55,
+    "stdDev": 1.4428,
+    "sharpeLike": 1.581,
+    "worstTrade": -10.11,
+    "bestTrade": 11.59,
+    "bounceRate": 58.55,
+    "olderHalf": {
+     "n": 4221,
+     "avgRet": 0.1104,
+     "medianRet": 0.1797,
+     "winRate": 58.75,
+     "stdDev": 1.4328,
+     "sharpeLike": 1.223,
+     "worstTrade": -9.09,
+     "bestTrade": 11.59
+    },
+    "newerHalf": {
+     "n": 4327,
+     "avgRet": 0.1762,
+     "medianRet": 0.1967,
+     "winRate": 58.35,
+     "stdDev": 1.4519,
+     "sharpeLike": 1.927,
+     "worstTrade": -10.11,
+     "bestTrade": 9.43
+    }
+   },
+   "S3": {
+    "n": 3706,
+    "avgRet": 0.1656,
+    "medianRet": 0.1823,
+    "winRate": 57.74,
+    "stdDev": 1.5099,
+    "sharpeLike": 1.741,
+    "worstTrade": -7.99,
+    "bestTrade": 11.68,
+    "bounceRate": 57.74,
+    "olderHalf": {
+     "n": 1895,
+     "avgRet": 0.0765,
+     "medianRet": 0.1554,
+     "winRate": 56.94,
+     "stdDev": 1.4302,
+     "sharpeLike": 0.849,
+     "worstTrade": -7.89,
+     "bestTrade": 8.36
+    },
+    "newerHalf": {
+     "n": 1811,
+     "avgRet": 0.259,
+     "medianRet": 0.2143,
+     "winRate": 58.59,
+     "stdDev": 1.5841,
+     "sharpeLike": 2.595,
+     "worstTrade": -7.99,
+     "bestTrade": 11.68
+    }
+   }
+  },
+  "fib": {
+   "R1": {
+    "n": 23039,
+    "avgRet": 0.0577,
+    "medianRet": 0.0707,
+    "winRate": 52.77,
+    "stdDev": 1.4302,
+    "sharpeLike": 0.64,
+    "worstTrade": -12.65,
+    "bestTrade": 12.23,
+    "bounceRate": 52.77,
+    "olderHalf": {
+     "n": 11756,
+     "avgRet": 0.0459,
+     "medianRet": 0.0493,
+     "winRate": 51.96,
+     "stdDev": 1.3666,
+     "sharpeLike": 0.533,
+     "worstTrade": -12.65,
+     "bestTrade": 11.15
+    },
+    "newerHalf": {
+     "n": 11283,
+     "avgRet": 0.07,
+     "medianRet": 0.0992,
+     "winRate": 53.6,
+     "stdDev": 1.4936,
+     "sharpeLike": 0.743,
+     "worstTrade": -11.36,
+     "bestTrade": 12.23
+    }
+   },
+   "R2": {
+    "n": 17437,
+    "avgRet": 0.0936,
+    "medianRet": 0.1081,
+    "winRate": 54.91,
+    "stdDev": 1.4052,
+    "sharpeLike": 1.058,
+    "worstTrade": -10.31,
+    "bestTrade": 10.61,
+    "bounceRate": 54.91,
+    "olderHalf": {
+     "n": 8931,
+     "avgRet": 0.1014,
+     "medianRet": 0.0996,
+     "winRate": 55.02,
+     "stdDev": 1.3287,
+     "sharpeLike": 1.211,
+     "worstTrade": -9.35,
+     "bestTrade": 10.61
+    },
+    "newerHalf": {
+     "n": 8506,
+     "avgRet": 0.0854,
+     "medianRet": 0.1143,
+     "winRate": 54.8,
+     "stdDev": 1.4813,
+     "sharpeLike": 0.916,
+     "worstTrade": -10.31,
+     "bestTrade": 9.21
+    }
+   },
+   "R3": {
+    "n": 9765,
+    "avgRet": 0.1193,
+    "medianRet": 0.14,
+    "winRate": 56.92,
+    "stdDev": 1.3393,
+    "sharpeLike": 1.414,
+    "worstTrade": -9.68,
+    "bestTrade": 9.42,
+    "bounceRate": 56.92,
+    "olderHalf": {
+     "n": 4996,
+     "avgRet": 0.1292,
+     "medianRet": 0.1325,
+     "winRate": 57.47,
+     "stdDev": 1.2229,
+     "sharpeLike": 1.677,
+     "worstTrade": -7.39,
+     "bestTrade": 9.42
+    },
+    "newerHalf": {
+     "n": 4769,
+     "avgRet": 0.1089,
+     "medianRet": 0.1504,
+     "winRate": 56.34,
+     "stdDev": 1.4514,
+     "sharpeLike": 1.191,
+     "worstTrade": -9.68,
+     "bestTrade": 7.98
+    }
+   },
+   "S1": {
+    "n": 21150,
+    "avgRet": 0.0989,
+    "medianRet": 0.1448,
+    "winRate": 55.89,
+    "stdDev": 1.4344,
+    "sharpeLike": 1.094,
+    "worstTrade": -10.32,
+    "bestTrade": 22.18,
+    "bounceRate": 55.89,
+    "olderHalf": {
+     "n": 10510,
+     "avgRet": 0.1348,
+     "medianRet": 0.1768,
+     "winRate": 57.61,
+     "stdDev": 1.4176,
+     "sharpeLike": 1.51,
+     "worstTrade": -8.86,
+     "bestTrade": 22.18
+    },
+    "newerHalf": {
+     "n": 10640,
+     "avgRet": 0.0633,
+     "medianRet": 0.1074,
+     "winRate": 54.19,
+     "stdDev": 1.45,
+     "sharpeLike": 0.693,
+     "worstTrade": -10.32,
+     "bestTrade": 11.92
+    }
+   },
+   "S2": {
+    "n": 15501,
+    "avgRet": 0.1119,
+    "medianRet": 0.1699,
+    "winRate": 57.17,
+    "stdDev": 1.4087,
+    "sharpeLike": 1.261,
+    "worstTrade": -12.05,
+    "bestTrade": 18.19,
+    "bounceRate": 57.17,
+    "olderHalf": {
+     "n": 7591,
+     "avgRet": 0.1161,
+     "medianRet": 0.1888,
+     "winRate": 58.2,
+     "stdDev": 1.3701,
+     "sharpeLike": 1.345,
+     "worstTrade": -11.24,
+     "bestTrade": 18.19
+    },
+    "newerHalf": {
+     "n": 7910,
+     "avgRet": 0.1078,
+     "medianRet": 0.1524,
+     "winRate": 56.18,
+     "stdDev": 1.445,
+     "sharpeLike": 1.184,
+     "worstTrade": -12.05,
+     "bestTrade": 8.09
+    }
+   },
+   "S3": {
+    "n": 8548,
+    "avgRet": 0.1437,
+    "medianRet": 0.1876,
+    "winRate": 58.55,
+    "stdDev": 1.4428,
+    "sharpeLike": 1.581,
+    "worstTrade": -10.11,
+    "bestTrade": 11.59,
+    "bounceRate": 58.55,
+    "olderHalf": {
+     "n": 4221,
+     "avgRet": 0.1104,
+     "medianRet": 0.1797,
+     "winRate": 58.75,
+     "stdDev": 1.4328,
+     "sharpeLike": 1.223,
+     "worstTrade": -9.09,
+     "bestTrade": 11.59
+    },
+    "newerHalf": {
+     "n": 4327,
+     "avgRet": 0.1762,
+     "medianRet": 0.1967,
+     "winRate": 58.35,
+     "stdDev": 1.4519,
+     "sharpeLike": 1.927,
+     "worstTrade": -10.11,
+     "bestTrade": 9.43
+    }
+   }
+  },
+  "camarilla": {
+   "R2": {
+    "n": 27739,
+    "avgRet": 0.032,
+    "medianRet": 0.051,
+    "winRate": 52.14,
+    "stdDev": 1.4756,
+    "sharpeLike": 0.344,
+    "worstTrade": -20.31,
+    "bestTrade": 12.15,
+    "bounceRate": 52.14,
+    "olderHalf": {
+     "n": 14103,
+     "avgRet": 0.0076,
+     "medianRet": 0.0212,
+     "winRate": 50.94,
+     "stdDev": 1.4408,
+     "sharpeLike": 0.083,
+     "worstTrade": -20.31,
+     "bestTrade": 11.25
+    },
+    "newerHalf": {
+     "n": 13636,
+     "avgRet": 0.0572,
+     "medianRet": 0.0816,
+     "winRate": 53.39,
+     "stdDev": 1.5105,
+     "sharpeLike": 0.601,
+     "worstTrade": -10.62,
+     "bestTrade": 12.15
+    }
+   },
+   "R3": {
+    "n": 25862,
+    "avgRet": 0.0627,
+    "medianRet": 0.0858,
+    "winRate": 53.36,
+    "stdDev": 1.4715,
+    "sharpeLike": 0.676,
+    "worstTrade": -18.63,
+    "bestTrade": 12.78,
+    "bounceRate": 53.36,
+    "olderHalf": {
+     "n": 13195,
+     "avgRet": 0.0492,
+     "medianRet": 0.0555,
+     "winRate": 52.53,
+     "stdDev": 1.4334,
+     "sharpeLike": 0.545,
+     "worstTrade": -18.63,
+     "bestTrade": 11.52
+    },
+    "newerHalf": {
+     "n": 12667,
+     "avgRet": 0.0767,
+     "medianRet": 0.1182,
+     "winRate": 54.23,
+     "stdDev": 1.5101,
+     "sharpeLike": 0.807,
+     "worstTrade": -11.45,
+     "bestTrade": 12.78
+    }
+   },
+   "R4": {
+    "n": 18439,
+    "avgRet": 0.0865,
+    "medianRet": 0.109,
+    "winRate": 54.94,
+    "stdDev": 1.439,
+    "sharpeLike": 0.954,
+    "worstTrade": -13.85,
+    "bestTrade": 11.24,
+    "bounceRate": 54.94,
+    "olderHalf": {
+     "n": 9471,
+     "avgRet": 0.0855,
+     "medianRet": 0.1012,
+     "winRate": 54.96,
+     "stdDev": 1.3685,
+     "sharpeLike": 0.992,
+     "worstTrade": -13.85,
+     "bestTrade": 10.44
+    },
+    "newerHalf": {
+     "n": 8968,
+     "avgRet": 0.0874,
+     "medianRet": 0.121,
+     "winRate": 54.92,
+     "stdDev": 1.51,
+     "sharpeLike": 0.919,
+     "worstTrade": -10.97,
+     "bestTrade": 11.24
+    }
+   },
+   "R1": {
+    "n": 28983,
+    "avgRet": 0.0042,
+    "medianRet": 0.0088,
+    "winRate": 50.34,
+    "stdDev": 1.4813,
+    "sharpeLike": 0.045,
+    "worstTrade": -22.04,
+    "bestTrade": 11.51,
+    "bounceRate": 50.34,
+    "olderHalf": {
+     "n": 14697,
+     "avgRet": -0.0291,
+     "medianRet": -0.0196,
+     "winRate": 49.17,
+     "stdDev": 1.4486,
+     "sharpeLike": -0.319,
+     "worstTrade": -22.04,
+     "bestTrade": 10.97
+    },
+    "newerHalf": {
+     "n": 14286,
+     "avgRet": 0.0385,
+     "medianRet": 0.0488,
+     "winRate": 51.54,
+     "stdDev": 1.5135,
+     "sharpeLike": 0.404,
+     "worstTrade": -10.91,
+     "bestTrade": 11.51
+    }
+   },
+   "S1": {
+    "n": 28441,
+    "avgRet": 0.0553,
+    "medianRet": 0.0782,
+    "winRate": 52.9,
+    "stdDev": 1.4561,
+    "sharpeLike": 0.603,
+    "worstTrade": -10.53,
+    "bestTrade": 20.4,
+    "bounceRate": 52.9,
+    "olderHalf": {
+     "n": 14343,
+     "avgRet": 0.088,
+     "medianRet": 0.113,
+     "winRate": 54.42,
+     "stdDev": 1.421,
+     "sharpeLike": 0.983,
+     "worstTrade": -10.41,
+     "bestTrade": 20.4
+    },
+    "newerHalf": {
+     "n": 14098,
+     "avgRet": 0.0221,
+     "medianRet": 0.038,
+     "winRate": 51.35,
+     "stdDev": 1.4904,
+     "sharpeLike": 0.235,
+     "worstTrade": -10.53,
+     "bestTrade": 11.84
+    }
+   },
+   "S2": {
+    "n": 26937,
+    "avgRet": 0.0796,
+    "medianRet": 0.115,
+    "winRate": 54.7,
+    "stdDev": 1.4397,
+    "sharpeLike": 0.878,
+    "worstTrade": -10.38,
+    "bestTrade": 22.04,
+    "bounceRate": 54.7,
+    "olderHalf": {
+     "n": 13563,
+     "avgRet": 0.109,
+     "medianRet": 0.1434,
+     "winRate": 56.32,
+     "stdDev": 1.4017,
+     "sharpeLike": 1.235,
+     "worstTrade": -10.13,
+     "bestTrade": 22.04
+    },
+    "newerHalf": {
+     "n": 13374,
+     "avgRet": 0.0497,
+     "medianRet": 0.0801,
+     "winRate": 53.05,
+     "stdDev": 1.4768,
+     "sharpeLike": 0.535,
+     "worstTrade": -10.38,
+     "bestTrade": 12.46
+    }
+   },
+   "S3": {
+    "n": 24656,
+    "avgRet": 0.0986,
+    "medianRet": 0.1457,
+    "winRate": 56.02,
+    "stdDev": 1.4119,
+    "sharpeLike": 1.108,
+    "worstTrade": -10.22,
+    "bestTrade": 16.91,
+    "bounceRate": 56.02,
+    "olderHalf": {
+     "n": 12393,
+     "avgRet": 0.1251,
+     "medianRet": 0.1713,
+     "winRate": 57.64,
+     "stdDev": 1.3613,
+     "sharpeLike": 1.459,
+     "worstTrade": -9.85,
+     "bestTrade": 16.91
+    },
+    "newerHalf": {
+     "n": 12263,
+     "avgRet": 0.0717,
+     "medianRet": 0.1153,
+     "winRate": 54.39,
+     "stdDev": 1.4608,
+     "sharpeLike": 0.779,
+     "worstTrade": -10.22,
+     "bestTrade": 13.32
+    }
+   },
+   "S4": {
+    "n": 17067,
+    "avgRet": 0.1301,
+    "medianRet": 0.1867,
+    "winRate": 58.01,
+    "stdDev": 1.3974,
+    "sharpeLike": 1.478,
+    "worstTrade": -11.58,
+    "bestTrade": 11.54,
+    "bounceRate": 58.01,
+    "olderHalf": {
+     "n": 8534,
+     "avgRet": 0.1418,
+     "medianRet": 0.199,
+     "winRate": 59.37,
+     "stdDev": 1.3564,
+     "sharpeLike": 1.659,
+     "worstTrade": -8.99,
+     "bestTrade": 11.54
+    },
+    "newerHalf": {
+     "n": 8533,
+     "avgRet": 0.1183,
+     "medianRet": 0.1685,
+     "winRate": 56.65,
+     "stdDev": 1.4372,
+     "sharpeLike": 1.307,
+     "worstTrade": -11.58,
+     "bestTrade": 8.98
+    }
+   }
+  },
+  "woodie": {
+   "R1": {
+    "n": 19818,
+    "avgRet": 0.0879,
+    "medianRet": 0.1131,
+    "winRate": 54.67,
+    "stdDev": 1.4509,
+    "sharpeLike": 0.962,
+    "worstTrade": -14.69,
+    "bestTrade": 10.94,
+    "bounceRate": 54.67,
+    "olderHalf": {
+     "n": 10146,
+     "avgRet": 0.0807,
+     "medianRet": 0.0991,
+     "winRate": 54.46,
+     "stdDev": 1.3832,
+     "sharpeLike": 0.926,
+     "worstTrade": -14.69,
+     "bestTrade": 10.27
+    },
+    "newerHalf": {
+     "n": 9672,
+     "avgRet": 0.0955,
+     "medianRet": 0.1312,
+     "winRate": 54.88,
+     "stdDev": 1.5188,
+     "sharpeLike": 0.998,
+     "worstTrade": -11.24,
+     "bestTrade": 10.94
+    }
+   },
+   "R2": {
+    "n": 9567,
+    "avgRet": 0.1259,
+    "medianRet": 0.1493,
+    "winRate": 57.36,
+    "stdDev": 1.3524,
+    "sharpeLike": 1.477,
+    "worstTrade": -9.47,
+    "bestTrade": 9.64,
+    "bounceRate": 57.36,
+    "olderHalf": {
+     "n": 4889,
+     "avgRet": 0.1307,
+     "medianRet": 0.1364,
+     "winRate": 57.8,
+     "stdDev": 1.2406,
+     "sharpeLike": 1.673,
+     "worstTrade": -7.92,
+     "bestTrade": 9.64
+    },
+    "newerHalf": {
+     "n": 4678,
+     "avgRet": 0.1208,
+     "medianRet": 0.1633,
+     "winRate": 56.9,
+     "stdDev": 1.4603,
+     "sharpeLike": 1.313,
+     "worstTrade": -9.47,
+     "bestTrade": 8.03
+    }
+   },
+   "S1": {
+    "n": 18390,
+    "avgRet": 0.1245,
+    "medianRet": 0.1811,
+    "winRate": 57.62,
+    "stdDev": 1.3902,
+    "sharpeLike": 1.421,
+    "worstTrade": -11.83,
+    "bestTrade": 11.1,
+    "bounceRate": 57.62,
+    "olderHalf": {
+     "n": 9204,
+     "avgRet": 0.1392,
+     "medianRet": 0.2002,
+     "winRate": 59.04,
+     "stdDev": 1.3496,
+     "sharpeLike": 1.637,
+     "worstTrade": -9.14,
+     "bestTrade": 11.1
+    },
+    "newerHalf": {
+     "n": 9186,
+     "avgRet": 0.1097,
+     "medianRet": 0.1613,
+     "winRate": 56.19,
+     "stdDev": 1.4296,
+     "sharpeLike": 1.218,
+     "worstTrade": -11.83,
+     "bestTrade": 9.2
+    }
+   },
+   "R3": {
+    "n": 1844,
+    "avgRet": 0.2066,
+    "medianRet": 0.1985,
+    "winRate": 59.76,
+    "stdDev": 1.4668,
+    "sharpeLike": 2.236,
+    "worstTrade": -8.81,
+    "bestTrade": 7.83,
+    "bounceRate": 59.76,
+    "olderHalf": {
+     "n": 952,
+     "avgRet": 0.2457,
+     "medianRet": 0.2142,
+     "winRate": 60.4,
+     "stdDev": 1.3572,
+     "sharpeLike": 2.874,
+     "worstTrade": -5.69,
+     "bestTrade": 6.76
+    },
+    "newerHalf": {
+     "n": 892,
+     "avgRet": 0.1649,
+     "medianRet": 0.1887,
+     "winRate": 59.08,
+     "stdDev": 1.5751,
+     "sharpeLike": 1.662,
+     "worstTrade": -8.81,
+     "bestTrade": 7.83
+    }
+   },
+   "S2": {
+    "n": 8416,
+    "avgRet": 0.1463,
+    "medianRet": 0.1893,
+    "winRate": 58.2,
+    "stdDev": 1.4456,
+    "sharpeLike": 1.607,
+    "worstTrade": -9.9,
+    "bestTrade": 11.98,
+    "bounceRate": 58.2,
+    "olderHalf": {
+     "n": 4138,
+     "avgRet": 0.1071,
+     "medianRet": 0.1828,
+     "winRate": 58.34,
+     "stdDev": 1.4258,
+     "sharpeLike": 1.193,
+     "worstTrade": -9.35,
+     "bestTrade": 11.98
+    },
+    "newerHalf": {
+     "n": 4278,
+     "avgRet": 0.1842,
+     "medianRet": 0.1941,
+     "winRate": 58.06,
+     "stdDev": 1.4637,
+     "sharpeLike": 1.998,
+     "worstTrade": -9.9,
+     "bestTrade": 9.28
+    }
+   },
+   "S3": {
+    "n": 1791,
+    "avgRet": 0.1638,
+    "medianRet": 0.198,
+    "winRate": 59.69,
+    "stdDev": 1.5948,
+    "sharpeLike": 1.63,
+    "worstTrade": -9.34,
+    "bestTrade": 10.67,
+    "bounceRate": 59.69,
+    "olderHalf": {
+     "n": 929,
+     "avgRet": 0.0977,
+     "medianRet": 0.1574,
+     "winRate": 57.7,
+     "stdDev": 1.5966,
+     "sharpeLike": 0.971,
+     "worstTrade": -9.34,
+     "bestTrade": 10.67
+    },
+    "newerHalf": {
+     "n": 862,
+     "avgRet": 0.2349,
+     "medianRet": 0.2392,
+     "winRate": 61.83,
+     "stdDev": 1.5906,
+     "sharpeLike": 2.345,
+     "worstTrade": -7.09,
+     "bestTrade": 10.23
+    }
+   }
+  }
+ },
+ "cluster": {
+  "tier1": {
+   "n": 63443,
+   "avgRet": 0.1082,
+   "medianRet": 0.1521,
+   "winRate": 55.48,
+   "stdDev": 1.8663,
+   "sharpeLike": 0.92,
+   "worstTrade": -22.04,
+   "bestTrade": 20.4,
+   "bounceRate": 55.48,
+   "avgMethods": 1,
+   "olderHalf": {
+    "n": 28835,
+    "avgRet": 0.0835,
+    "medianRet": 0.1508,
+    "winRate": 55.8,
+    "stdDev": 1.933,
+    "sharpeLike": 0.686,
+    "worstTrade": -22.04,
+    "bestTrade": 20.4,
+    "bounceRate": 55.8
+   },
+   "newerHalf": {
+    "n": 34608,
+    "avgRet": 0.1287,
+    "medianRet": 0.1542,
+    "winRate": 55.21,
+    "stdDev": 1.8086,
+    "sharpeLike": 1.13,
+    "worstTrade": -12.15,
+    "bestTrade": 13.32,
+    "bounceRate": 55.21
+   }
+  },
+  "tier2": {
+   "n": 20760,
+   "avgRet": 0.1261,
+   "medianRet": 0.1364,
+   "winRate": 55.54,
+   "stdDev": 1.337,
+   "sharpeLike": 1.497,
+   "worstTrade": -10.74,
+   "bestTrade": 10.3,
+   "bounceRate": 55.54,
+   "avgMethods": 1,
+   "olderHalf": {
+    "n": 9925,
+    "avgRet": 0.1279,
+    "medianRet": 0.1459,
+    "winRate": 55.99,
+    "stdDev": 1.2885,
+    "sharpeLike": 1.575,
+    "worstTrade": -8.64,
+    "bestTrade": 7.75,
+    "bounceRate": 55.99
+   },
+   "newerHalf": {
+    "n": 10835,
+    "avgRet": 0.1245,
+    "medianRet": 0.1278,
+    "winRate": 55.13,
+    "stdDev": 1.3801,
+    "sharpeLike": 1.432,
+    "worstTrade": -10.74,
+    "bestTrade": 10.3,
+    "bounceRate": 55.13
+   }
+  },
+  "tier3": {
+   "n": 33868,
+   "avgRet": 0.1094,
+   "medianRet": 0.1447,
+   "winRate": 55.67,
+   "stdDev": 1.6044,
+   "sharpeLike": 1.083,
+   "worstTrade": -15.94,
+   "bestTrade": 22.11,
+   "bounceRate": 55.67,
+   "avgMethods": 1.76,
+   "olderHalf": {
+    "n": 16280,
+    "avgRet": 0.1097,
+    "medianRet": 0.1377,
+    "winRate": 55.77,
+    "stdDev": 1.5743,
+    "sharpeLike": 1.106,
+    "worstTrade": -15.94,
+    "bestTrade": 22.11,
+    "bounceRate": 55.77
+   },
+   "newerHalf": {
+    "n": 17588,
+    "avgRet": 0.1092,
+    "medianRet": 0.1511,
+    "winRate": 55.57,
+    "stdDev": 1.6317,
+    "sharpeLike": 1.062,
+    "worstTrade": -11.71,
+    "bestTrade": 12.14,
+    "bounceRate": 55.57
+   }
+  },
+  "tier4plus": {
+   "n": 67579,
+   "avgRet": 0.1329,
+   "medianRet": 0.156,
+   "winRate": 57.06,
+   "stdDev": 1.2785,
+   "sharpeLike": 1.65,
+   "worstTrade": -11.31,
+   "bestTrade": 10.14,
+   "bounceRate": 57.06,
+   "avgMethods": 3.07,
+   "olderHalf": {
+    "n": 34967,
+    "avgRet": 0.1284,
+    "medianRet": 0.1463,
+    "winRate": 57.14,
+    "stdDev": 1.2088,
+    "sharpeLike": 1.686,
+    "worstTrade": -10.31,
+    "bestTrade": 10.14,
+    "bounceRate": 57.14
+   },
+   "newerHalf": {
+    "n": 32612,
+    "avgRet": 0.1377,
+    "medianRet": 0.1678,
+    "winRate": 56.97,
+    "stdDev": 1.3493,
+    "sharpeLike": 1.621,
+    "worstTrade": -11.31,
+    "bestTrade": 9.83,
+    "bounceRate": 56.97
+   }
+  }
+ }
+}
