@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS TAGES-PIVOT // Live-Scanner</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+.scan-bar{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px 16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px;}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:260px;}
+.field label{font-size:9px;letter-spacing:1px;color:var(--muted);}
+.field input{font-family:var(--mono);font-size:11px;padding:8px 10px;border:1px solid var(--border);border-radius:4px;background:#fff;color:var(--text);}
+.btn{font-family:var(--head);font-size:10px;letter-spacing:1.5px;padding:10px 18px;border-radius:4px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-weight:700;white-space:nowrap;}
+.btn:hover:not(:disabled){background:#0b5a6e;}
+.btn:disabled{background:#9fb3b8;cursor:not-allowed;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:7px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+.badge{font-family:var(--head);font-size:8px;letter-spacing:.5px;padding:3px 7px;border-radius:3px;white-space:nowrap;}
+.badge.long{background:rgba(21,128,61,.12);color:var(--green);}
+.badge.short{background:rgba(185,28,28,.1);color:var(--red);}
+.badge.strong{background:rgba(21,128,61,.14);color:var(--green);}
+.badge.weak{background:rgba(180,83,9,.1);color:var(--gold);}
+.tag{display:block;font-size:7.5px;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
+@media(max-width:640px){.scan-bar{flex-direction:column;align-items:stretch;}.field{min-width:0;}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">TAGES-PIVOT LIVE</div><div class="logo-sub">PP-SIGNAL + NÄCHSTE KONFLUENZ-ZONEN</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="strategies-hub.html">← Strategien-Hub</a>
+    <a class="back" href="pivot-daily-backtest.html">📊 Backtest</a>
+    <a class="back" href="pivot-monthly.html">🗓️ Monats-Pivot Live</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  Pivot (Classic, aus Hoch/Tief/Schluss des letzten vollständigen Handelstages) gegen den aktuellen Kurs --
+  plus die nächstgelegene Support- und Widerstands-<b>Konfluenz-Zone</b> aus allen 4 Methoden (Classic, Fibonacci,
+  Camarilla, Woodie). Laut <a href="pivot-daily-backtest.html">3-Jahres-Backtest</a>: der reine PP-Breakout
+  (LONG/SHORT-Signal unten) hat <b>keinen</b> robusten Tages-Edge -- die Konfluenz-Zonen dagegen schon, und zwar
+  umso mehr, je mehr Methoden übereinstimmen (Zonen mit 4+ Methoden: 57,0% Abprall-Rate, nur 1,3% Stop-Rate bei
+  -4%). Deshalb unten entsprechend markiert: <span class="badge strong">stark</span> = 4+ Methoden einig,
+  <span class="badge weak">schwach</span> = nur 1 Methode.
+  </div>
+
+  <div class="scan-bar">
+    <div class="field">
+      <label>WATCHLIST (kommagetrennt, Suffix wie .US / .XETRA / .HK)</label>
+      <input id="symInput" value="AAPL.US,MSFT.US,NVDA.US,AMZN.US,GOOGL.US,META.US,TSLA.US,AVGO.US,JPM.US,V.US,UNH.US,XOM.US,JNJ.US,WMT.US,HD.US">
+    </div>
+    <button class="btn" id="scanBtn" onclick="runScan()">▶ PIVOT-SCAN STARTEN</button>
+  </div>
+
+  <div id="resultContent" class="loading">Watchlist prüfen, dann "PIVOT-SCAN STARTEN" klicken.</div>
+
+  <div class="caveat">
+  <b>Einschränkungen, ehrlich benannt:</b><br>
+  • "Aktueller Kurs" ist der letzte verfügbare Tagesschluss vom Datenanbieter, keine Echtzeit-Notierung.<br>
+  • Konfluenz-Zonen werden aus Hoch/Tief/Schluss des letzten vollständigen Handelstages berechnet (gleiche
+  Toleranz wie im Backtest: 0,3% Cluster-Toleranz). Bei sehr neu gelisteten Symbolen ggf. zu wenig Historie.<br>
+  • Das LONG/SHORT-PP-Signal wird trotzdem angezeigt (volle Transparenz), ist laut Backtest aber <b>kein</b>
+  verlässliches Tages-Signal -- nur die Konfluenz-Zonen-Spalten haben einen gezeigten Edge.<br>
+  • Keine Positionsgröße, kein automatischer Stop -- reine Entscheidungs-Unterstützung.
+  </div>
+
+  <div class="source-note">
+  Herkunft der Pivot-Formeln: nutzereigener PIVOT-HUNTER-Entwurf. Validierung siehe
+  <a href="pivot-daily-backtest.html">Tages-Pivot-Backtest</a> (52 Titel, 3 Jahre).
+  </div>
+</div>
+<script>
+const PROXY = 'https://theserver-open-ai.replit.app';
+
+function fmtPct(v) { return (v>=0?'+':'') + v.toFixed(2) + '%'; }
+
+function calcClassic(H, L, C) { const PP = (H + L + C) / 3; return { PP, R1: 2*PP-L, R2: PP+(H-L), R3: H+2*(PP-L), S1: 2*PP-H, S2: PP-(H-L), S3: L-2*(H-PP) }; }
+function calcFibonacci(H, L, C) { const PP = (H + L + C) / 3, r = H - L; return { PP, R1: PP+0.382*r, R2: PP+0.618*r, R3: PP+r, S1: PP-0.382*r, S2: PP-0.618*r, S3: PP-r }; }
+function calcCamarilla(H, L, C) { const r = H - L; return { PP: (H+L+C)/3, R1: C+r*1.1/12, R2: C+r*1.1/6, R3: C+r*1.1/4, R4: C+r*1.1/2, S1: C-r*1.1/12, S2: C-r*1.1/6, S3: C-r*1.1/4, S4: C-r*1.1/2 }; }
+function calcWoodie(H, L, C) { const PP = (H + L + 2*C) / 4, r = H - L; return { PP, R1: 2*PP-L, R2: PP+r, R3: PP+2*r, S1: 2*PP-H, S2: PP-r, S3: PP-2*r }; }
+
+function clusterLevels(allLevels, tol) {
+  const sorted = [...allLevels].sort((a, b) => a.val - b.val);
+  const clusters = [];
+  let i = 0;
+  while (i < sorted.length) {
+    const group = [sorted[i]]; let j = i + 1;
+    while (j < sorted.length && (sorted[j].val - group[0].val) / group[0].val <= tol) { group.push(sorted[j]); j++; }
+    const avg = group.reduce((s, l) => s + l.val, 0) / group.length;
+    const methods = new Set(group.map(l => l.method));
+    const strength = methods.size + (group.length >= 5 ? 3 : group.length >= 3 ? 2 : group.length >= 2 ? 1 : 0);
+    clusters.push({ avg, strength, nMethods: methods.size, n: group.length });
+    i = j;
+  }
+  return clusters;
+}
+
+async function fetchDaily(symbol) {
+  const from = new Date(Date.now() - 25 * 86400000).toISOString().slice(0, 10);
+  const res = await fetch(PROXY + '/eod/historical/' + encodeURIComponent(symbol) + '?from=' + from, { signal: AbortSignal.timeout(20000) });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const raw = await res.json();
+  if (!Array.isArray(raw)) throw new Error('ungültige Antwort');
+  return raw
+    .filter(h => h && h.date && [h.open, h.high, h.low, h.close].every(v => Number.isFinite(Number(v))))
+    .map(h => ({ date: h.date, open: +h.open, high: +h.high, low: +h.low, close: +h.close }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+async function scanSymbol(sym) {
+  const bars = await fetchDaily(sym);
+  if (bars.length < 2) return { sym, error: 'zu wenig Historie' };
+
+  const prev = bars[bars.length - 2];
+  const cur = bars[bars.length - 1];
+
+  const classic = calcClassic(prev.high, prev.low, prev.close);
+  const fib = calcFibonacci(prev.high, prev.low, prev.close);
+  const cam = calcCamarilla(prev.high, prev.low, prev.close);
+  const woodie = calcWoodie(prev.high, prev.low, prev.close);
+
+  const price = cur.close;
+  const direction = price > classic.PP ? 'LONG' : (price < classic.PP ? 'SHORT' : null);
+
+  const allLevels = [];
+  for (const [mName, piv] of [['classic', classic], ['fib', fib], ['camarilla', cam], ['woodie', woodie]]) {
+    for (const key of ['R1', 'R2', 'R3', 'R4', 'S1', 'S2', 'S3', 'S4']) {
+      if (piv[key] != null) allLevels.push({ val: piv[key], method: mName });
+    }
+  }
+  const clusters = clusterLevels(allLevels, 0.003);
+  const support = clusters.filter(c => c.avg < price).sort((a, b) => b.avg - a.avg)[0] || null;
+  const resistance = clusters.filter(c => c.avg > price).sort((a, b) => a.avg - b.avg)[0] || null;
+
+  return { sym, date: cur.date, price, pivotPP: classic.PP, direction, support, resistance };
+}
+
+function clusterCell(cl, price) {
+  if (!cl) return '<span class="tag">keine Zone gefunden</span>';
+  const dist = ((cl.avg - price) / price) * 100;
+  const tierCls = cl.nMethods >= 4 ? 'strong' : cl.nMethods === 1 ? 'weak' : '';
+  const tierLbl = cl.nMethods >= 4 ? 'stark' : cl.nMethods === 1 ? 'schwach' : 'mittel';
+  return cl.avg.toFixed(2) + ' <span class="tag">' + fmtPct(dist) + (tierCls ? ' · <span class="badge ' + tierCls + '">' + tierLbl + ' (' + cl.nMethods + 'x)</span>' : ' · ' + cl.nMethods + 'x') + '</span>';
+}
+
+async function runScan() {
+  const symbols = document.getElementById('symInput').value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+  if (!symbols.length) return;
+  const btn = document.getElementById('scanBtn');
+  const content = document.getElementById('resultContent');
+  btn.disabled = true;
+  content.innerHTML = '<div class="loading">Scanne ' + symbols.length + ' Symbole…</div>';
+
+  const results = [];
+  for (const sym of symbols) {
+    try {
+      results.push(await scanSymbol(sym));
+    } catch (e) {
+      results.push({ sym, error: e.message });
+    }
+  }
+
+  const ok = results.filter(r => !r.error);
+  const errs = results.filter(r => r.error);
+  const longCount = ok.filter(r => r.direction === 'LONG').length;
+  const shortCount = ok.filter(r => r.direction === 'SHORT').length;
+
+  const rows = ok.map(r => {
+    const dist = ((r.price - r.pivotPP) / r.pivotPP) * 100;
+    return '<tr>' +
+      '<td><b>' + r.sym + '</b><span class="tag">' + r.date + '</span></td>' +
+      '<td class="num">' + r.price.toFixed(2) + '</td>' +
+      '<td class="num">' + r.pivotPP.toFixed(2) + '</td>' +
+      '<td class="num ' + (dist>=0?'pos':'neg') + '">' + fmtPct(dist) + '</td>' +
+      '<td><span class="badge ' + (r.direction==='SHORT'?'short':'long') + '">' + r.direction + '</span></td>' +
+      '<td class="num">' + clusterCell(r.support, r.price) + '</td>' +
+      '<td class="num">' + clusterCell(r.resistance, r.price) + '</td>' +
+      '</tr>';
+  }).join('');
+
+  content.innerHTML =
+    '<div class="finding"><b>' + ok.length + ' Symbole gescannt:</b> ' + longCount + ' LONG, ' + shortCount + ' SHORT (PP-Signal, laut Backtest ohne verlässlichen Edge)' +
+    (errs.length ? ', ' + errs.length + ' Fehler (' + errs.map(e => e.sym + ': ' + e.error).join('; ') + ')' : '') + '.</div>' +
+    (rows ? '<div class="table-wrap"><table><thead><tr><th>Symbol</th><th class="num">Kurs</th><th class="num">PP (Classic)</th>' +
+      '<th class="num">Abstand PP</th><th>PP-Signal</th><th class="num">Nächster Support</th><th class="num">Nächster Widerstand</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table></div>' : '<div class="error">Keine verwertbaren Symbole.</div>');
+
+  btn.disabled = false;
+}
+
+document.getElementById('symInput').addEventListener('keydown', e => { if (e.key === 'Enter') runScan(); });
+</script>
+</body>
+</html>
