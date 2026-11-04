@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS MONATS-PIVOT // 10-Jahres-Backtest</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:6px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.best{background:rgba(21,128,61,.08);} .worst{background:rgba(185,28,28,.06);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+.bstat{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px 10px;text-align:center;}
+.bstat b{font-family:var(--head);font-size:16px;display:block;color:var(--bright);}
+.bstat b.pos{color:var(--green);} .bstat b.neg{color:var(--red);}
+.bstat span{font-size:7.5px;color:var(--muted);letter-spacing:.3px;}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;margin:14px 0;height:320px;}
+.sym-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:0;}
+.sym-grid>div{min-width:0;}
+@media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr);}.sym-grid{grid-template-columns:1fr;}}
+@media(max-width:360px){.stat-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">MONATS-PIVOT BACKTEST</div><div class="logo-sub">10 JAHRE, 2.033 TITEL, LOOKAHEAD-FREI</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="strategies-hub.html">← Strategien-Hub</a>
+    <a class="back" href="pivot-monthly.html">📡 Live-Scanner</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  Nutzereigene Logik, hier formalisiert und über 10 Jahre getestet: <b>Pivot</b> = Schlusskurs am letzten Freitag
+  des Vormonats. <b>Entry</b> = Schlusskurs des ersten Freitags des Folgemonats (die erste neue Information nach
+  Pivot-Fixierung) -- steht er über dem Pivot: <b>LONG</b>, darunter: <b>SHORT</b>. <b>Exit</b> = Schlusskurs des
+  letzten Freitags desselben Monats. Ein Trade pro Symbol pro Monat, kein Stop-Loss, keine Transaktionskosten.
+  Datenbasis: 2.033 Titel, wöchentliche (freitägliche) dividenden-/split-bereinigte Schlusskurse, 10/2016-10/2026
+  (dieselbe Kursdatenbank wie <a href="index.html">Midpoint-Terminal</a>/<a href="longterm.html">Langfrist-Terminal</a>).
+  Alle Vorwärtsrenditen lookahead-frei (Pivot und Entry beide VOR dem gemessenen Exit bekannt).
+  </div>
+
+  <div id="findingBox" class="loading">Lade Backtest-Ergebnis…</div>
+</div>
+<script>
+function fmtPct(v, dp) { dp = dp == null ? 2 : dp; return (v>=0?'+':'') + v.toFixed(dp) + '%'; }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+function statGrid(stats, labelN) {
+  return '<div class="stat-grid">' +
+    '<div class="bstat"><b>' + stats.n.toLocaleString('de-DE') + '</b><span>' + labelN + '</span></div>' +
+    '<div class="bstat"><b class="' + (stats.avgRet>=0?'pos':'neg') + '">' + fmtPct(stats.avgRet) + '</b><span>Ø RENDITE/TRADE</span></div>' +
+    '<div class="bstat"><b>' + stats.winRate + '%</b><span>TREFFERQUOTE</span></div>' +
+    '<div class="bstat"><b class="' + (stats.sharpeLike>=0?'pos':'neg') + '">' + stats.sharpeLike + '</b><span>SHARPE-ÄHNLICH (×√12)</span></div>' +
+  '</div>';
+}
+
+function symTable(list, cls) {
+  return '<div class="table-wrap"><table><thead><tr><th>Symbol</th><th class="num">N Trades</th><th class="num">Ø Rendite</th>' +
+    '<th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th></tr></thead><tbody>' +
+    list.map(s => '<tr class="' + cls + '"><td><b>' + esc(s.sym) + '</b></td><td class="num">' + s.n + '</td>' +
+      '<td class="num ' + (s.avgRet>=0?'pos':'neg') + '">' + fmtPct(s.avgRet) + '</td>' +
+      '<td class="num">' + s.winRate + '%</td><td class="num">' + s.sharpeLike + '</td></tr>').join('') +
+    '</tbody></table></div>';
+}
+
+async function load() {
+  try {
+    const res = await fetch('data/pivot-monthly-backtest-result.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+
+    const finalAll = d.equityCurve[d.equityCurve.length - 1].equity;
+    const finalLong = d.equityCurveLong[d.equityCurveLong.length - 1].equity;
+    const finalShort = d.equityCurveShort[d.equityCurveShort.length - 1].equity;
+
+    document.getElementById('findingBox').outerHTML = `
+      <div class="finding">
+      <b>Kernbefund: die Regel hat insgesamt KEINEN Edge (Ø ${fmtPct(d.overall.avgRet)}/Trade, Trefferquote
+      ${d.overall.winRate}%, praktisch Münzwurf) -- aber das verdeckt eine klare, über beide Zeithälften stabile
+      Asymmetrie zwischen LONG und SHORT.</b><br><br>
+      <b class="pos">LONG-Seite</b> (${d.long.n.toLocaleString('de-DE')} Trades): Ø ${fmtPct(d.long.avgRet)}/Monat,
+      Trefferquote <b class="pos">${d.long.winRate}%</b>, Sharpe-ähnlich ${d.long.sharpeLike}. 100€ gleichgewichtet
+      nur in LONG-Signale investiert wären über 10 Jahre auf <b class="pos">${finalLong.toFixed(0)}€</b> gewachsen
+      (max. Drawdown ${d.maxDrawdownPctLong}%).<br>
+      <b class="neg">SHORT-Seite</b> (${d.short.n.toLocaleString('de-DE')} Trades): Ø ${fmtPct(d.short.avgRet)}/Monat,
+      Trefferquote nur <b class="neg">${d.short.winRate}%</b>, Sharpe-ähnlich ${d.short.sharpeLike}. Dieselben 100€
+      nur in SHORT-Signale wären auf <b class="neg">${finalShort.toFixed(0)}€</b> geschrumpft (max. Drawdown
+      ${d.maxDrawdownPctShort}%).<br>
+      Beide Muster sind <b>robust über zwei unabhängige 5-Jahres-Zeithälften</b>: LONG Ø ${fmtPct(d.robustness.olderHalf.long.avgRet)}
+      (2016-2021) → ${fmtPct(d.robustness.newerHalf.long.avgRet)} (2021-2026), SHORT Ø
+      ${fmtPct(d.robustness.olderHalf.short.avgRet)} → ${fmtPct(d.robustness.newerHalf.short.avgRet)} -- kein
+      Zufallsartefakt einer einzelnen Marktphase.<br><br>
+      <b>Praktische Lesart:</b> wer naiv beide Seiten tradet, landet bei ~0% (Ø ${fmtPct(d.overall.avgRet)}, Endkapital
+      ${finalAll.toFixed(0)}€ aus 100€). Wer nur die LONG-Seite nimmt und SHORT-Signale ignoriert, hätte historisch
+      einen echten Edge gehabt. Wahrscheinlichste Erklärung: die Regel reflektiert größtenteils den langfristigen
+      Aktienmarkt-Aufwärtsdrift -- ein Trendfilter erkennt diesen Drift auf der LONG-Seite korrekt, kämpft auf der
+      SHORT-Seite aber gegen ihn an.
+      </div>
+
+      <h2>Overall / Long / Short (alle 2.033 Titel, 10 Jahre gepoolt)</h2>
+      ${statGrid(d.overall, 'TRADES GESAMT')}
+      <div class="table-wrap"><table><thead><tr><th>Segment</th><th class="num">N</th><th class="num">Ø Rendite</th>
+      <th class="num">Median</th><th class="num">Trefferquote</th><th class="num">Std.-Abw.</th>
+      <th class="num">Sharpe-ähnlich</th><th class="num">Bester Trade</th><th class="num">Schlechtester Trade</th></tr></thead>
+      <tbody>
+        <tr><td><b>Gesamt</b></td><td class="num">${d.overall.n.toLocaleString('de-DE')}</td><td class="num ${d.overall.avgRet>=0?'pos':'neg'}">${fmtPct(d.overall.avgRet)}</td><td class="num ${d.overall.medianRet>=0?'pos':'neg'}">${fmtPct(d.overall.medianRet)}</td><td class="num">${d.overall.winRate}%</td><td class="num">${d.overall.stdDev}</td><td class="num">${d.overall.sharpeLike}</td><td class="num pos">${fmtPct(d.overall.bestTrade)}</td><td class="num neg">${fmtPct(d.overall.worstTrade)}</td></tr>
+        <tr class="best"><td><b class="pos">LONG</b></td><td class="num">${d.long.n.toLocaleString('de-DE')}</td><td class="num ${d.long.avgRet>=0?'pos':'neg'}">${fmtPct(d.long.avgRet)}</td><td class="num ${d.long.medianRet>=0?'pos':'neg'}">${fmtPct(d.long.medianRet)}</td><td class="num">${d.long.winRate}%</td><td class="num">${d.long.stdDev}</td><td class="num">${d.long.sharpeLike}</td><td class="num pos">${fmtPct(d.long.bestTrade)}</td><td class="num neg">${fmtPct(d.long.worstTrade)}</td></tr>
+        <tr class="worst"><td><b class="neg">SHORT</b></td><td class="num">${d.short.n.toLocaleString('de-DE')}</td><td class="num ${d.short.avgRet>=0?'pos':'neg'}">${fmtPct(d.short.avgRet)}</td><td class="num ${d.short.medianRet>=0?'pos':'neg'}">${fmtPct(d.short.medianRet)}</td><td class="num">${d.short.winRate}%</td><td class="num">${d.short.stdDev}</td><td class="num">${d.short.sharpeLike}</td><td class="num pos">${fmtPct(d.short.bestTrade)}</td><td class="num neg">${fmtPct(d.short.worstTrade)}</td></tr>
+      </tbody></table></div>
+
+      <h2>Robustheit über zwei Zeithälften</h2>
+      <div class="table-wrap"><table><thead><tr><th>Zeitraum</th><th>Segment</th><th class="num">N</th><th class="num">Ø Rendite</th>
+      <th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th></tr></thead><tbody>
+        <tr><td>${d.robustness.olderHalf.monthRange[0]} – ${d.robustness.olderHalf.monthRange[1]}</td><td class="pos"><b>LONG</b></td><td class="num">${d.robustness.olderHalf.long.n.toLocaleString('de-DE')}</td><td class="num pos">${fmtPct(d.robustness.olderHalf.long.avgRet)}</td><td class="num">${d.robustness.olderHalf.long.winRate}%</td><td class="num">${d.robustness.olderHalf.long.sharpeLike}</td></tr>
+        <tr><td>${d.robustness.olderHalf.monthRange[0]} – ${d.robustness.olderHalf.monthRange[1]}</td><td class="neg"><b>SHORT</b></td><td class="num">${d.robustness.olderHalf.short.n.toLocaleString('de-DE')}</td><td class="num neg">${fmtPct(d.robustness.olderHalf.short.avgRet)}</td><td class="num">${d.robustness.olderHalf.short.winRate}%</td><td class="num">${d.robustness.olderHalf.short.sharpeLike}</td></tr>
+        <tr><td>${d.robustness.newerHalf.monthRange[0]} – ${d.robustness.newerHalf.monthRange[1]}</td><td class="pos"><b>LONG</b></td><td class="num">${d.robustness.newerHalf.long.n.toLocaleString('de-DE')}</td><td class="num pos">${fmtPct(d.robustness.newerHalf.long.avgRet)}</td><td class="num">${d.robustness.newerHalf.long.winRate}%</td><td class="num">${d.robustness.newerHalf.long.sharpeLike}</td></tr>
+        <tr><td>${d.robustness.newerHalf.monthRange[0]} – ${d.robustness.newerHalf.monthRange[1]}</td><td class="neg"><b>SHORT</b></td><td class="num">${d.robustness.newerHalf.short.n.toLocaleString('de-DE')}</td><td class="num neg">${fmtPct(d.robustness.newerHalf.short.avgRet)}</td><td class="num">${d.robustness.newerHalf.short.winRate}%</td><td class="num">${d.robustness.newerHalf.short.sharpeLike}</td></tr>
+      </tbody></table></div>
+
+      <h2>Gleichgewichtete Monats-Equity-Kurve (Start = 100)</h2>
+      <div class="chart-wrap"><canvas id="equityChart"></canvas></div>
+
+      <h2>Beste / schlechteste Einzeltitel (min. 20 Trades)</h2>
+      <div class="sym-grid" id="symGrid"></div>
+
+      <div class="caveat">
+      <b>Einschränkungen, ehrlich benannt:</b><br>
+      • Keine Transaktionskosten, Spreads oder Steuern eingerechnet.<br>
+      • SHORT-Renditen ohne Stop-Loss können rechnerisch über -100% hinausgehen (z.B. MAPI.JK -951% in einem
+      einzelnen Monat) -- mathematisch korrekt für eine ungehebelte %-Rendite ohne Stop, aber in der Praxis würde
+      ein echtes Short-Konto hier längst nachschusspflichtig oder liquidiert sein. Nur 35 von 228.400 Trades
+      (0,015%) liegen über ±100%, meist auf Centavo-/Rupiah-Kleinst-Aktien -- verzerren den Durchschnitt kaum,
+      zeigen sich aber im "schlechtester Trade"-Wert.<br>
+      • Entry = erster Freitag des Monats, nicht der 1. Kalendertag -- bei Monaten mit Feiertagsverschiebung kann
+      der tatsächliche erste Handelstag abweichen.<br>
+      • Gleicher 2016-2026-Datensatz wie die übrigen Strategien in diesem Hub, überwiegend ein Bullenmarkt-Kontext --
+      der robuste LONG/SHORT-Split über beide Zeithälften spricht aber gegen ein reines Bullenmarkt-Artefakt einer
+      einzelnen Phase.<br>
+      • "Sharpe-ähnlich" ist Ø/Std.-Abw. der Trade-Renditen × √12 (grob auf Jahresbasis gebracht, keine echte
+      risikofreie-Zins-bereinigte Kennzahl).
+      </div>
+
+      <div class="source-note">
+      ${d.meta.symbols.toLocaleString('de-DE')} von ${d.meta.totalSymbolsInCache.toLocaleString('de-DE')} Titeln im Cache hatten
+      ausreichend Historie · ${d.meta.totalTrades.toLocaleString('de-DE')} Trades gesamt · Datenbereich ${d.meta.dateRange.from}
+      bis ${d.meta.dateRange.to} · Live-Version dieser Regel: <a href="pivot-monthly.html">Monats-Pivot Live-Scanner</a>.
+      Berechnet ${new Date(d.meta.generatedAt).toLocaleString('de-DE')}.
+      </div>
+    `;
+
+    const grid = document.getElementById('symGrid');
+    grid.innerHTML = '<div><h3 style="font-family:var(--head);font-size:10px;color:var(--green);margin-bottom:6px;">TOP 15 BESTE</h3>' +
+      symTable(d.bestSymbols, 'best') + '</div>' +
+      '<div><h3 style="font-family:var(--head);font-size:10px;color:var(--red);margin-bottom:6px;">TOP 15 SCHLECHTESTE</h3>' +
+      symTable(d.worstSymbols, 'worst') + '</div>';
+
+    const labels = d.equityCurve.map(p => p.month);
+    const ctx = document.getElementById('equityChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Gesamt (LONG+SHORT gemischt)', data: d.equityCurve.map(p => p.equity), borderColor: '#0e7490', borderWidth: 1.5, pointRadius: 0 },
+          { label: 'Nur LONG', data: d.equityCurveLong.map(p => p.equity), borderColor: '#15803d', borderWidth: 2, pointRadius: 0 },
+          { label: 'Nur SHORT', data: d.equityCurveShort.map(p => p.equity), borderColor: '#b91c1c', borderWidth: 2, pointRadius: 0 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { type: 'logarithmic', title: { display: true, text: 'Equity (Start=100, log-Skala)' } }, x: { ticks: { maxTicksLimit: 12 } } },
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } }
+      }
+    });
+  } catch (e) {
+    document.getElementById('findingBox').innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
