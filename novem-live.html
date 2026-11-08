@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS NOVEM-SUITE // Live-Scanner</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+.scan-bar{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px 16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:18px;}
+.field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:260px;}
+.field label{font-size:9px;letter-spacing:1px;color:var(--muted);}
+.field input{font-family:var(--mono);font-size:11px;padding:8px 10px;border:1px solid var(--border);border-radius:4px;background:#fff;color:var(--text);}
+.btn{font-family:var(--head);font-size:10px;letter-spacing:1.5px;padding:10px 18px;border-radius:4px;border:none;cursor:pointer;background:var(--accent);color:#fff;font-weight:700;white-space:nowrap;}
+.btn:hover:not(:disabled){background:#0b5a6e;}
+.btn:disabled{background:#9fb3b8;cursor:not-allowed;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:7px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+.badge{font-family:var(--head);font-size:7.5px;letter-spacing:.3px;padding:2px 6px;border-radius:3px;white-space:nowrap;display:inline-block;}
+.badge.long{background:rgba(21,128,61,.12);color:var(--green);}
+.badge.short{background:rgba(185,28,28,.1);color:var(--red);}
+.badge.robust{background:rgba(21,128,61,.14);color:var(--green);}
+.badge.norobust{background:rgba(185,28,28,.12);color:var(--red);}
+.badge.none{background:rgba(95,114,119,.1);color:var(--muted);}
+.conf-cell{font-weight:700;}
+.conf-cell.tier2{color:var(--green);}
+.conf-cell.tier1{color:var(--muted);}
+.conf-cell.tier3plus{color:var(--gold);}
+@media(max-width:640px){.scan-bar{flex-direction:column;align-items:stretch;}.field{min-width:0;}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">NOVEM-SUITE LIVE</div><div class="logo-sub">9 SIGNALE, BACKTEST-BADGES, KONFLUENZ</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="strategies-hub.html">← Strategien-Hub</a>
+    <a class="back" href="novem-backtest.html">📊 Backtest</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  Scannt die Watchlist live gegen alle 9 formalisierten Signale aus dem
+  <a href="novem-backtest.html">NOVEM-Backtest</a>. Jede Signal-Spalte zeigt Richtung + Robustheits-Badge
+  direkt aus dem Backtest-Ergebnis: <span class="badge robust">robust</span> = Edge über beide Zeithälften
+  gleich vorzeichenbehaftet, <span class="badge norobust">kein Edge</span> = Vorzeichenwechsel oder insgesamt
+  negativ (nur BODY-SLAM und CONSULTUS-Wöchentlich betroffen, siehe Backtest). Die Konfluenz-Spalte zeigt, wie
+  viele Signale an diesem Tag übereinstimmen -- laut Backtest ist dort <b>Tier 2 (genau 2 Signale) am
+  stärksten</b>, nicht Tier 3+.
+  </div>
+
+  <div class="scan-bar">
+    <div class="field">
+      <label>WATCHLIST (kommagetrennt, Suffix .US)</label>
+      <input id="symInput" value="AAPL.US,MSFT.US,NVDA.US,AMZN.US,GOOGL.US,META.US,TSLA.US,AVGO.US,JPM.US,V.US,UNH.US,XOM.US,JNJ.US,WMT.US,HD.US">
+    </div>
+    <button class="btn" id="scanBtn" onclick="runScan()">▶ NOVEM-SCAN STARTEN</button>
+  </div>
+
+  <div id="resultContent" class="loading">Watchlist prüfen, dann "NOVEM-SCAN STARTEN" klicken.</div>
+
+  <div class="caveat">
+  <b>Einschränkungen, ehrlich benannt:</b><br>
+  • "Aktueller Kurs" ist der letzte verfügbare Tagesschluss, keine Echtzeit-Notierung.<br>
+  • VOLUMINA/CONSULTUS/CORPUS-PARVUS zeigen hier nur die reine Kompressions-Erkennung (ohne die spätere
+  Breakout-Auflösung aus dem Backtest) -- "Richtung" bei diesen drei ist deshalb erst ein Beobachtungs-Setup,
+  kein fertiges Signal wie bei den anderen 6.<br>
+  • Nur BODY-SLAM und CONSULTUS-Wöchentlich sind laut Backtest nicht robust -- werden trotzdem angezeigt
+  (volle Transparenz), aber entsprechend markiert.<br>
+  • Keine Positionsgröße, kein automatischer Stop -- reine Entscheidungs-Unterstützung.
+  </div>
+
+  <div class="source-note">
+  Herkunft: nutzereigener Replit-Export. Methodik und Validierung siehe
+  <a href="novem-backtest.html">NOVEM-Backtest-Report</a>.
+  </div>
+</div>
+<script>
+const PROXY = 'https://theserver-open-ai.replit.app';
+let BACKTEST = null;
+
+function fmtPct(v) { return (v>=0?'+':'') + v.toFixed(2) + '%'; }
+function mean(arr) { return arr.reduce((a,v)=>a+v,0) / arr.length; }
+function stdev(arr, m) { if (arr.length<2) return 0; return Math.sqrt(arr.reduce((s,x)=>s+(x-m)*(x-m),0)/(arr.length-1)); }
+
+async function loadBacktest() {
+  const res = await fetch('data/novem-backtest-result.json', { signal: AbortSignal.timeout(20000) });
+  return res.json();
+}
+
+function robustFlag(logicKey) {
+  const entry = BACKTEST.logics[logicKey];
+  if (!entry || !entry.bestExitRule) return null;
+  const rule = entry.exitRules[entry.bestExitRule.key];
+  if (!rule.olderHalf.n || !rule.newerHalf.n) return null;
+  return (rule.olderHalf.avgRet > 0 && rule.newerHalf.avgRet > 0) || (rule.olderHalf.avgRet < 0 && rule.newerHalf.avgRet < 0);
+}
+
+async function fetchDaily(symbol) {
+  const from = new Date(Date.now() - 80 * 86400000).toISOString().slice(0, 10);
+  const res = await fetch(PROXY + '/eod/historical/' + encodeURIComponent(symbol) + '?from=' + from, { signal: AbortSignal.timeout(20000) });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const raw = await res.json();
+  if (!Array.isArray(raw)) throw new Error('ungültige Antwort');
+  return raw
+    .filter(h => h && h.date && [h.open,h.high,h.low,h.close,h.volume].every(v => Number.isFinite(Number(v))) && Number.isFinite(Number(h.adjusted_close)) && Number(h.close) > 0)
+    .map(h => { const f = Number(h.adjusted_close)/Number(h.close); return { date: h.date, open: +h.open*f, high: +h.high*f, low: +h.low*f, close: +h.adjusted_close, volume: +h.volume }; })
+    .sort((a,b) => a.date.localeCompare(b.date));
+}
+
+// -- live detectors, mirroring scripts/novem-backtest.js exactly, evaluated on the latest completed day --
+function evalSymbol(bars, universeMeanToday) {
+  const d = bars.length - 1;
+  const signals = {};
+
+  if (d >= 20) {
+    const sma20 = mean(bars.slice(d-19, d+1).map(b=>b.close));
+    const stretchPct = ((bars[d].close - sma20) / sma20) * 100;
+
+    if (Math.abs(stretchPct) >= 6) {
+      signals.bodySlam = { direction: stretchPct <= -6 ? 'LONG' : 'SHORT', note: fmtPct(stretchPct) + ' Stretch' };
+    }
+    const today = bars[d], yest = bars[d-1];
+    const bullTrap = today.high > yest.high && today.close < yest.high;
+    const bearTrap = today.low < yest.low && today.close > yest.low;
+    if (bullTrap || bearTrap) {
+      const dir = bullTrap ? 'SHORT' : 'LONG';
+      const confirms = bullTrap ? stretchPct >= 5 : stretchPct <= -5;
+      signals.hiddenSmash = { direction: dir, note: confirms ? 'Stretch bestätigt' : 'Stretch fehlt' };
+    }
+  }
+
+  if (d >= 2) {
+    const c0=bars[d].close, c1=bars[d-1].close, c2=bars[d-2].close;
+    const isValley = c1===Math.min(c0,c1,c2) && c1!==c0 && c1!==c2;
+    const isPeak = c1===Math.max(c0,c1,c2) && c1!==c0 && c1!==c2;
+    if (isValley || isPeak) signals.peakValley = { direction: isValley?'LONG':'SHORT', note: isValley?'Valley':'Peak' };
+
+    const spread = bars[d].close / bars[d-2].close;
+    const volTrend = bars[d-1].volume>0 ? ((bars[d].volume-bars[d-1].volume)/bars[d-1].volume)*100 : 0;
+    signals.denarius = { direction: spread>=1.0?'LONG':'SHORT', note: (volTrend<=0?'Hard-Lock':'Clean') };
+
+    const diffAB = Math.abs(bars[d].close-bars[d-1].close), diffCB = Math.abs(bars[d-2].close-bars[d-1].close);
+    if (diffAB < diffCB) {
+      const longT = Math.max(bars[d].close,bars[d-1].close,bars[d-2].close), shortT = Math.min(bars[d].close,bars[d-1].close,bars[d-2].close);
+      signals.consultusDaily = { direction: null, note: 'Kompression, Level ' + longT.toFixed(2) + ' / ' + shortT.toFixed(2) };
+    }
+    const bodyA = Math.abs(bars[d-1].close-bars[d-1].open), bodyB = Math.abs(bars[d].close-bars[d].open);
+    if (bodyB < bodyA) {
+      signals.corpusParvus = { direction: null, note: 'Inside-Bar, Level ' + (bars[d].close*1.01).toFixed(2) + ' / ' + (bars[d].close*0.99).toFixed(2) };
+    }
+  }
+
+  if (d >= 5) {
+    const volToday = bars[d].volume, volYest = bars[d-1].volume;
+    if (volToday < volYest && volToday > 0) {
+      signals.volumina = { direction: null, note: 'Kompression, Level ' + (bars[d].close*1.01).toFixed(2) + ' / ' + (bars[d].close*0.99).toFixed(2) };
+    }
+  }
+
+  if (d >= 20 && universeMeanToday != null) {
+    // simple rolling-window z vs the last 20 days' own spread history
+    const spreadHist = [];
+    for (let k = Math.max(20, d-19); k <= d; k++) {
+      if (k-20 < 0) continue;
+      const p = (bars[k].close - bars[k-20].close) / bars[k-20].close;
+      spreadHist.push(p - (universeMeanToday.get(bars[k].date) ?? p));
+    }
+    if (spreadHist.length >= 10) {
+      const m = mean(spreadHist), sd = Math.max(stdev(spreadHist, m), 0.01);
+      const z = (spreadHist[spreadHist.length-1] - m) / sd;
+      let dir = null, tier = null;
+      if (z <= -2.0) { dir='LONG'; tier='extrem'; } else if (z >= 2.0) { dir='SHORT'; tier='extrem'; }
+      else if (z >= 0.75) { dir='LONG'; tier='trend'; } else if (z <= -0.75) { dir='SHORT'; tier='trend'; }
+      if (dir) signals.argentum = { direction: dir, note: 'Z=' + z.toFixed(2) + ' (' + tier + ')' };
+    }
+  }
+
+  return { signals, date: bars[d].date, price: bars[d].close };
+}
+
+const LOGIC_LABELS = { argentum:'ARGENTUM', bodySlam:'BODY-SLAM', hiddenSmash:'HIDDEN-SMASH', peakValley:'PEAK-VALLEY', denarius:'DENARIUS', volumina:'VOLUMINA', consultusDaily:'CONSULTUS-T', corpusParvus:'CORPUS-PARVUS' };
+
+function badgeFor(logicKey, direction) {
+  if (!direction) return '<span class="badge none">Setup</span>';
+  const robust = robustFlag(logicKey);
+  const dirBadge = '<span class="badge ' + (direction==='LONG'?'long':'short') + '">' + direction + '</span>';
+  const robustBadge = robust===true ? '<span class="badge robust">robust</span>' : robust===false ? '<span class="badge norobust">kein Edge</span>' : '';
+  return dirBadge + ' ' + robustBadge;
+}
+
+async function runScan() {
+  const symbols = document.getElementById('symInput').value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+  if (!symbols.length) return;
+  const btn = document.getElementById('scanBtn');
+  const content = document.getElementById('resultContent');
+  btn.disabled = true;
+  content.innerHTML = '<div class="loading">Lade Backtest-Referenz…</div>';
+
+  try {
+    if (!BACKTEST) BACKTEST = await loadBacktest();
+  } catch (e) {
+    content.innerHTML = '<div class="error">Backtest-Referenz nicht ladbar: ' + e.message + '</div>';
+    btn.disabled = false; return;
+  }
+
+  content.innerHTML = '<div class="loading">Scanne ' + symbols.length + ' Symbole…</div>';
+  const barsCache = {}; const fetchErrors = [];
+  for (const sym of symbols) {
+    try { barsCache[sym] = await fetchDaily(sym); }
+    catch (e) { fetchErrors.push({ sym, error: e.message }); }
+  }
+
+  // Cross-sektionaler 20-Tage-Perf-Durchschnitt NUR über die aktuell gescannte Watchlist
+  // (der Backtest nutzt dasselbe Prinzip über sein eigenes 52-Symbol-Universum).
+  const universeMeanToday = new Map();
+  const dateToPerfs = new Map();
+  for (const sym of Object.keys(barsCache)) {
+    const bars = barsCache[sym];
+    for (let k = 20; k < bars.length; k++) {
+      const p = (bars[k].close - bars[k - 20].close) / bars[k - 20].close;
+      if (!dateToPerfs.has(bars[k].date)) dateToPerfs.set(bars[k].date, []);
+      dateToPerfs.get(bars[k].date).push(p);
+    }
+  }
+  for (const [date, vals] of dateToPerfs.entries()) universeMeanToday.set(date, mean(vals));
+
+  const results = Object.keys(barsCache).map(sym => ({ sym, ...evalSymbol(barsCache[sym], universeMeanToday) }))
+    .concat(fetchErrors);
+
+  const ok = results.filter(r => !r.error);
+  const errs = results.filter(r => r.error);
+
+  const rows = ok.map(r => {
+    const dirCounts = { LONG: 0, SHORT: 0 };
+    for (const [k, s] of Object.entries(r.signals)) { if (s.direction) dirCounts[s.direction]++; }
+    const agree = Math.max(dirCounts.LONG, dirCounts.SHORT);
+    const tier = agree >= 3 ? 'tier3plus' : agree === 2 ? 'tier2' : agree === 1 ? 'tier1' : null;
+    const tierLabel = tier === 'tier3plus' ? (agree + 'x (3+)') : tier === 'tier2' ? '2x ★' : tier === 'tier1' ? '1x' : '—';
+
+    const cells = ['argentum','bodySlam','hiddenSmash','peakValley','denarius','volumina','consultusDaily','corpusParvus'].map(k => {
+      const s = r.signals[k];
+      if (!s) return '<td>—</td>';
+      return '<td>' + badgeFor(k, s.direction) + '<span class="tag" style="display:block;font-size:7px;color:var(--muted);">' + (s.note||'') + '</span></td>';
+    }).join('');
+
+    return '<tr><td><b>' + r.sym + '</b><span style="display:block;font-size:7px;color:var(--muted);">' + r.date + ' · ' + r.price.toFixed(2) + '</span></td>' +
+      cells + '<td class="conf-cell ' + (tier||'') + '">' + tierLabel + '</td></tr>';
+  }).join('');
+
+  content.innerHTML =
+    '<div class="finding"><b>' + ok.length + ' Symbole gescannt' + (errs.length ? ', ' + errs.length + ' Fehler (' + errs.map(e=>e.sym+': '+e.error).join('; ') + ')' : '') + '.</b></div>' +
+    (rows ? '<div class="table-wrap"><table><thead><tr><th>Symbol</th>' +
+      ['ARGENTUM','BODY-SLAM','HIDDEN-SMASH','PEAK-VALLEY','DENARIUS','VOLUMINA','CONSULTUS-T','CORPUS-PARVUS'].map(l=>'<th>'+l+'</th>').join('') +
+      '<th>Konfluenz</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="error">Keine verwertbaren Symbole.</div>');
+
+  btn.disabled = false;
+}
+
+document.getElementById('symInput').addEventListener('keydown', e => { if (e.key === 'Enter') runScan(); });
+</script>
+</body>
+</html>

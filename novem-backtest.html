@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS NOVEM-SUITE // Backtest</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:6px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.best{background:rgba(21,128,61,.08);} .worst{background:rgba(185,28,28,.06);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+h3{font-family:var(--head);font-size:10px;letter-spacing:1px;color:var(--accent);margin:16px 0 8px;text-transform:uppercase;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+.bstat{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px 10px;text-align:center;}
+.bstat b{font-family:var(--head);font-size:16px;display:block;color:var(--bright);}
+.bstat b.pos{color:var(--green);} .bstat b.neg{color:var(--red);}
+.bstat span{font-size:7.5px;color:var(--muted);letter-spacing:.3px;}
+.robust-ok{color:var(--green);font-weight:700;} .robust-bad{color:var(--red);font-weight:700;}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;margin:14px 0;height:260px;}
+.sym-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:0;}
+.sym-grid>div{min-width:0;}
+@media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr);}.sym-grid{grid-template-columns:1fr;}}
+@media(max-width:360px){.stat-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">NOVEM-SUITE BACKTEST</div><div class="logo-sub">9 NUTZEREIGENE SIGNALE, 52 TITEL, 3 JAHRE</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="strategies-hub.html">← Strategien-Hub</a>
+    <a class="back" href="novem-live.html">📡 Live-Scanner</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  9 eigene Scanner-Ideen (Latein-Namen: ARGENTUM, BODY-SLAM, HIDDEN-SMASH, PEAK-VALLEY, VOLUMINA, CONSULTUS
+  Täglich/Wöchentlich, CORPUS-PARVUS, DENARIUS), aus einem Replit-Export extrahiert. Keine der Original-Dateien
+  definierte eine Exit-Regel oder (bei 4 von 9) überhaupt eine Richtung -- alle waren reine Live-"GO/NO-GO"-
+  Snapshots. Hier formalisiert: <b>Einstieg = nächste Eröffnung</b> nach dem Erkennungstag (nie derselbe Schluss,
+  der das Signal ausgelöst hat), dann ein <b>Exit-Regel-Sweep</b> (1/3/5/10 Tage fix, 10 Tage + -4%-Stop, bis
+  Gegensignal max. 20 Tage) -- die beste Regel pro Signal wird über eine <b>Zweiperioden-Robustheit</b> geprüft,
+  genau wie bereits bei <a href="pivot-daily-backtest.html">Tages-Pivot</a> und
+  <a href="midpoint-strategy.html">Midpoint-Strategie</a>. 52 liquide Standardwerte, 3 Jahre, über
+  <code>theserver-open-ai.replit.app</code> -- O/H/L split-bereinigt (ein echter Bug beim ersten Lauf: rohe
+  Kurse erzeugten bei AVGO/NVDA/NFLX/INTC-Splits ~90%-Scheinbewegungen, jetzt per
+  <code>adjusted_close/close</code>-Faktor korrigiert).
+  </div>
+
+  <div id="findingBox" class="loading">Lade Backtest-Ergebnis…</div>
+</div>
+<script>
+function fmtPct(v, dp) { dp = dp == null ? 3 : dp; return (v==null?'—':(v>=0?'+':'') + v.toFixed(dp) + '%'); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+const LOGIC_LABELS = {
+  argentum: 'ARGENTUM — Relative-Stärke Z-Score',
+  bodySlam: 'BODY-SLAM — Anti-zyklische Mean-Reversion',
+  hiddenSmash: 'HIDDEN-SMASH — Stop-Hunt / Liquidity-Trap',
+  peakValley: 'PEAK-VALLEY — 3-Kerzen-Pivot',
+  denarius: 'DENARIUS — Long/Short Spread-Cluster',
+  volumina: 'VOLUMINA — Volumen-Kompressions-Breakout',
+  consultusDaily: 'CONSULTUS (Täglich) — 3-Tage-Kompression',
+  consultusWeekly: 'CONSULTUS (Wöchentlich) — 3-Wochen-Kompression',
+  corpusParvus: 'CORPUS-PARVUS — Inside-Bar-Kompression'
+};
+const EXIT_LABELS = {
+  horizon_1d: 'Fix 1 Tag', horizon_3d: 'Fix 3 Tage', horizon_5d: 'Fix 5 Tage', horizon_10d: 'Fix 10 Tage',
+  stop4pct_10d: '10 Tage + -4%-Stop', signal_reversal: 'Bis Gegensignal (max. 20 Tage)',
+  horizon_1w: 'Fix 1 Woche', horizon_2w: 'Fix 2 Wochen', horizon_4w: 'Fix 4 Wochen', horizon_8w: 'Fix 8 Wochen'
+};
+const TIER_LABELS = {
+  confirmed: 'Kerzenkörper bestätigt Richtung', extreme: 'Extremzone (≥10% Stretch bzw. |Z|≥2,0)',
+  stretchConfirmed: 'Mit SMA-Stretch-Filter', highConfidence: 'Hohe Konfidenz (≥65)',
+  tightRVol: 'RVOL < 0,7 (straff)', looseRVol: 'RVOL < 1,0', trendAligned: 'Trendkonform',
+  hardLocked: 'Hard-Lock (Volumen widerspricht)', clean: 'Clean (Volumen bestätigt)', trend: 'Trend-Zone (0,75≤|Z|<2,0)'
+};
+
+function robustBadge(exitRule) {
+  if (!exitRule || !exitRule.olderHalf || !exitRule.newerHalf || !exitRule.olderHalf.n || !exitRule.newerHalf.n) return '<span class="muted">—</span>';
+  const o = exitRule.olderHalf.avgRet, n = exitRule.newerHalf.avgRet;
+  const sameSign = (o > 0 && n > 0) || (o < 0 && n < 0);
+  return sameSign ? '<span class="robust-ok">✓ robust</span>' : '<span class="robust-bad">✗ Vorzeichenwechsel</span>';
+}
+
+function exitTable(exitRules, bestKey) {
+  const rows = Object.entries(exitRules).filter(([, s]) => s && s.n).map(([key, s]) => `
+    <tr class="${key===bestKey?'best':''}">
+      <td>${EXIT_LABELS[key] || key}${key===bestKey?' ★':''}</td>
+      <td class="num">${s.n.toLocaleString('de-DE')}</td>
+      <td class="num ${s.avgRet>=0?'pos':'neg'}">${fmtPct(s.avgRet)}</td>
+      <td class="num">${s.winRate}%</td>
+      <td class="num">${s.stopRate!=null?s.stopRate+'%':'—'}</td>
+      <td class="num">${s.sharpeLike}</td>
+      <td class="num">${robustBadge(s)}</td>
+    </tr>`).join('');
+  return `<div class="table-wrap"><table><thead><tr><th>Exit-Regel</th><th class="num">N</th><th class="num">Ø Rendite</th>
+    <th class="num">Trefferquote</th><th class="num">-4%-Stop</th><th class="num">Sharpe-ähnlich</th><th class="num">2-Perioden-Check</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+function tierSection(tiers) {
+  if (!tiers) return '';
+  return Object.entries(tiers).map(([tk, t]) => {
+    const trueS = t.trueCase.exitRules.stop4pct_10d || t.trueCase.exitRules.horizon_4w;
+    const falseS = t.falseCase.exitRules.stop4pct_10d || t.falseCase.exitRules.horizon_4w;
+    if (!trueS && !falseS) return '';
+    return `<h3>Tier: ${TIER_LABELS[tk] || tk}</h3>
+      <div class="table-wrap"><table><thead><tr><th>Gruppe</th><th class="num">N</th><th class="num">Ø Rendite</th>
+      <th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th></tr></thead><tbody>
+        <tr><td>Trifft zu (${t.trueCase.n.toLocaleString('de-DE')})</td><td class="num">${trueS?trueS.n.toLocaleString('de-DE'):0}</td><td class="num ${trueS&&trueS.avgRet>=0?'pos':'neg'}">${trueS?fmtPct(trueS.avgRet):'—'}</td><td class="num">${trueS?trueS.winRate+'%':'—'}</td><td class="num">${trueS?trueS.sharpeLike:'—'}</td></tr>
+        <tr><td>Trifft nicht zu (${t.falseCase.n.toLocaleString('de-DE')})</td><td class="num">${falseS?falseS.n.toLocaleString('de-DE'):0}</td><td class="num ${falseS&&falseS.avgRet>=0?'pos':'neg'}">${falseS?fmtPct(falseS.avgRet):'—'}</td><td class="num">${falseS?falseS.winRate+'%':'—'}</td><td class="num">${falseS?falseS.sharpeLike:'—'}</td></tr>
+      </tbody></table></div>`;
+  }).join('');
+}
+
+async function load() {
+  try {
+    const res = await fetch('data/novem-backtest-result.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+
+    // ---- robustness summary across all logics ----
+    const ranked = Object.entries(d.logics).map(([logicKey, e]) => ({ logicKey, ...e.bestExitRule, robust: null }));
+    for (const r of ranked) {
+      const entry = d.logics[r.logicKey];
+      r.ruleKey = entry.bestExitRule.key;
+      const o = entry.exitRules[r.ruleKey].olderHalf, n = entry.exitRules[r.ruleKey].newerHalf;
+      r.robust = (o && n && o.n && n.n) ? ((o.avgRet > 0 && n.avgRet > 0) || (o.avgRet < 0 && n.avgRet < 0)) : null;
+    }
+    ranked.sort((a, b) => (b.sharpeLike||0) - (a.sharpeLike||0));
+    const robustCount = ranked.filter(r => r.robust).length;
+
+    const summaryRows = ranked.map(r => `
+      <tr>
+        <td><b>${LOGIC_LABELS[r.logicKey]}</b></td>
+        <td class="num">${r.n.toLocaleString('de-DE')}</td>
+        <td>${EXIT_LABELS[r.ruleKey] || r.ruleKey}</td>
+        <td class="num ${r.avgRet>=0?'pos':'neg'}">${fmtPct(r.avgRet)}</td>
+        <td class="num">${r.winRate}%</td>
+        <td class="num">${r.sharpeLike}</td>
+        <td class="num">${r.robust===true?'<span class="robust-ok">✓ robust</span>':r.robust===false?'<span class="robust-bad">✗ Vorzeichenwechsel</span>':'—'}</td>
+      </tr>`).join('');
+
+    const conf = d.confluence;
+    const confRanked = Object.entries(conf).sort((a,b) => b[1].sharpeLike - a[1].sharpeLike);
+    const bestConf = confRanked[0];
+
+    document.getElementById('findingBox').outerHTML = `
+      <div class="finding">
+      <b>Gesamtbild: ${robustCount} von 9 Signalen zeigen einen über beide Zeithälften robusten (gleich
+      vorzeichenbehafteten) Edge</b> -- mit demselben Muster wie schon beim Monats-Pivot: Trefferquoten
+      durchweg unter 50% (38-49%), aber positiv durch asymmetrische Auszahlung (ca. 43-52% der Trades reißen
+      den -4%-Stop, die Gewinner laufen dafür deutlich weiter, bis +70% in 10 Tagen). Auffälligster Einzelfund:
+      <b class="neg">BODY-SLAM hat trotz der höchsten Overall-Sharpe-ähnlichen Kennzahl (${d.logics.bodySlam.bestExitRule.sharpeLike})
+      KEINEN robusten Edge</b> -- die ältere Hälfte zeigt ${fmtPct(d.logics.bodySlam.exitRules.stop4pct_10d.olderHalf.avgRet)}/Trade,
+      die neuere Hälfte dreht ins Minus (${fmtPct(d.logics.bodySlam.exitRules.stop4pct_10d.newerHalf.avgRet)}) -- ein Lehrbuchbeispiel
+      dafür, warum der Zweiperioden-Check Pflicht ist, nicht nur die Gesamtzahl.
+      <b>CONSULTUS (Wöchentlich) hat gar keinen Edge</b> (Ø ${fmtPct(d.logics.consultusWeekly.bestExitRule.avgRet)}, selbst bei der
+      am wenigsten schlechten Regel).
+      </div>
+
+      <h2>Zusammenfassung: alle 9 Signale, beste Regel je Signal</h2>
+      <div class="table-wrap"><table><thead><tr><th>Signal</th><th class="num">N Trades</th><th>Beste Regel</th>
+      <th class="num">Ø Rendite</th><th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th>
+      <th class="num">2-Perioden-Check</th></tr></thead><tbody>${summaryRows}</tbody></table></div>
+
+      <div id="logicSections"></div>
+
+      <h2>Konfluenz-Test: stimmen mehrere Signale überein?</h2>
+      <div class="finding">
+      Pro Symbol-Tag gezählt, wie viele der 9 Signale an diesem Einstiegstag in dieselbe Richtung feuern --
+      fester Exit (10 Tage + -4%-Stop) für alle Tiers, um nur den Übereinstimmungs-Effekt zu isolieren.
+      <b>Anders als beim Tages-Pivot-Konfluenz-Test ist hier NICHT "mehr Übereinstimmung = besser"</b>: Tier 2
+      (genau 2 Signale einig) ist mit Sharpe-ähnlich ${conf.tier2.sharpeLike} das robusteste Ergebnis
+      (${fmtPct(conf.tier2.olderHalf.avgRet)} → ${fmtPct(conf.tier2.newerHalf.avgRet)}, gleiches Vorzeichen beide
+      Hälften) -- Tier 3+ (3 oder mehr Signale einig) fällt dagegen auf Sharpe ${conf.tier3plus.sharpeLike}
+      zurück, schwächer als sowohl Tier 1 als auch Tier 2. Plausible Erklärung: viele dieser 9 Signale messen
+      im Kern ähnliche Dinge (Mean-Reversion/Kompression), sodass 3+ gleichzeitige Treffer öfter einen bereits
+      überdehnten, chaotischen Markt anzeigen als eine stärkere, saubere Bestätigung.
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Konfluenz-Tier</th><th class="num">N</th><th class="num">Ø Rendite</th>
+      <th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th><th class="num">Älter → Neuer</th></tr></thead><tbody>
+        ${confRanked.map(([tier,s]) => `<tr class="${tier===bestConf[0]?'best':''}"><td><b>${tier}</b>${tier===bestConf[0]?' ★':''}</td>
+          <td class="num">${s.n.toLocaleString('de-DE')}</td><td class="num ${s.avgRet>=0?'pos':'neg'}">${fmtPct(s.avgRet)}</td>
+          <td class="num">${s.winRate}%</td><td class="num">${s.sharpeLike}</td>
+          <td class="num">${fmtPct(s.olderHalf.avgRet)} → ${fmtPct(s.newerHalf.avgRet)}</td></tr>`).join('')}
+      </tbody></table></div>
+
+      <div class="chart-wrap"><canvas id="confChart"></canvas></div>
+
+      <div class="caveat">
+      <b>Einschränkungen, ehrlich benannt:</b><br>
+      • Formalisierung notwendig, nicht neutral: keine der 9 Originaldateien definierte Exit oder (bei 4 von 9)
+      Richtung -- die hier getesteten Regeln sind die plausibelste Lesart, nicht die einzig mögliche.<br>
+      • 52 liquide Standardwerte, 3 Jahre -- kleineres/jüngeres Universum als der
+      <a href="pivot-monthly-backtest.html">Monats-Pivot-Backtest</a> (2.033 Titel, 10 Jahre).<br>
+      • ARGENTUM nutzt einen cross-sektionalen Z-Score gegen den gleichgewichteten 20-Tage-Durchschnitt des
+      52er-Universums statt eines einzelnen Benchmark-Tickers (im Original nicht festgelegt) -- bewusste,
+      offengelegte Interpretation, keine stille Annahme.<br>
+      • -4%-Stop nach derselben konservativen "Tagesspanne berührt = ausgelöst"-Regel wie beim
+      <a href="pivot-daily-backtest.html">Tages-Pivot-Backtest</a>, hier über das gesamte Haltefenster geprüft.<br>
+      • VOLUMINA/CONSULTUS/CORPUS-PARVUS: Setups ohne Breakout innerhalb von 10 Tagen (bzw. 8 Wochen bei
+      Consultus-Wöchentlich) werden als "unresolved" verworfen, nicht als Verlust gezählt -- ehrlich ausgewiesen
+      pro Signal, aber kein Nullsummen-Vergleich mit den aufgelösten Trades.<br>
+      • Keine Transaktionskosten/Spreads eingerechnet.
+      </div>
+
+      <div class="source-note">
+      ${d.meta.symbols} Titel, ${d.meta.dateRange.from} bis ${d.meta.dateRange.to} · Quelle der Signal-Logiken:
+      nutzereigener Replit-Export (ARGENTUM/BODY-SLAM/HIDDEN-SMASH/PEAK-VALLEY/VOLUMINA/CONSULTUS/
+      CORPUS-PARVUS/DENARIUS). Live-Version: <a href="novem-live.html">NOVEM-Suite Live-Scanner</a>.
+      Berechnet ${new Date(d.meta.generatedAt).toLocaleString('de-DE')}.
+      </div>
+    `;
+
+    const sections = ranked.map(r => {
+      const entry = d.logics[r.logicKey];
+      const best = entry.bestExitRule;
+      return `
+      <h2>${LOGIC_LABELS[r.logicKey]}</h2>
+      <div class="stat-grid">
+        <div class="bstat"><b>${entry.n.toLocaleString('de-DE')}</b><span>SIGNALE GESAMT</span></div>
+        <div class="bstat"><b class="${best.avgRet>=0?'pos':'neg'}">${fmtPct(best.avgRet)}</b><span>Ø RENDITE (BESTE REGEL)</span></div>
+        <div class="bstat"><b>${best.winRate}%</b><span>TREFFERQUOTE</span></div>
+        <div class="bstat"><b class="${best.sharpeLike>=0?'pos':'neg'}">${best.sharpeLike}</b><span>SHARPE-ÄHNLICH</span></div>
+      </div>
+      ${entry.unresolved != null ? `<div class="caveat">${entry.unresolved.toLocaleString('de-DE')} Setups ohne Breakout innerhalb des Fensters ("unresolved"), nicht in den Trades enthalten.</div>` : ''}
+      ${exitTable(entry.exitRules, best.key)}
+      <div class="sym-grid" style="margin-top:10px;">
+        <div><h3>LONG (${entry.long.n.toLocaleString('de-DE')})</h3>${exitTable(entry.long.exitRules, best.key)}</div>
+        <div><h3>SHORT (${entry.short.n.toLocaleString('de-DE')})</h3>${exitTable(entry.short.exitRules, best.key)}</div>
+      </div>
+      ${tierSection(entry.tiers)}
+      `;
+    }).join('');
+    document.getElementById('logicSections').innerHTML = sections;
+
+    const ctx = document.getElementById('confChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Tier 1 (1 Signal)', 'Tier 2 (2 Signale)', 'Tier 3+ (3+ Signale)'],
+        datasets: [{ label: 'Sharpe-ähnlich', data: [conf.tier1.sharpeLike, conf.tier2.sharpeLike, conf.tier3plus.sharpeLike], backgroundColor: ['#94a3b8', '#15803d', '#b45309'] }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+  } catch (e) {
+    document.getElementById('findingBox').innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
