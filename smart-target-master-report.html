@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS SMART-TARGET MASTER REPORT</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)} .intro a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:6px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.best{background:rgba(21,128,61,.08);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:14px 0;}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;text-decoration:none;color:var(--text);display:block;}
+.tool-card:hover{border-color:var(--accent);}
+.tool-card .n{font-family:var(--head);font-size:10px;color:var(--accent);margin-bottom:4px;}
+.tool-card .s{font-size:9.5px;color:var(--muted);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">SMART-TARGET MASTER REPORT</div><div class="logo-sub">GBM-VOLA-BUCKET RETROFIT ÜBER ALLE BACKTESTS</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="strategies-hub.html">← Strategien-Hub</a>
+    <a class="back" href="broker-ai-signals-backtest.html">Broker-AI Backtest</a>
+    <a class="back" href="novem-backtest.html">NOVEM Backtest</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  Die Smart-Target-Vola-Bucket-Methodik (GBM First-Passage, Reflection Principle -- siehe
+  <a href="broker-ai-signals-backtest.html">Broker-AI-Signals-Backtest</a>) wurde hier auf <b>jedes andere
+  Backtest-Signal angewendet, das dafür in Frage kommt</b>: ein Signal mit "stop4pct_10d" (10 Handelstage
+  halten, -4%-Stop) als eigene beste Exit-Regel, auf täglichen OHLC-Bars. Das trifft auf <b>8 von 9
+  NOVEM-Signalen</b> zu (Consultus-Wöchentlich ausgeschlossen -- nutzt horizon_4w statt Stop, war im
+  Original-Backtest bereits ohne Edge) und <b>alle 4 Broker-AI-Signale</b> (bereits dort gerechnet, hier
+  nur referenziert). <b>Bewusst ausgeschlossen:</b> Pivot-Daily/-Monthly, Midpoint-Strategy, RS/Pairs/
+  Longterm und die 14 Faktor-Strategien (strat-*) -- deren Original-Detektor-Skripte existieren nicht mehr
+  in diesem Repo (nur die aggregierten Ergebnis-JSONs aus einer früheren Scratchpad-Session überlebten),
+  und mehrere nutzen Wochen-/Monats-Schlusskurse ohne Intraday-Hoch/Tief. Eine Neu-Herleitung allein aus
+  Formeln hätte das Risiko einer stillen Abweichung von "dem" Original-Backtest -- bewusst nicht versucht,
+  nicht verschwiegen.
+  </div>
+
+  <div id="findingBox" class="finding">Lade...</div>
+
+  <h2>Master-Ranking: alle (Signal × Vola-Bucket)-Kombinationen, n≥200, nach Sharpe-ähnlich</h2>
+  <div id="rankingTable" class="table-wrap"></div>
+
+  <h2>Die 10 "Best Edge"-Live-Tools (robustheitsgeprüft, in Produktion)</h2>
+  <div class="finding">
+  Aus dem robusten Teil des Rankings (beide Zeithälften positiv) wurden die 10 stärksten, inhaltlich
+  unterschiedlichen Signale zu eigenständigen Live-Tools gebaut -- jedes mit dem validierten Smart Stop
+  (-4%) und einem Vola-Bucket-abhängigen Smart Target, plus Live-GBM-Badge. Alle 10 sind auch über den
+  <a href="https://babybounce500.github.io/neural-kommandozentrale/trading/IFRAME-BOT-V2.html">Iframe-Bot</a>
+  navigierbar.
+  </div>
+  <div class="tool-grid" id="toolGrid"></div>
+
+  <div class="caveat" id="caveatBox"></div>
+
+  <div class="source-note" id="sourceNote"></div>
+</div>
+<script>
+function fmtPct(v, dp) { dp = dp == null ? 3 : dp; return (v==null?'—':(v>=0?'+':'') + v.toFixed(dp) + '%'); }
+const LABELS = {
+  monthly: 'Monthly (Broker-AI)', spread: 'Spread (Broker-AI)', midpoint: 'Midpoint (Broker-AI)', weeklySma: 'WeeklySMA (Broker-AI)',
+  argentum: 'Argentum (NOVEM)', bodySlam: 'Body-Slam (NOVEM)', hiddenSmash: 'Hidden-Smash (NOVEM)', peakValley: 'Peak-Valley (NOVEM)',
+  denarius: 'Denarius (NOVEM)', volumina: 'Volumina (NOVEM)', consultusDaily: 'Consultus Daily (NOVEM)', corpusParvus: 'Corpus Parvus (NOVEM)'
+};
+const BUCKET_LABEL = { far_lowP: '🔴 far_lowP', mid_P: '🟡 mid_P', near_highP: '🟢 near_highP' };
+
+const TOOL_LINKS = [
+  { file: 'SMART-MONTHLY-EDGE.html', name: 'Smart Monthly Edge', sharpe: 1.389 },
+  { file: 'SMART-DENARIUS-EDGE.html', name: 'Smart Denarius Edge', sharpe: 0.995 },
+  { file: 'SMART-SPREAD-EDGE.html', name: 'Smart Spread Edge', sharpe: 0.992 },
+  { file: 'SMART-MIDPOINT-EDGE.html', name: 'Smart Midpoint Edge', sharpe: 0.941 },
+  { file: 'SMART-WEEKLYSMA-EDGE.html', name: 'Smart WeeklySMA Edge', sharpe: 0.794 },
+  { file: 'SMART-CONSULTUS-EDGE.html', name: 'Smart Consultus Edge', sharpe: 0.739 },
+  { file: 'SMART-CORPUS-EDGE.html', name: 'Smart Corpus Edge', sharpe: 0.686 },
+  { file: 'SMART-HIDDENSMASH-EDGE.html', name: 'Smart Hidden-Smash Edge', sharpe: 0.584 },
+  { file: 'SMART-VOLUMINA-EDGE.html', name: 'Smart Volumina Edge', sharpe: 0.539 },
+  { file: 'SMART-ARGENTUM-EDGE.html', name: 'Smart Argentum Edge', sharpe: 0.545 }
+];
+
+async function load() {
+  try {
+    const res = await fetch('data/smart-target-master-result.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+
+    // Robustheits-Kriterium identisch zu dem, das die 10 Live-Tools auswählt: beide Hälften
+    // positiv UND die neuere Hälfte fällt nicht auf unter 50% der älteren zurück ("fading").
+    function isRobust(c) {
+      if (!c.olderHalf || !c.newerHalf || !c.olderHalf.n || !c.newerHalf.n) return false;
+      if (c.olderHalf.sharpeLike <= 0 || c.newerHalf.sharpeLike <= 0) return false;
+      return c.newerHalf.sharpeLike >= c.olderHalf.sharpeLike * 0.5;
+    }
+    const robust = d.masterRanking.filter(isRobust);
+    document.getElementById('findingBox').innerHTML = `
+      <b>${d.masterRanking.length} Signal×Bucket-Kombinationen geprüft (n≥200), ${robust.length} davon robust</b>
+      (beide Zeithälften positiver Sharpe). <b>Der dominante Muster hält über die ganze Suite:</b> fast jedes
+      Signal performt am besten im "near_highP"-Bucket (volatiler Titel, Stop GBM-rechnerisch nah) -- Ausnahmen
+      sind Hidden-Smash und Argentum, deren bester (robuster) Bucket "mid_P" ist. Bestes Einzelergebnis:
+      <b class="pos">${LABELS[d.masterRanking[0].signal] || d.masterRanking[0].signal} / ${d.masterRanking[0].bucket}</b>
+      mit Sharpe-ähnlich ${d.masterRanking[0].sharpeLike} -- <b class="neg">aber nicht robust</b> (ältere Hälfte
+      ${d.masterRanking[0].olderHalf.sharpeLike} → neuere Hälfte ${d.masterRanking[0].newerHalf.sharpeLike}, n nur
+      ${d.masterRanking[0].n.toLocaleString('de-DE')}) -- genau deshalb fliesst dieses Top-Ergebnis NICHT in die
+      10 Live-Tools ein, nur robustheitsgeprüfte Kombinationen tun das.
+    `;
+
+    const rows = d.masterRanking.filter(c => c.n >= 200).map(c => {
+      const robustOk = isRobust(c);
+      return `<tr class="${robustOk ? 'best' : ''}">
+        <td>${c.family === 'novem' ? 'NOVEM' : 'Broker-AI'}</td>
+        <td><b>${LABELS[c.signal] || c.signal}</b></td>
+        <td>${BUCKET_LABEL[c.bucket] || c.bucket}</td>
+        <td class="num">${c.n.toLocaleString('de-DE')}</td>
+        <td class="num ${c.avgRet>=0?'pos':'neg'}">${fmtPct(c.avgRet)}</td>
+        <td class="num">${c.winRate}%</td>
+        <td class="num">${c.sharpeLike}</td>
+        <td class="num">${c.olderHalf?c.olderHalf.sharpeLike:'—'} → ${c.newerHalf?c.newerHalf.sharpeLike:'—'}</td>
+        <td>${robustOk ? '✅' : ''}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('rankingTable').innerHTML = `<table><thead><tr><th>Familie</th><th>Signal</th><th>Bucket</th>
+      <th class="num">N</th><th class="num">Ø Rendite</th><th class="num">Trefferquote</th><th class="num">Sharpe</th>
+      <th class="num">Älter → Neuer</th><th>Robust</th></tr></thead><tbody>${rows}</tbody></table>`;
+
+    document.getElementById('toolGrid').innerHTML = TOOL_LINKS.map(t => `
+      <a class="tool-card" href="https://babybounce500.github.io/neural-kommandozentrale/trading/${t.file}">
+        <div class="n">${t.name}</div>
+        <div class="s">Sharpe-ähnlich ${t.sharpe}</div>
+      </a>`).join('');
+
+    document.getElementById('caveatBox').innerHTML = `
+      <b>Einschränkungen, ehrlich benannt:</b><br>
+      • Scope bewusst auf NOVEM (8/9) + Broker-AI (4/4) begrenzt -- siehe Intro oben für den Grund.<br>
+      • "Robust" heisst hier nur: beide Zeithälften positiver Sharpe, nicht garantiert zukünftig profitabel.<br>
+      • Monthly/Spread/Denarius teilen sich strukturell ähnliche kurzfristige Momentum-Logik (teilweise
+      identische Formel) -- die 10 Tools sind nicht 10 völlig unabhängige Wetten.<br>
+      • Keine Transaktionskosten/Spreads eingerechnet. Keine Anlageberatung.
+    `;
+    document.getElementById('sourceNote').innerHTML = `${d.meta.symbols} Titel · Stop ${d.meta.stopPct}% · Holding ${d.meta.maxHoldDays} Tage ·
+      Berechnet ${new Date(d.meta.generatedAt).toLocaleString('de-DE')}.`;
+  } catch (e) {
+    document.getElementById('findingBox').innerHTML = '<span style="color:var(--red)">Fehler beim Laden: ' + e.message + '</span>';
+  }
+}
+load();
+</script>
+</body>
+</html>
