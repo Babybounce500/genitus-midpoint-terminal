@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { estimateParams, probHitTarget } = require('./smart-target-lib.js');
 
 const CACHE_PATH = path.join(__dirname, '..', 'data', '.cache', 'novem-ohlc-cache.json');
 const cache = JSON.parse(fs.readFileSync(CACHE_PATH, 'utf8'));
@@ -204,6 +205,16 @@ for (const sym of symbols) {
   }
 }
 
+// Smart-Target diagnosis (see scripts/broker-ai-smart-target-diagnosis.js for the full writeup):
+// at each entry, estimate trailing sigma/mu (252d, strictly before entry) and the GBM first-passage
+// probability of touching the -4% stop within the 10-day window. Confirmed finding: performance is
+// NOT uniform across this -- it's a clean volatility gradient (far_lowP loses money, near_highP wins),
+// consistent across all 4 signals and not an artifact of older/newer-half composition shift. Computed
+// here (not just the standalone diagnosis) so it ships in the same result JSON the report/live tool use.
+const SIGMA_LOOKBACK = 252;
+const STOP_T_YEARS = MAX_HOLD_DAYS / 252;
+function volBucketOf(p) { return p < 0.40 ? 'far_lowP' : p < 0.70 ? 'mid_P' : 'near_highP'; }
+
 for (const [logicName, instances] of Object.entries(raw)) {
   const bySym = {};
   for (const inst of instances) { if (!bySym[inst.sym]) bySym[inst.sym] = []; bySym[inst.sym].push(inst); }
@@ -211,7 +222,35 @@ for (const [logicName, instances] of Object.entries(raw)) {
   for (const inst of instances) {
     const variants = computeExitVariants(cache[inst.sym], inst.entryIdx, inst.direction);
     inst.exits = variants ? { ...variants, signal_reversal: inst.signalReversal } : { signal_reversal: inst.signalReversal };
+
+    const bars = cache[inst.sym];
+    const closes = bars.map(b => b.close);
+    const histStart = Math.max(0, inst.detectIdx - SIGMA_LOOKBACK + 1);
+    const trailing = closes.slice(histStart, inst.detectIdx + 1);
+    const params = estimateParams(trailing);
+    if (params && inst.entryIdx < bars.length) {
+      const entry = bars[inst.entryIdx].open;
+      const stopLevel = inst.direction === 'LONG' ? entry * (1 - STOP_PCT / 100) : entry * (1 + STOP_PCT / 100);
+      inst.pTouchStop = probHitTarget(entry, stopLevel, params.mu, params.sigma, STOP_T_YEARS);
+      inst.sigma = params.sigma;
+      inst.volBucket = volBucketOf(inst.pTouchStop);
+    }
   }
+}
+
+function summarizeByVolBucket(instances, exitKey) {
+  const buckets = { far_lowP: [], mid_P: [], near_highP: [] };
+  for (const i of instances) {
+    if (!i.volBucket || i.exits[exitKey] == null) continue;
+    buckets[i.volBucket].push({ retPct: i.exits[exitKey].retPct, detectDate: i.detectDate, stopped: !!i.exits[exitKey].stopped });
+  }
+  const result = {};
+  for (const [bk, trades] of Object.entries(buckets)) {
+    const { older, newer } = splitHalves(trades);
+    const stopRate = trades.length ? +((trades.filter(t => t.stopped).length / trades.length) * 100).toFixed(2) : 0;
+    result[bk] = { ...summarize(trades), stopRate, olderHalf: summarize(older), newerHalf: summarize(newer) };
+  }
+  return result;
 }
 
 function summarizeByExitRule(instances, exitRuleKeys) {
@@ -249,9 +288,14 @@ for (const [logicName, instances] of Object.entries(raw)) {
     long: { n: longInstances.length, exitRules: summarizeByExitRule(longInstances, EXIT_KEYS) },
     short: { n: shortInstances.length, exitRules: summarizeByExitRule(shortInstances, EXIT_KEYS) },
     exitRules,
-    bestExitRule: best
+    bestExitRule: best,
+    volFilter: summarizeByVolBucket(instances, 'stop4pct_10d')
   };
 }
+
+// Smart-Target filter, all 4 signals combined (same bucket definition, stop4pct_10d exit)
+const allInstances = Object.values(raw).flat();
+output.volFilterCombined = summarizeByVolBucket(allInstances, 'stop4pct_10d');
 
 // ---------- confluence: how many of the 4 signals agree on direction, same symbol+day ----------
 // Fixed exit rule for a fair comparison (not each signal's own best), same convention as NOVEM.

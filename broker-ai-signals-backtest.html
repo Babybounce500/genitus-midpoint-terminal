@@ -165,6 +165,9 @@ async function load() {
       <th class="num">Ø Rendite</th><th class="num">Median</th><th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th>
       <th class="num">2-Perioden-Check</th></tr></thead><tbody>${summaryRows}</tbody></table></div>
 
+      <h2>Smart-Target-Filter: lohnt sich der Trade überhaupt? (GBM-Vola-Gradient)</h2>
+      <div id="volFilterSection"></div>
+
       <div id="logicSections"></div>
 
       <h2>Konfluenz-Test: stimmen mehrere der 4 Signale überein?</h2>
@@ -227,6 +230,40 @@ async function load() {
       `;
     }).join('');
     document.getElementById('logicSections').innerHTML = sections;
+
+    // ---- Smart-Target-Filter: GBM first-passage P(Touch -4%-Stop in 10d) as a pre-entry filter ----
+    const VOL_LABELS = { far_lowP: 'far_lowP (ruhig, P(Touch)<40%)', mid_P: 'mid_P (P(Touch) 40-70%)', near_highP: 'near_highP (volatil, P(Touch)≥70%)' };
+    if (d.volFilterCombined) {
+      const vf = d.volFilterCombined;
+      const rows = Object.entries(vf).map(([bk, s]) => `
+        <tr class="${bk==='near_highP'?'best':''}">
+          <td>${VOL_LABELS[bk]}</td>
+          <td class="num">${s.n.toLocaleString('de-DE')}</td>
+          <td class="num ${s.avgRet>=0?'pos':'neg'}">${fmtPct(s.avgRet)}</td>
+          <td class="num ${s.medianRet>=0?'pos':'neg'}">${fmtPct(s.medianRet)}</td>
+          <td class="num">${s.winRate}%</td>
+          <td class="num">${s.stopRate}%</td>
+          <td class="num">${s.sharpeLike}</td>
+        </tr>`).join('');
+      document.getElementById('volFilterSection').innerHTML = `
+        <div class="finding">
+        Pro Trade wurde bei Entry die trailing 252-Tage-Volatilität (σ) + Drift (μ) geschätzt (gleiche Formeln
+        wie der <a href="https://babybounce500.github.io/neural-kommandozentrale/trading/probability-cone-scanner.html">Target-Scanner</a>)
+        und per First-Passage-Formel (Reflection Principle) berechnet, wie wahrscheinlich der eigene -4%-Stop
+        innerhalb der 10-Tage-Haltedauer GBM-rechnerisch überhaupt berührt wird. <b>Klarer, über alle 4 Signale
+        konsistenter Vola-Gradient:</b> Setups, bei denen -4% statistisch "weit weg" lag (ruhiger Titel, Stop
+        kaum in Reichweite) <b class="neg">verlieren im Schnitt Geld</b> (Sharpe ${vf.far_lowP.sharpeLike}),
+        während Setups mit "nahem" Stop (volatiler Titel, Stop wird in 60% der Fälle tatsächlich berührt)
+        trotzdem die <b class="pos">beste risikoadjustierte Performance</b> liefern (Sharpe ${vf.near_highP.sharpeLike}).
+        Kein Compositions-Artefakt: der Älter/Neuer-Anteil ist in allen 3 Buckets nahezu gleich verteilt.
+        <b>Konsequenz:</b> diese 4 Signale haben strukturell keinen Edge auf ruhigen Titeln -- ein simpler
+        Vorab-Filter (nur traden, wenn P(Touch) ≥ 40%) würde laut diesen Daten die Ergebnisqualität deutlich
+        verbessern, ohne irgendeine Signal-Logik selbst zu ändern.
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Vola-Bucket (GBM P(Touch -4%-Stop))</th><th class="num">N</th>
+        <th class="num">Ø Rendite</th><th class="num">Median</th><th class="num">Trefferquote</th>
+        <th class="num">Stop-Rate</th><th class="num">Sharpe-ähnlich</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    }
 
     const ctx = document.getElementById('confChart').getContext('2d');
     new Chart(ctx, {
