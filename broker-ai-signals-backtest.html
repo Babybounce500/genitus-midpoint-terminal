@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS BROKER-AI SIGNALS // Backtest</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:6px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.best{background:rgba(21,128,61,.08);}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+h3{font-family:var(--head);font-size:10px;letter-spacing:1px;color:var(--accent);margin:16px 0 8px;text-transform:uppercase;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+.bstat{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px 10px;text-align:center;}
+.bstat b{font-family:var(--head);font-size:16px;display:block;color:var(--bright);}
+.bstat b.pos{color:var(--green);} .bstat b.neg{color:var(--red);}
+.bstat span{font-size:7.5px;color:var(--muted);letter-spacing:.3px;}
+.robust-ok{color:var(--green);font-weight:700;} .robust-bad{color:var(--red);font-weight:700;} .robust-warn{color:var(--gold);font-weight:700;}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;margin:14px 0;height:260px;}
+.sym-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-width:0;}
+.sym-grid>div{min-width:0;}
+@media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr);}.sym-grid{grid-template-columns:1fr;}}
+@media(max-width:360px){.stat-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">BROKER-AI SIGNALS BACKTEST</div><div class="logo-sub">4 SIGNALE AUS BROKER-AI-TRADE-SIGNALS.HTML, 52 TITEL, 3 JAHRE</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="strategies-hub.html">← Strategien-Hub</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  <code>broker-ai-trade-signals.html</code> (Teil des GLOW-UP-FINTECH-Exports) hat 4 eigene Signale: Monats-
+  Momentum (<b>Monthly</b>, Vergleich mit dem letzten Freitags-Schluss des Vormonats), 3-Tage-Momentum
+  (<b>Spread</b>), Intraday-Mittelpunkt (<b>Midpoint</b> -- Kurs vs. (Hoch+Tief)/2 des <u>gleichen</u> Tages,
+  nicht zu verwechseln mit dem bereits validierten <a href="midpoint-strategy.html">Vortages-Mittelpunkt-System</a>)
+  und ein 3er-SMA-Crossover (<b>WeeklySMA</b>). Keines der 4 war jemals rückgetestet -- jede Funktion gab einen
+  frei erfundenen Target/Stop-Prozentsatz aus (unterschiedlich pro Funktion: ±1%, ±4%, ±8%, ±20%). Hier:
+  exakt dieselbe Entscheidungsregel wie im Live-Code nachgebaut, <b>Einstieg = nächste Eröffnung</b> nach dem
+  Signaltag (nie derselbe Schluss, der das Signal auslöste), <b>Exit-Regel-Sweep</b> (1/3/5/10 Tage fix, 10
+  Tage + -4%-Stop, bis Gegensignal max. 20 Tage), beste Regel über eine <b>Zweiperioden-Robustheit</b> geprüft
+  -- identisches Muster wie bei <a href="novem-backtest.html">NOVEM-Suite</a> und
+  <a href="pivot-daily-backtest.html">Tages-Pivot</a>. Gleicher 52-Titel/3-Jahre-Cache wie NOVEM (wiederverwendet,
+  keine neue Datenziehung nötig). Die Ergebnisse dieses Reports wurden bereits in die Live-Datei
+  <code>broker-ai-trade-signals.html</code> zurückgespielt (Target/Stop + sichtbares Backtest-Badge pro Karte).
+  </div>
+
+  <div id="findingBox" class="loading">Lade Backtest-Ergebnis…</div>
+</div>
+<script>
+function fmtPct(v, dp) { dp = dp == null ? 3 : dp; return (v==null?'—':(v>=0?'+':'') + v.toFixed(dp) + '%'); }
+
+const LOGIC_LABELS = {
+  monthly:   'MONTHLY — Momentum vs. letzter Freitag des Vormonats',
+  spread:    'SPREAD — 3-Tage-Momentum',
+  midpoint:  'MIDPOINT — Kurs vs. Intraday-Mittelpunkt (gleicher Tag)',
+  weeklySma: 'WEEKLYSMA — 3er-SMA-Crossover (überlappend)'
+};
+const EXIT_LABELS = {
+  horizon_1d: 'Fix 1 Tag', horizon_3d: 'Fix 3 Tage', horizon_5d: 'Fix 5 Tage', horizon_10d: 'Fix 10 Tage',
+  stop4pct_10d: '10 Tage + -4%-Stop', signal_reversal: 'Bis Gegensignal (max. 20 Tage)'
+};
+
+function robustLabel(older, newer) {
+  if (!older || !newer || !older.n || !newer.n) return { cls: '', txt: '—' };
+  const sameSign = (older.avgRet > 0 && newer.avgRet > 0) || (older.avgRet < 0 && newer.avgRet < 0);
+  if (!sameSign) return { cls: 'robust-bad', txt: '✗ Vorzeichenwechsel' };
+  const fading = newer.sharpeLike < older.sharpeLike * 0.5;
+  if (fading) return { cls: 'robust-warn', txt: '⚠ schwächt ab' };
+  const improving = newer.sharpeLike > older.sharpeLike * 1.3;
+  if (improving) return { cls: 'robust-ok', txt: '📈 verstärkt sich' };
+  return { cls: 'robust-ok', txt: '✓ stabil' };
+}
+
+function exitTable(exitRules, bestKey) {
+  const rows = Object.entries(exitRules).filter(([, s]) => s && s.n).map(([key, s]) => {
+    const r = robustLabel(s.olderHalf, s.newerHalf);
+    return `
+    <tr class="${key===bestKey?'best':''}">
+      <td>${EXIT_LABELS[key] || key}${key===bestKey?' ★':''}</td>
+      <td class="num">${s.n.toLocaleString('de-DE')}</td>
+      <td class="num ${s.avgRet>=0?'pos':'neg'}">${fmtPct(s.avgRet)}</td>
+      <td class="num">${s.medianRet!=null?fmtPct(s.medianRet):'—'}</td>
+      <td class="num">${s.winRate}%</td>
+      <td class="num">${s.stopRate!=null?s.stopRate+'%':'—'}</td>
+      <td class="num">${s.sharpeLike}</td>
+      <td class="num ${r.cls}">${r.txt}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="table-wrap"><table><thead><tr><th>Exit-Regel</th><th class="num">N</th><th class="num">Ø Rendite</th>
+    <th class="num">Median</th><th class="num">Trefferquote</th><th class="num">-4%-Stop</th><th class="num">Sharpe-ähnlich</th><th class="num">2-Perioden-Check</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+async function load() {
+  try {
+    const res = await fetch('data/broker-ai-signals-backtest-result.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+
+    const ranked = Object.entries(d.logics).map(([logicKey, e]) => ({ logicKey, ...e.bestExitRule }));
+    ranked.sort((a, b) => (b.sharpeLike||0) - (a.sharpeLike||0));
+
+    const summaryRows = ranked.map(r => {
+      const rb = robustLabel(r.olderHalf, r.newerHalf);
+      return `
+      <tr>
+        <td><b>${LOGIC_LABELS[r.logicKey]}</b></td>
+        <td class="num">${r.n.toLocaleString('de-DE')}</td>
+        <td>${EXIT_LABELS[r.exitKey] || r.exitKey}</td>
+        <td class="num ${r.avgRet>=0?'pos':'neg'}">${fmtPct(r.avgRet)}</td>
+        <td class="num ${r.medianRet>=0?'pos':'neg'}">${fmtPct(r.medianRet)}</td>
+        <td class="num">${r.winRate}%</td>
+        <td class="num">${r.sharpeLike}</td>
+        <td class="num ${rb.cls}">${rb.txt}</td>
+      </tr>`;
+    }).join('');
+
+    const conf = d.confluence;
+    const confRanked = Object.entries(conf).filter(([,s]) => s.n).sort((a,b) => b[1].sharpeLike - a[1].sharpeLike);
+    const bestConfKey = confRanked[0] ? confRanked[0][0] : null;
+
+    document.getElementById('findingBox').outerHTML = `
+      <div class="finding">
+      <b>Alle 4 Signale laufen auf dieselbe beste Regel: 10 Tage halten + -4%-Stop</b> -- Sharpe-ähnlich
+      zwischen ${Math.min(...ranked.map(r=>r.sharpeLike))} und ${Math.max(...ranked.map(r=>r.sharpeLike))}, Trefferquote
+      durchweg <b>unter 50%</b> (42-43%), aber positiver Erwartungswert durch asymmetrische Auszahlung --
+      Median-Trade ist bei allen 4 <b class="neg">negativ</b> (ca. -1,4%), der Mittelwert ist nur positiv, weil
+      ca. 43-44% der Trades den -4%-Stop reißen, während die Gewinner im 10-Tage-Fenster deutlich weiter laufen.
+      <b>Wichtigster Fund: 3 von 4 Signalen (Spread, Midpoint, WeeklySMA) zeigen in der neueren Hälfte einen
+      klar schwächeren Edge als in der älteren</b> (Sharpe fällt jeweils auf weniger als die Hälfte) -- nur
+      <b>Monthly</b> verbessert sich (${fmtPct(d.logics.monthly.bestExitRule.olderHalf.avgRet)} → ${fmtPct(d.logics.monthly.bestExitRule.newerHalf.avgRet)}).
+      Plausible Erklärung: Spread/Midpoint/WeeklySMA sind im Kern alle sehr kurzfristige Preis-Momentum-Proxys
+      (2-5 Handelstage) -- stark korreliert untereinander, nicht unabhängig.
+      </div>
+
+      <h2>Zusammenfassung: alle 4 Signale, beste Regel je Signal</h2>
+      <div class="table-wrap"><table><thead><tr><th>Signal</th><th class="num">N Trades</th><th>Beste Regel</th>
+      <th class="num">Ø Rendite</th><th class="num">Median</th><th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th>
+      <th class="num">2-Perioden-Check</th></tr></thead><tbody>${summaryRows}</tbody></table></div>
+
+      <div id="logicSections"></div>
+
+      <h2>Konfluenz-Test: stimmen mehrere der 4 Signale überein?</h2>
+      <div class="finding">
+      Pro Symbol-Tag gezählt, wie viele der 4 Signale an diesem Tag in dieselbe Richtung zeigen -- fester Exit
+      (5 Tage) für alle Tiers, um nur den Übereinstimmungs-Effekt zu isolieren (gleiches Vorgehen wie beim
+      NOVEM-Konfluenz-Test). <b>Auch hier gilt NICHT "mehr Übereinstimmung = besser"</b>: Tier 3+ (3 oder 4
+      Signale einig, mit Abstand der häufigste Fall -- die 4 Signale korrelieren stark) landet mit Sharpe
+      ${conf.tier3plus.sharpeLike} praktisch bei Zufallsniveau, während Tier 2 (genau 2 Signale einig, 2 widersprechen)
+      mit Sharpe ${conf.tier2.sharpeLike} das stärkste Ergebnis liefert -- vereinbar mit der Theorie, dass
+      "alle 4 einig" meist einen bereits ausgereizten kurzfristigen Trend markiert, der eher dreht als weiterläuft.
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Konfluenz-Tier</th><th class="num">N</th><th class="num">Ø Rendite</th>
+      <th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th></tr></thead><tbody>
+        ${confRanked.map(([tier,s]) => `<tr class="${tier===bestConfKey?'best':''}"><td><b>${tier}</b>${tier===bestConfKey?' ★':''}</td>
+          <td class="num">${s.n.toLocaleString('de-DE')}</td><td class="num ${s.avgRet>=0?'pos':'neg'}">${fmtPct(s.avgRet)}</td>
+          <td class="num">${s.winRate}%</td><td class="num">${s.sharpeLike}</td></tr>`).join('')}
+      </tbody></table></div>
+
+      <div class="chart-wrap"><canvas id="confChart"></canvas></div>
+
+      <div class="caveat">
+      <b>Einschränkungen, ehrlich benannt:</b><br>
+      • Keine der 4 Signalfunktionen war im Original für einen Backtest gedacht -- die hier getestete Regel
+      ist die wörtliche Übersetzung der Live-Entscheidungslogik, nicht eine Neuerfindung.<br>
+      • "Midpoint" nutzt bewusst den <u>gleichen</u> Tages-Hoch/Tief wie die Live-Version (nicht den Vortag) --
+      das ist strukturell schwächer als das bereits validierte Vortages-Mittelpunkt-System in
+      <a href="midpoint-strategy.html">midpoint-strategy.html</a> und sollte nicht damit verwechselt werden.<br>
+      • 52 liquide US-Standardwerte, 3 Jahre -- gleiches (kleineres) Universum wie NOVEM-Suite, nicht der
+      2.033-Titel-Pivot-Backtest.<br>
+      • Monthly/Spread/WeeklySMA feuern jeden Handelstag (nicht nur an "echten" Wendepunkten) -- entsprechend
+      viele, stark überlappende/autokorrelierte Trades pro Symbol; die N-Zahlen sind nicht 38.000 unabhängige
+      Ereignisse.<br>
+      • Keine Transaktionskosten/Spreads eingerechnet.
+      </div>
+
+      <div class="source-note">
+      ${d.meta.symbols} Titel, 3 Jahre · Quelle der Signal-Logiken: <code>broker-ai-trade-signals.html</code>
+      (<code>getMonthlyAnalysis</code>/<code>getSpreadAnalysis</code>/<code>getStockInfo</code>/<code>getWeeklySMAAnalysis</code>).
+      Berechnet ${new Date(d.meta.generatedAt).toLocaleString('de-DE')}.
+      </div>
+    `;
+
+    const sections = ranked.map(r => {
+      const entry = d.logics[r.logicKey];
+      const best = entry.bestExitRule;
+      return `
+      <h2>${LOGIC_LABELS[r.logicKey]}</h2>
+      <div class="stat-grid">
+        <div class="bstat"><b>${entry.n.toLocaleString('de-DE')}</b><span>SIGNALE GESAMT</span></div>
+        <div class="bstat"><b class="${best.avgRet>=0?'pos':'neg'}">${fmtPct(best.avgRet)}</b><span>Ø RENDITE (BESTE REGEL)</span></div>
+        <div class="bstat"><b>${best.winRate}%</b><span>TREFFERQUOTE</span></div>
+        <div class="bstat"><b class="${best.sharpeLike>=0?'pos':'neg'}">${best.sharpeLike}</b><span>SHARPE-ÄHNLICH</span></div>
+      </div>
+      ${exitTable(entry.exitRules, best.exitKey)}
+      <div class="sym-grid" style="margin-top:10px;">
+        <div><h3>LONG (${entry.long.n.toLocaleString('de-DE')})</h3>${exitTable(entry.long.exitRules, best.exitKey)}</div>
+        <div><h3>SHORT (${entry.short.n.toLocaleString('de-DE')})</h3>${exitTable(entry.short.exitRules, best.exitKey)}</div>
+      </div>
+      `;
+    }).join('');
+    document.getElementById('logicSections').innerHTML = sections;
+
+    const ctx = document.getElementById('confChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Tier 1 (1 Signal)', 'Tier 2 (2 Signale)', 'Tier 3+ (3-4 Signale)'],
+        datasets: [{ label: 'Sharpe-ähnlich', data: [conf.tier1.sharpeLike||0, conf.tier2.sharpeLike||0, conf.tier3plus.sharpeLike||0], backgroundColor: ['#94a3b8', '#15803d', '#b45309'] }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+  } catch (e) {
+    document.getElementById('findingBox').innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
