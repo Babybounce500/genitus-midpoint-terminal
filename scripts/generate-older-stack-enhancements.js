@@ -82,17 +82,28 @@ const SHARED_SCRIPT = `
 
 function toolScript(spec) {
   const buckets = Object.entries(spec.backtest.buckets).map(([k,v]) => `${k}: ${v === null ? 'null' : v}`).join(', ');
+  const hasWinData = !!spec.backtest.winBuckets;
+  const winBuckets = Object.entries(spec.backtest.winBuckets || {}).map(([k,v]) => `${k}: ${v === null ? 'null' : v}`).join(', ');
+  const winRateBuckets = Object.entries(spec.backtest.winRateBuckets || {}).map(([k,v]) => `${k}: ${v === null ? 'null' : v}`).join(', ');
   return `
 <script>
-const ST_BACKTEST = { n: ${spec.backtest.n}, avgRet: ${spec.backtest.avgRet}, winRate: ${spec.backtest.winRate}, sharpeLike: ${spec.backtest.sharpeLike}, bestBucket: '${spec.backtest.bestBucket}', status: '${spec.backtest.status}', buckets: { ${buckets} } };
+const ST_BACKTEST = { n: ${spec.backtest.n}, avgRet: ${spec.backtest.avgRet}, winRate: ${spec.backtest.winRate}, sharpeLike: ${spec.backtest.sharpeLike}, bestBucket: '${spec.backtest.bestBucket}', status: '${spec.backtest.status}', buckets: { ${buckets} }${hasWinData ? `, winBuckets: { ${winBuckets} }, winRateBuckets: { ${winRateBuckets} }` : ''} };
 document.getElementById('st_intro').innerHTML = ${JSON.stringify(spec.introHTML)};
 
+// Echtes Limit statt Erwartungswert: Target = Entry +/- Oe-Groesse der tatsaechlichen GEWINNER-Trades
+// in diesem Bucket (winBuckets), nicht der ueber alle Trades gemittelte avgRet (der war 0.02-0.58%
+// und erzeugte gegen den festen 4%-Stop ein absurdes Chance/Risiko -- siehe Nutzer-Report). Wenn der
+// Bucket keine Win-Daten hat (nicht validiert fuer dieses Regime), wird "kein Trade" statt eines
+// erfundenen Zielkurses angezeigt.
 function st_smartStopTarget(price, direction, bucket) {
   const sign = direction==='LONG'?1:-1;
-  const bucketAvgRet = ST_BACKTEST.buckets[bucket] != null ? ST_BACKTEST.buckets[bucket] : ST_BACKTEST.avgRet;
-  const target = price*(1+sign*(bucketAvgRet/100));
+  const bucketAvgRet = ST_BACKTEST.buckets[bucket] != null ? ST_BACKTEST.buckets[bucket] : null;
+  const noEdge = !ST_BACKTEST.winBuckets || bucketAvgRet == null || bucketAvgRet < 0 || ST_BACKTEST.winBuckets[bucket] == null;
+  const winPct = (ST_BACKTEST.winBuckets && ST_BACKTEST.winBuckets[bucket] != null) ? ST_BACKTEST.winBuckets[bucket] : ST_STOP_PCT;
+  const hitRate = (ST_BACKTEST.winRateBuckets && ST_BACKTEST.winRateBuckets[bucket] != null) ? ST_BACKTEST.winRateBuckets[bucket] : ST_BACKTEST.winRate;
+  const target = price*(1+sign*(winPct/100));
   const stop = price*(1-sign*(ST_STOP_PCT/100));
-  return { target: target.toFixed(2), stop: stop.toFixed(2), bucketAvgRet };
+  return { target: target.toFixed(2), stop: stop.toFixed(2), winPct, hitRate, bucketAvgRet, noEdge };
 }
 
 function st_renderCard(sym, price, direction, vts, volRegime) {
@@ -104,8 +115,13 @@ function st_renderCard(sym, price, direction, vts, volRegime) {
     : ST_BACKTEST.status === 'warning'
       ? '<span style="color:#b91c1c;font-weight:700;">⚠️ geprüft, NICHT robust (reale Zahlen, aber Edge schwächt stark ab)</span>'
       : '<span style="color:#b45309;font-weight:700;">ℹ️ informativ, kein eigener Backtest für dieses Signal</span>';
-  card.innerHTML = '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><b>' + sym + '</b><span style="font-weight:700;color:' + (direction==='LONG'?'#15803d':'#b91c1c') + ';">' + direction + '</span></div>' +
-    '<div>Entry: <b>' + price.toFixed(2) + '</b> &nbsp; Smart Target: <b style="color:#0e7490;">' + vts.target + '</b> &nbsp; Smart Stop (-4%): <b style="color:#b45309;">' + vts.stop + '</b></div>' +
+  const noEdgeBanner = vts.noEdge ? '<div style="background:#fde2e2;border:1px solid #f5a3a3;color:#991b1b;font-size:10.5px;font-weight:700;padding:5px 8px;border-radius:4px;text-align:center;margin-bottom:6px;">⛔ KEIN TRADE EMPFOHLEN -- ausserhalb des validierten Vola-Buckets</div>' : '';
+  const targetLine = vts.noEdge
+    ? '<div>Entry: <b>' + price.toFixed(2) + '</b> &nbsp; Smart Target: <b style="color:#9aa5a9;">(unplausibel)</b> &nbsp; Smart Stop (-4%): <b style="color:#b45309;">' + vts.stop + '</b></div>'
+    : '<div>Entry: <b>' + price.toFixed(2) + '</b> &nbsp; Smart Target (Limit): <b style="color:#0e7490;">' + vts.target + '</b> &nbsp; Smart Stop (-4%, hart): <b style="color:#b45309;">' + vts.stop + '</b></div>' +
+      '<div style="font-size:10px;color:#9aa5a9;margin-top:2px;">🎯 Echtes Limit: Ø-Größe der tatsächlichen Gewinner-Trades in diesem Bucket (±' + vts.winPct.toFixed(2) + '%), trifft ca. in ' + vts.hitRate + '% der Fälle. R:R ≈ ' + (vts.winPct/ST_STOP_PCT).toFixed(1) + ':1 gegen den festen ' + ST_STOP_PCT + '%-Stop.</div>';
+  card.innerHTML = noEdgeBanner + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><b>' + sym + '</b><span style="font-weight:700;color:' + (direction==='LONG'?'#15803d':'#b91c1c') + ';">' + direction + '</span></div>' +
+    targetLine +
     (volRegime ? '<div style="margin-top:4px;font-size:10.5px;color:#5f7277;">P(Touch Stop in 10d) = ' + (volRegime.pTouchStop*100).toFixed(0) + '% (σ=' + (volRegime.sigma*100).toFixed(1) + '%) · ' + ST_VOL_LABEL[volRegime.bucket] + '</div>' : '') +
     '<div style="margin-top:4px;font-size:10px;color:#9aa5a9;">' + statusBadge + ' -- n=' + ST_BACKTEST.n.toLocaleString('de-DE') + ', Ø' + ST_BACKTEST.avgRet + '%, Sharpe ' + ST_BACKTEST.sharpeLike + ' (Bucket: ' + ST_BACKTEST.bestBucket + ')</div>';
   container.appendChild(card);
@@ -147,7 +163,8 @@ const ENHANCEMENTS = [
 
 {
   file: 'ARGENTUM-DAILY-FINAL (1).html', defaultWatchlist: 'NVDA.US, TSLA.US, SAP.XETRA, BAS.XETRA',
-  backtest: { n: 16920, avgRet: 0.1749, winRate: 42.88, sharpeLike: 0.545, bestBucket: 'mid_P', status: 'validated', buckets: { far_lowP: null, mid_P: 0.1749, near_highP: null } },
+  backtest: { n: 16920, avgRet: 0.1749, winRate: 42.88, sharpeLike: 0.545, bestBucket: 'mid_P', status: 'validated', buckets: { far_lowP: null, mid_P: 0.1749, near_highP: null },
+    winBuckets: { far_lowP: null, mid_P: 4.9624, near_highP: null }, winRateBuckets: { far_lowP: 46.87, mid_P: 42.88, near_highP: 33.06 } },
   introHTML: 'Backtest-validiert (siehe <a href="https://babybounce500.github.io/genitus-midpoint-terminal/smart-target-master-report.html" target="_blank">Master-Report</a>): Der stärkste Bucket von Argentum ist "mid_P", Sharpe 0.545, robust über beide Zeithälften (aber schwächt leicht ab -- siehe Report).',
   detectorBody: `
   const UNIVERSE = ['AAPL.US','MSFT.US','GOOGL.US','AMZN.US','NVDA.US','META.US','TSLA.US','JPM.US','JNJ.US','PG.US','SAP.XETRA','SIE.XETRA','ALV.XETRA','BAS.XETRA','DTE.XETRA'];
@@ -180,7 +197,8 @@ const ENHANCEMENTS = [
 
 {
   file: 'HIDDEN-SMASH-FINAL (1).html', defaultWatchlist: 'SIE.XETRA, SAP.XETRA, ALV.XETRA, DBK.XETRA',
-  backtest: { n: 10074, avgRet: 0.1859, winRate: 43.39, sharpeLike: 0.584, bestBucket: 'mid_P', status: 'validated', buckets: { far_lowP: null, mid_P: 0.1859, near_highP: null } },
+  backtest: { n: 10074, avgRet: 0.1859, winRate: 43.39, sharpeLike: 0.584, bestBucket: 'mid_P', status: 'validated', buckets: { far_lowP: null, mid_P: 0.1859, near_highP: null },
+    winBuckets: { far_lowP: null, mid_P: 4.8794, near_highP: null }, winRateBuckets: { far_lowP: 47.49, mid_P: 43.39, near_highP: 33.44 } },
   introHTML: 'Backtest-validiert: Der stärkste Bucket von Hidden-Smash ist "mid_P", Sharpe 0.584, robust über beide Zeithälften.',
   detectorBody: `
   const data = await ST_API.eod.historical(symbol, { from: st_isoDaysAgo(10) });
@@ -196,7 +214,8 @@ const ENHANCEMENTS = [
 
 {
   file: 'CONSULTUS-BULK-DAILY (1).html', defaultWatchlist: 'VOW3.XETRA, BAS.XETRA, DTE.XETRA, CON.XETRA, HEI.XETRA',
-  backtest: { n: 2532, avgRet: 0.3458, winRate: 32.58, sharpeLike: 0.739, bestBucket: 'near_highP', status: 'validated', buckets: { far_lowP: null, mid_P: 0.245, near_highP: 0.3458 } },
+  backtest: { n: 2532, avgRet: 0.3458, winRate: 32.58, sharpeLike: 0.739, bestBucket: 'near_highP', status: 'validated', buckets: { far_lowP: null, mid_P: 0.245, near_highP: 0.3458 },
+    winBuckets: { far_lowP: null, mid_P: 4.9117, near_highP: 8.7672 }, winRateBuckets: { far_lowP: 44.86, mid_P: 43.84, near_highP: 32.58 } },
   introHTML: 'Backtest-validiert: Der stärkste Bucket von Consultus Daily ist "near_highP", Sharpe 0.739, robust.',
   detectorBody: `
   const data = await ST_API.eod.historical(symbol, { from: st_isoDaysAgo(25) });
@@ -220,7 +239,8 @@ const ENHANCEMENTS = [
 
 {
   file: 'CORPUS-PARVUS (1).html', defaultWatchlist: 'DHL.XETRA, EOAN.XETRA, MUV2.XETRA, HEN3.XETRA, FRE.XETRA',
-  backtest: { n: 2548, avgRet: 0.3201, winRate: 32.61, sharpeLike: 0.686, bestBucket: 'near_highP', status: 'validated', buckets: { far_lowP: null, mid_P: null, near_highP: 0.3201 } },
+  backtest: { n: 2548, avgRet: 0.3201, winRate: 32.61, sharpeLike: 0.686, bestBucket: 'near_highP', status: 'validated', buckets: { far_lowP: null, mid_P: null, near_highP: 0.3201 },
+    winBuckets: { far_lowP: null, mid_P: null, near_highP: 8.7301 }, winRateBuckets: { far_lowP: 45.43, mid_P: 43.43, near_highP: 32.61 } },
   introHTML: 'Backtest-validiert: Der stärkste Bucket von Corpus Parvus ist "near_highP", Sharpe 0.686, robust.',
   detectorBody: `
   const data = await ST_API.eod.historical(symbol, { from: st_isoDaysAgo(25) });
@@ -244,7 +264,8 @@ const ENHANCEMENTS = [
 
 {
   file: 'DENARIUS-FINAL_html.html', defaultWatchlist: 'AMD.US, NVDA.US, TSLA.US, RHM.XETRA',
-  backtest: { n: 5057, avgRet: 0.4668, winRate: 34.19, sharpeLike: 0.995, bestBucket: 'near_highP', status: 'validated', buckets: { far_lowP: null, mid_P: 0.209, near_highP: 0.4668 } },
+  backtest: { n: 5057, avgRet: 0.4668, winRate: 34.19, sharpeLike: 0.995, bestBucket: 'near_highP', status: 'validated', buckets: { far_lowP: null, mid_P: 0.209, near_highP: 0.4668 },
+    winBuckets: { far_lowP: null, mid_P: 4.9775, near_highP: 8.6108 }, winRateBuckets: { far_lowP: 45.41, mid_P: 43.1, near_highP: 34.19 } },
   introHTML: 'Backtest-validiert: Der stärkste Bucket von Denarius ist "near_highP", Sharpe 0.995 -- einer der stärksten Edges der ganzen Suite.',
   detectorBody: `
   const data = await ST_API.eod.historical(symbol, { from: st_isoDaysAgo(14) });
@@ -258,7 +279,8 @@ const ENHANCEMENTS = [
 
 {
   file: 'VOLUMINA-FINAL (1).html', defaultWatchlist: 'NVDA.US, AMD.US, TSLA.US, VOW3.XETRA, RHM.XETRA',
-  backtest: { n: 2621, avgRet: 0.2511, winRate: 31.36, sharpeLike: 0.539, bestBucket: 'near_highP', status: 'validated', buckets: { far_lowP: null, mid_P: 0.214, near_highP: 0.2511 } },
+  backtest: { n: 2621, avgRet: 0.2511, winRate: 31.36, sharpeLike: 0.539, bestBucket: 'near_highP', status: 'validated', buckets: { far_lowP: null, mid_P: 0.214, near_highP: 0.2511 },
+    winBuckets: { far_lowP: null, mid_P: 4.9331, near_highP: 9.0256 }, winRateBuckets: { far_lowP: 45.58, mid_P: 43.57, near_highP: 31.36 } },
   introHTML: 'Backtest-validiert: Der stärkste Bucket von Volumina ist "near_highP", Sharpe 0.539, robust.',
   detectorBody: `
   const data = await ST_API.eod.historical(symbol, { from: st_isoDaysAgo(25) });
@@ -280,7 +302,10 @@ const ENHANCEMENTS = [
 
 {
   file: 'PEAK-VALLEY-BULK-FINAL (1).html', defaultWatchlist: 'SAP.XETRA, SIE.XETRA, BMW.XETRA, IFX.XETRA',
-  backtest: { n: 2524, avgRet: 0.301, winRate: 0, sharpeLike: 0.301, bestBucket: 'near_highP', status: 'warning', buckets: { far_lowP: null, mid_P: null, near_highP: 0.301 } },
+  // avgRet/winRate were previously placeholders (avgRet mistakenly set equal to sharpeLike, winRate
+  // left at 0) -- corrected to the actual near_highP bucket numbers from data/smart-target-master-result.json.
+  backtest: { n: 2524, avgRet: 0.1334, winRate: 32.53, sharpeLike: 0.301, bestBucket: 'near_highP', status: 'warning', buckets: { far_lowP: null, mid_P: null, near_highP: 0.1334 },
+    winBuckets: { far_lowP: null, mid_P: null, near_highP: 8.2684 }, winRateBuckets: { far_lowP: 46.95, mid_P: 43.11, near_highP: 32.53 } },
   introHTML: '<b style="color:#b91c1c;">Audit-Ergebnis: Peak-Valley ist NICHT robust</b> -- selbst der beste Bucket (near_highP) fällt von Sharpe 0.476 (ältere Hälfte) auf 0.156 (neuere Hälfte). Reale Zahlen unten, aber als Warnung markiert, nicht als Edge verkauft.',
   detectorBody: `
   const data = await ST_API.eod.historical(symbol, { from: st_isoDaysAgo(10) });
@@ -297,7 +322,8 @@ const ENHANCEMENTS = [
 
 {
   file: 'BODY-SLAM-FINAL-v2.html', defaultWatchlist: 'TSLA.US, NVDA.US, GME.US, RHM.XETRA',
-  backtest: { n: 444, avgRet: 0.5815, winRate: 50, sharpeLike: 2.262, bestBucket: 'far_lowP', status: 'warning', buckets: { far_lowP: 0.5815, mid_P: 0.3282, near_highP: null } },
+  backtest: { n: 444, avgRet: 0.5815, winRate: 50, sharpeLike: 2.262, bestBucket: 'far_lowP', status: 'warning', buckets: { far_lowP: 0.5815, mid_P: 0.3282, near_highP: null },
+    winBuckets: { far_lowP: 3.9798, mid_P: 5.9393, near_highP: null }, winRateBuckets: { far_lowP: 50, mid_P: 40.7, near_highP: 30.19 } },
   introHTML: '<b style="color:#b91c1c;">Audit-Ergebnis: Body-Slam ist NICHT robust, trotz spektakulärer Headline-Sharpe (2.262)</b> -- die ältere Hälfte zeigt Sharpe 3.545, die neuere nur noch 0.467 (n ebenfalls klein: 444 Trades total). Klassisches Beispiel, warum der Zweiperioden-Check Pflicht ist. Reale Zahlen unten, explizit als Warnung markiert.',
   detectorBody: `
   const data = await ST_API.eod.historical(symbol, { from: st_isoDaysAgo(45) });
