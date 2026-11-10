@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS MARKOV-CHAIN // Backtest</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:6px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.best{background:rgba(21,128,61,.08);} .worst{background:rgba(185,28,28,.06);} .excluded{opacity:.5;}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+h3{font-family:var(--head);font-size:10px;letter-spacing:1px;color:var(--accent);margin:16px 0 8px;text-transform:uppercase;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+.bstat{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px 10px;text-align:center;}
+.bstat b{font-family:var(--head);font-size:16px;display:block;color:var(--bright);}
+.bstat b.pos{color:var(--green);} .bstat b.neg{color:var(--red);}
+.bstat span{font-size:7.5px;color:var(--muted);letter-spacing:.3px;}
+.robust-ok{color:var(--green);font-weight:700;} .robust-bad{color:var(--red);font-weight:700;}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;margin:14px 0;height:260px;}
+@media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:360px){.stat-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">MARKOV-CHAIN BACKTEST</div><div class="logo-sub">STÜNDLICH · TÄGLICH · WÖCHENTLICH · MONATLICH, 52 TITEL</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="strategies-hub.html">← Strategien-Hub</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  Backtest des 2-Zustands-Markov-Edges (Zustand = Kerzenkörper-Richtung, Close ≥ Open), der dem
+  Live-Tab <b>🎲 Intraday Markov</b> in der KOMMANDOZENTRALE zugrunde liegt -- hier formal getestet über
+  <b>vier Zeitebenen</b> (Stündlich/Täglich/Wöchentlich/Monatlich), beide mögliche Hypothesen
+  (<b>Fortsetzung</b>: handle in Richtung des gerade geschlossenen Balkens; <b>Umkehr</b>: handle entgegengesetzt),
+  über einen Exit-Regel-Sweep, einheitlich über das 52-Symbol-Universum (keine Richtungs-Vorauswahl pro
+  Symbol), mit <b>Zweiperioden-Robustheitsprüfung</b> -- exakt dieselbe Disziplin wie bei
+  <a href="novem-backtest.html">NOVEM-Suite</a> und <a href="pivot-daily-backtest.html">Tages-Pivot</a>.
+  Einstieg immer zur nächsten Eröffnung nach dem Signal-Balken. Tagesdaten aus dem bereits vorhandenen
+  3-Jahres-Cache (52 liquide Standardwerte, split-bereinigt), Wochen/Monat daraus resampled, Stundendaten
+  frisch über <code>open-bb.replit.app</code> geladen (dieselbe Begründung wie beim Live-Tab: die regulären
+  EOD-Proxies liefern auf <code>/eod/intraday</code> aktuell 500er/403er, verifiziert).
+  </div>
+
+  <div id="findingBox" class="loading">Lade Backtest-Ergebnis…</div>
+</div>
+<script>
+function fmtPct(v, dp) { dp = dp == null ? 3 : dp; return (v==null?'—':(v>=0?'+':'') + v.toFixed(dp) + '%'); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+const TF_META = {
+  hourly:  { label: 'Stündlich', unit: 'Stunden' },
+  daily:   { label: 'Täglich',   unit: 'Tage' },
+  weekly:  { label: 'Wöchentlich', unit: 'Wochen' },
+  monthly: { label: 'Monatlich', unit: 'Monate' }
+};
+const EXIT_LABELS = {
+  horizon_1h:'Fix 1 Stunde', horizon_3h:'Fix 3 Stunden', horizon_5h:'Fix 5 Stunden', horizon_10h:'Fix 10 Stunden',
+  horizon_1d:'Fix 1 Tag', horizon_3d:'Fix 3 Tage', horizon_5d:'Fix 5 Tage', horizon_10d:'Fix 10 Tage',
+  horizon_1w:'Fix 1 Woche', horizon_2w:'Fix 2 Wochen', horizon_4w:'Fix 4 Wochen', horizon_8w:'Fix 8 Wochen',
+  horizon_1m:'Fix 1 Monat', horizon_2m:'Fix 2 Monate', horizon_3m:'Fix 3 Monate',
+  stop4pct_10d:'10 Tage + -4%-Stop',
+  signal_reversal:'Bis Gegenfarbe (Exit @ Close) ⚠', signal_reversal_open:'Bis Gegenfarbe (Exit @ Open) ⚠'
+};
+const UNRELIABLE_KEYS = ['signal_reversal','signal_reversal_open'];
+const HYP_LABELS = { continuation: 'Fortsetzung (Momentum)', reversal: 'Umkehr (Mean-Reversion)' };
+
+function robustBadge(stat) {
+  if (!stat || !stat.olderHalf || !stat.newerHalf || !stat.olderHalf.n || !stat.newerHalf.n) return '<span class="muted">—</span>';
+  const o = stat.olderHalf.sharpeLike, n = stat.newerHalf.sharpeLike;
+  const ok = o > 0 && n > 0 && n >= o * 0.5;
+  return ok ? '<span class="robust-ok">✓ robust</span>' : '<span class="robust-bad">✗ nicht robust</span>';
+}
+
+function exitTable(hypSummaries, winnerHyp, winnerKey) {
+  const keys = Object.keys(hypSummaries.continuation);
+  const rows = [];
+  for (const hyp of ['continuation','reversal']) {
+    for (const key of keys) {
+      const s = hypSummaries[hyp][key];
+      if (!s || !s.n) continue;
+      const isWinner = hyp === winnerHyp && key === winnerKey;
+      const unreliable = UNRELIABLE_KEYS.includes(key);
+      rows.push({ hyp, key, s, isWinner, unreliable });
+    }
+  }
+  rows.sort((a,b) => (b.s.sharpeLike||0) - (a.s.sharpeLike||0));
+  const body = rows.map(r => `
+    <tr class="${r.isWinner?'best':''} ${r.unreliable?'excluded':''}">
+      <td>${HYP_LABELS[r.hyp]}</td>
+      <td>${EXIT_LABELS[r.key]||r.key}${r.isWinner?' ★':''}</td>
+      <td class="num">${r.s.n.toLocaleString('de-DE')}</td>
+      <td class="num ${r.s.avgRet>=0?'pos':'neg'}">${fmtPct(r.s.avgRet)}</td>
+      <td class="num">${r.s.winRate}%</td>
+      <td class="num">${r.s.stopRate!=null?r.s.stopRate+'%':'—'}</td>
+      <td class="num">${r.s.sharpeLike}</td>
+      <td class="num">${r.unreliable?'<span class="muted">ausgeschlossen</span>':robustBadge(r.s)}</td>
+    </tr>`).join('');
+  return `<div class="table-wrap"><table><thead><tr><th>Hypothese</th><th>Exit-Regel</th><th class="num">N</th><th class="num">Ø Rendite</th>
+    <th class="num">Trefferquote</th><th class="num">-4%-Stop</th><th class="num">Sharpe-ähnlich</th><th class="num">2-Perioden-Check</th></tr></thead>
+    <tbody>${body}</tbody></table></div>`;
+}
+
+function leaderboardTable(leaderboard, fullCount) {
+  const rows = leaderboard.map((r,i) => `
+    <tr class="${i===0?'best':''}">
+      <td><b>${r.symbol}</b></td>
+      <td>${r.quality} (${r.entropy.toFixed(3)} bit)</td>
+      <td class="num">${r.n.toLocaleString('de-DE')}</td>
+      <td class="num ${r.avgRet>=0?'pos':'neg'}">${fmtPct(r.avgRet)}</td>
+      <td class="num">${r.winRate}%</td>
+      <td class="num">${r.sharpeLike}</td>
+      <td class="num">${r.robust?'<span class="robust-ok">✓</span>':'<span class="robust-bad">✗</span>'}</td>
+    </tr>`).join('');
+  return `<div class="table-wrap"><table><thead><tr><th>Symbol</th><th>Entropie-Qualität</th><th class="num">N Trades</th>
+    <th class="num">Ø Rendite</th><th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th><th class="num">Robust?</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    <div class="caveat" style="margin-top:6px;">Top 10 + schwächste 5 von ${fullCount} Symbolen, alle mit derselben universums-weiten Gewinner-Regel
+    (${leaderboard[0]?HYP_LABELS[leaderboard[0]._hyp||'']:''} bewusst NICHT pro Symbol neu optimiert, um Richtungs-Cherry-Picking auf Symbolebene zu vermeiden).</div>`;
+}
+
+async function load() {
+  try {
+    const res = await fetch('data/markov-chain-backtest-result.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    const tfKeys = ['hourly','daily','weekly','monthly'];
+
+    const summaryRows = tfKeys.map(k => {
+      const tf = d.timeframes[k];
+      const w = tf.winnerBest;
+      return `<tr>
+        <td><b>${TF_META[k].label}</b></td>
+        <td>${HYP_LABELS[tf.winnerHyp]}</td>
+        <td>${EXIT_LABELS[w.key]||w.key}</td>
+        <td class="num">${w.n.toLocaleString('de-DE')}</td>
+        <td class="num ${w.avgRet>=0?'pos':'neg'}">${fmtPct(w.avgRet)}</td>
+        <td class="num">${w.winRate}%</td>
+        <td class="num">${w.sharpeLike}</td>
+        <td class="num">${robustBadge(w)}</td>
+      </tr>`;
+    }).join('');
+
+    const robustCount = tfKeys.filter(k => { const w=d.timeframes[k].winnerBest; return w.olderHalf.n && w.newerHalf.n && w.olderHalf.sharpeLike>0 && w.newerHalf.sharpeLike>0 && w.newerHalf.sharpeLike>=w.olderHalf.sharpeLike*0.5; }).length;
+
+    const hEx = d.timeframes.hourly.hypSummaries.continuation;
+
+    document.getElementById('findingBox').outerHTML = `
+      <div class="finding">
+      <b>Gesamtbild: nach Ausschluss der methodisch unzuverlässigen "Bis Gegenfarbe"-Exit-Regel (siehe
+      Methodik-Hinweis unten) zeigt KEINE der vier Zeitebenen einen wirtschaftlich relevanten, robusten
+      Markov-Edge.</b> Die saubersten (Fixzeit- bzw. Stop-basierten) Exit-Regeln liegen bei Sharpe-ähnlich
+      0,10-0,54 -- statistisches Rauschen bis schwach messbar, nicht handelbar. Bester Rohwert ist
+      <b>Täglich, Fortsetzung + 10 Tage/-4%-Stop</b> (Sharpe-ähnlich ${d.timeframes.daily.winnerBest.sharpeLike}),
+      <b class="neg">fällt aber beim Zweiperioden-Check knapp durch</b>
+      (${d.timeframes.daily.winnerBest.olderHalf.sharpeLike} → ${d.timeframes.daily.winnerBest.newerHalf.sharpeLike},
+      unter der 50%-Schwelle). ${robustCount} von 4 Zeitebenen gelten technisch als "robust", aber mit
+      Sharpe-ähnlich-Werten von nur 0,10-0,34 ist das ein Robustheits-Pass auf einem wirtschaftlich
+      vernachlässigbaren Edge, kein Fund, der eine echte Strategie trägt. <b>Ergänzender Befund:</b> auf
+      keiner der vier Zeitebenen erreicht auch nur eines der 52 Symbole die "PATTERN"-Entropie-Schwelle
+      (&lt;0,75 Bit) -- alle 52×4 = 208 Messungen liegen bei 0,93-1,00 Bit (praktisch Münzwurf-Rauschen).
+      Der Entropie-"Qualitätsfilter" des Live-Tabs ist auf echten liquiden Aktien damit rein deskriptiv,
+      kein funktionierender Out-of-Sample-Filter in diesem Universum.
+      </div>
+
+      <h2>Zusammenfassung: beste saubere Regel je Zeitebene</h2>
+      <div class="table-wrap"><table><thead><tr><th>Zeitebene</th><th>Hypothese</th><th>Beste Regel</th>
+      <th class="num">N Trades</th><th class="num">Ø Rendite</th><th class="num">Trefferquote</th>
+      <th class="num">Sharpe-ähnlich</th><th class="num">2-Perioden-Check</th></tr></thead><tbody>${summaryRows}</tbody></table></div>
+
+      <h2>Methodik-Hinweis: die "Bis Gegenfarbe"-Falle (Exit-Regel-Artefakt, mit Beweis)</h2>
+      <div class="finding">
+      Für ein Signal, bei dem <b>jeder einzelne Balken</b> einen Zustand trägt (anders als bei den NOVEM-
+      Detektoren, die selten feuern), entpuppt sich "halten bis die Gegenfarbe erscheint" als
+      selbstreferenziell: die Exit-Regel wählt den Ausstiegszeitpunkt anhand einer Eigenschaft GENAU DES
+      Balkens, an dem sie aussteigt. Zwei naive Varianten getestet, beide am Beispiel Stündlich/Fortsetzung:
+      <br><br>
+      <b>Exit @ Close des Umkehr-Balkens:</b> Trefferquote ${hEx.signal_reversal.winRate}%, Sharpe-ähnlich
+      ${hEx.signal_reversal.sharpeLike} -- bricht auf eine Trefferquote von nur 3,2% ein, sobald man exakt
+      denselben Balken stattdessen an seiner EIGENEN Eröffnung statt seinem Schluss verlässt (reiner
+      Kontroll-Test, nicht Teil der Haupttabelle) -- Beweis, dass der scheinbare Edge nur daraus kommt, dass
+      der Schlusskurs des Stopp-Balkens per Definition in die "richtige" Richtung gelaufen ist.<br>
+      <b>Exit @ Open des Umkehr-Balkens:</b> Trefferquote ${hEx.signal_reversal_open.winRate}%, Sharpe-ähnlich
+      ${hEx.signal_reversal_open.sharpeLike} -- nach Korrektur eines Mindesthalte-Bugs (Entry und Exit durften
+      vorher auf demselben Balken landen, was massenhaft exakte 0%-Trades erzeugte) bleibt dennoch ein
+      unplausibel großer, über beide Zeithälften stabiler Sharpe-Wert übrig, der strukturell daraus entsteht,
+      dass "Eröffnung des nächsten Balkens" und "Schluss des aktuellen Balkens" bei stündlichen/täglichen
+      Reihen fast identisch sind -- die Exit-Regel misst dann faktisch wieder nur die Eigenbewegung des
+      Einstiegs-Balkens selbst, nicht einen echten mehrperiodigen Effekt.<br><br>
+      <b>Konsequenz:</b> beide Varianten werden aus der Gewinner-Ermittlung ausgeschlossen (in den Tabellen
+      unten ausgegraut, mit ⚠ markiert) -- nur die unverfänglichen Fixzeit- und Stop-Regeln zählen für die
+      Verdikte oben.
+      </div>
+
+      <div id="tfSections"></div>
+
+      <div class="caveat">
+      <b>Einschränkungen, ehrlich benannt:</b><br>
+      • Zustand = Kerzenkörper-Richtung (Close ≥ Open), 1. Ordnung -- dieselbe Definition wie im Live-Tab
+      und in <a href="https://babybounce500.github.io/neural-kommandozentrale/trading/KOMMANDOZENTRALE-V2.html">🎲 Intraday Markov</a>,
+      nicht die einzig mögliche Markov-Zustandsdefinition.<br>
+      • Richtung (Fortsetzung/Umkehr) wird einheitlich über das gesamte Universum getestet, nicht pro Symbol
+      optimiert -- vermeidet Cherry-Picking, kann aber einen pro-Symbol stärkeren Edge verdecken.<br>
+      • 52 liquide Standardwerte (dieselben wie NOVEM-Suite), 3 Jahre täglich bzw. ~1 Jahr stündlich (die
+      Stunden-Proxy liefert keine längere Historie) -- kleineres Universum/Fenster als die großen
+      Mehrjahres-Backtests dieses Repos.<br>
+      • Wochen/Monat aus Tagesdaten resampled (Montag-Woche, Kalendermonat), keine eigene Datenquelle.<br>
+      • Keine Transaktionskosten/Spreads/Slippage eingerechnet -- bei stündlichen Halteperioden wiegt das
+      besonders schwer.<br>
+      • Entropie-Qualitätsfilter ist hier rein deskriptiv (Tier-Vergleich), nicht Teil der Gewinner-Auswahl.
+      </div>
+
+      <div class="source-note">
+      ${d.meta.universe} Titel · Berechnet ${new Date(d.meta.generatedAt).toLocaleString('de-DE')} ·
+      Live-Version der zugrundeliegenden Logik: <a href="https://babybounce500.github.io/neural-kommandozentrale/trading/KOMMANDOZENTRALE-V2.html">🎲 Intraday Markov in der KOMMANDOZENTRALE</a>.
+      </div>
+    `;
+
+    const sections = tfKeys.map(k => {
+      const tf = d.timeframes[k];
+      const w = tf.winnerBest;
+      tf.leaderboard.forEach(r => r._hyp = tf.winnerHyp);
+      return `
+      <h2>${TF_META[k].label}</h2>
+      <div class="stat-grid">
+        <div class="bstat"><b>${tf.usedSymbols}</b><span>SYMBOLE GETESTET</span></div>
+        <div class="bstat"><b class="${w.avgRet>=0?'pos':'neg'}">${fmtPct(w.avgRet)}</b><span>Ø RENDITE (BESTE SAUBERE REGEL)</span></div>
+        <div class="bstat"><b>${w.winRate}%</b><span>TREFFERQUOTE</span></div>
+        <div class="bstat"><b class="${w.sharpeLike>=0?'pos':'neg'}">${w.sharpeLike}</b><span>SHARPE-ÄHNLICH</span></div>
+      </div>
+      <h3>Alle Hypothesen × Exit-Regeln (⚠ = methodisch ausgeschlossen, siehe oben)</h3>
+      ${exitTable(tf.hypSummaries, tf.winnerHyp, w.key)}
+      <h3>Entropie-Qualität: PATTERN vs. NOISE (deskriptiv, nicht gewinner-bestimmend)</h3>
+      <div class="finding" style="margin:8px 0;">
+        PATTERN-Symbole (Entropie &lt; 0,75 Bit): <b>${tf.qualityTier.pattern.n}</b> von ${tf.usedSymbols}.
+        ${tf.qualityTier.pattern.n ? `Sharpe-ähnlich ${tf.qualityTier.pattern.sharpeLike} (PATTERN) vs. ${tf.qualityTier.noise.sharpeLike} (NOISE).` : 'Keine einzige PATTERN-Einstufung auf dieser Zeitebene -- der Filter unterscheidet hier nichts.'}
+      </div>
+      <h3>Symbol-Leaderboard (Top 10 + schwächste 5, feste Gewinner-Regel)</h3>
+      ${leaderboardTable(tf.leaderboard, tf.leaderboardFullCount)}
+      `;
+    }).join('');
+    document.getElementById('tfSections').innerHTML = sections;
+  } catch (e) {
+    document.getElementById('findingBox').innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
