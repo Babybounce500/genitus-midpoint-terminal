@@ -361,7 +361,11 @@ const TOOLS = [
 {
   file: 'SMART-ARGENTUM-EDGE.html', title: 'Smart Argentum Edge', icon: 'fa-coins',
   heading: 'SMART ARGENTUM EDGE', sub: 'Cross-sektionaler Relative-Stärke Z-Score (NOVEM "Argentum") · bedingt robuster Edge im mittleren Regime',
-  backtest: { n: 16920, avgRet: 0.1749, winRate: 42.88, sharpeLike: 0.545, bestBucket: 'mid_P', robust: true, caveat: true,
+  // robust:false -- newerHalf.sharpeLike (0.327) < 50% of olderHalf.sharpeLike (0.79), fails the
+  // canonical isRobust() check in smart-target-master-report.html (see data/smart-target-master-result.json).
+  // The hardcoded true here contradicted both the caveat text below AND the sub-heading above --
+  // found and fixed on user report, not caught by the original generator run.
+  backtest: { n: 16920, avgRet: 0.1749, winRate: 42.88, sharpeLike: 0.545, bestBucket: 'mid_P', robust: false, caveat: true,
     buckets: { far_lowP: null, mid_P: 0.1749, near_highP: null },
     winBuckets: { far_lowP: null, mid_P: 4.9624, near_highP: null },
     winRateBuckets: { far_lowP: 46.87, mid_P: 42.88, near_highP: 33.06 } },
