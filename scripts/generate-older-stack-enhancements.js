@@ -163,9 +163,12 @@ const ENHANCEMENTS = [
 
 {
   file: 'ARGENTUM-DAILY-FINAL (1).html', defaultWatchlist: 'NVDA.US, TSLA.US, SAP.XETRA, BAS.XETRA',
-  backtest: { n: 16920, avgRet: 0.1749, winRate: 42.88, sharpeLike: 0.545, bestBucket: 'mid_P', status: 'validated', buckets: { far_lowP: null, mid_P: 0.1749, near_highP: null },
+  // status corrected to 'warning': newerHalf.sharpeLike (0.327) is only 41% of olderHalf.sharpeLike
+  // (0.79), below the project's 50% robustness cutoff -- found via the same cross-check that caught
+  // the SMART-ARGENTUM-EDGE.html badge mismatch; this older-stack panel had the identical bug.
+  backtest: { n: 16920, avgRet: 0.1749, winRate: 42.88, sharpeLike: 0.545, bestBucket: 'mid_P', status: 'warning', buckets: { far_lowP: null, mid_P: 0.1749, near_highP: null },
     winBuckets: { far_lowP: null, mid_P: 4.9624, near_highP: null }, winRateBuckets: { far_lowP: 46.87, mid_P: 42.88, near_highP: 33.06 } },
-  introHTML: 'Backtest-validiert (siehe <a href="https://babybounce500.github.io/genitus-midpoint-terminal/smart-target-master-report.html" target="_blank">Master-Report</a>): Der stärkste Bucket von Argentum ist "mid_P", Sharpe 0.545, robust über beide Zeithälften (aber schwächt leicht ab -- siehe Report).',
+  introHTML: 'Geprüft (siehe <a href="https://babybounce500.github.io/genitus-midpoint-terminal/smart-target-master-report.html" target="_blank">Master-Report</a>): Der stärkste Bucket von Argentum ist "mid_P", Sharpe 0.545, aber NICHT robust -- Sharpe fällt von 0.79 (ältere Hälfte) auf 0.33 (neuere Hälfte), unter die 50%-Schwelle. Reale Zahlen, aber Edge schwächt sich deutlich ab.',
   detectorBody: `
   const UNIVERSE = ['AAPL.US','MSFT.US','GOOGL.US','AMZN.US','NVDA.US','META.US','TSLA.US','JPM.US','JNJ.US','PG.US','SAP.XETRA','SIE.XETRA','ALV.XETRA','BAS.XETRA','DTE.XETRA'];
   const basket = Array.from(new Set([symbol, ...UNIVERSE]));
