@@ -71,7 +71,7 @@ h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);m
   Aus dem robusten Teil des Rankings (beide Zeithälften positiv) wurden die 10 stärksten, inhaltlich
   unterschiedlichen Signale zu eigenständigen Live-Tools gebaut -- jedes mit dem validierten Smart Stop
   (-4%) und einem Vola-Bucket-abhängigen Smart Target, plus Live-GBM-Badge. Alle 10 sind auch über den
-  <a href="https://babybounce500.github.io/neural-kommandozentrale/trading/IFRAME-BOT-V2.html">Iframe-Bot</a>
+  <a href="https://babybounce500.github.io/neural-kommandozentrale-v2/trading/IFRAME-BOT-V2.html">Iframe-Bot</a>
   navigierbar.
   </div>
   <div class="tool-grid" id="toolGrid"></div>
@@ -147,7 +147,7 @@ async function load() {
       <th class="num">Älter → Neuer</th><th>Robust</th></tr></thead><tbody>${rows}</tbody></table>`;
 
     document.getElementById('toolGrid').innerHTML = TOOL_LINKS.map(t => `
-      <a class="tool-card" href="https://babybounce500.github.io/neural-kommandozentrale/trading/${t.file}">
+      <a class="tool-card" href="https://babybounce500.github.io/neural-kommandozentrale-v2/trading/${t.file}">
         <div class="n">${t.name}</div>
         <div class="s">Sharpe-ähnlich ${t.sharpe}</div>
       </a>`).join('');
