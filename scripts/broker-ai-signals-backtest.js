@@ -30,13 +30,20 @@ function summarize(trades, retKey) {
   const avg = mean(rets);
   const sorted = rets.slice().sort((a, b) => a - b);
   const median = n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
-  const wins = rets.filter(r => r > 0).length;
+  const winTrades = rets.filter(r => r > 0);
+  const lossTrades = rets.filter(r => r <= 0);
+  const wins = winTrades.length;
   const std = stdev(rets, avg);
   return {
     n,
     avgRet: +avg.toFixed(4),
     medianRet: +median.toFixed(4),
     winRate: +((wins / n) * 100).toFixed(2),
+    // avgWin/avgLoss: real achieved trade outcomes (not the all-trades mean) -- used to build an
+    // actual tradeable target price (avgWin) instead of a time-averaged expectancy number that
+    // looks like a price level but isn't one. See smart-target-master-backtest.js for the same fix.
+    avgWin: winTrades.length ? +mean(winTrades).toFixed(4) : null,
+    avgLoss: lossTrades.length ? +mean(lossTrades).toFixed(4) : null,
     stdDev: +std.toFixed(4),
     sharpeLike: std > 0 ? +((avg / std) * Math.sqrt(252)).toFixed(3) : 0,
     worstTrade: +sorted[0].toFixed(2),

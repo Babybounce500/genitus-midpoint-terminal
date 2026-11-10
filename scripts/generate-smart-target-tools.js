@@ -79,12 +79,18 @@ const SHARED_SCRIPT_HEAD = `
       return { pTouchStop, sigma: params.sigma, bucket: volBucketOf(pTouchStop) };
     } catch (e) { console.error('getVolRegime failed', e); return null; }
   }
+  // Echtes Limit statt Erwartungswert: Target = Entry +/- Ø-Groesse der tatsaechlichen GEWINNER-Trades
+  // in diesem Bucket (winBuckets), nicht der Durchschnitt ueber ALLE Trades (der war nur 0.17-0.69%
+  // gross und erzeugte ein absurdes 1:20-Chance/Risiko gegen den festen 4%-Stop). Stop bleibt hart -4%.
   function smartStopTarget(price, direction, bucket) {
     const sign = direction==='LONG'?1:-1;
-    const bucketAvgRet = BACKTEST.buckets[bucket] != null ? BACKTEST.buckets[bucket] : BACKTEST.avgRet;
-    const target = price*(1+sign*(bucketAvgRet/100));
+    const bucketAvgRet = BACKTEST.buckets[bucket] != null ? BACKTEST.buckets[bucket] : null;
+    const noEdge = bucketAvgRet == null || bucketAvgRet < 0;
+    const winPct = (BACKTEST.winBuckets && BACKTEST.winBuckets[bucket] != null) ? BACKTEST.winBuckets[bucket] : STOP_PCT;
+    const hitRate = (BACKTEST.winRateBuckets && BACKTEST.winRateBuckets[bucket] != null) ? BACKTEST.winRateBuckets[bucket] : BACKTEST.winRate;
+    const target = price*(1+sign*(winPct/100));
     const stop = price*(1-sign*(STOP_PCT/100));
-    return { target: target.toFixed(2), stop: stop.toFixed(2), bucketAvgRet, noEdge: BACKTEST.buckets[bucket] != null && bucketAvgRet < 0 };
+    return { target: target.toFixed(2), stop: stop.toFixed(2), winPct, hitRate, bucketAvgRet, noEdge };
   }
 `;
 
@@ -102,9 +108,10 @@ function renderCard(sym, price, direction, vts, volRegime) {
     \${noEdge ? '<div class="bg-red-100 dark:bg-red-900/40 border border-red-400 text-red-800 dark:text-red-300 text-xs font-bold p-2 rounded text-center mb-2">⛔ KEIN TRADE EMPFOHLEN -- ausserhalb des validierten Vola-Buckets</div>' : ''}
     <div class="font-mono text-sm space-y-1.5">
       <div class="flex justify-between bg-gray-100 dark:bg-gray-800 p-1.5 rounded"><span>ENTRY</span><span class="font-bold">\${price.toFixed(2)}</span></div>
-      <div class="flex justify-between \${noEdge?'bg-gray-100 dark:bg-gray-800 opacity-60':'bg-blue-50 dark:bg-blue-950'} p-1.5 rounded"><span>SMART TARGET</span><span class="font-bold \${noEdge?'text-gray-500':'text-blue-600 dark:text-blue-400'}">\${vts.target}</span></div>
-      <div class="flex justify-between bg-orange-50 dark:bg-orange-950 p-1.5 rounded"><span>SMART STOP (-4%)</span><span class="font-bold text-orange-600 dark:text-orange-400">\${vts.stop}</span></div>
+      <div class="flex justify-between \${noEdge?'bg-gray-100 dark:bg-gray-800 opacity-60':'bg-blue-50 dark:bg-blue-950'} p-1.5 rounded"><span>SMART TARGET (Limit)</span><span class="font-bold \${noEdge?'text-gray-500':'text-blue-600 dark:text-blue-400'}">\${vts.target}</span></div>
+      <div class="flex justify-between bg-orange-50 dark:bg-orange-950 p-1.5 rounded"><span>SMART STOP (-4%, hart)</span><span class="font-bold text-orange-600 dark:text-orange-400">\${vts.stop}</span></div>
     </div>
+    <div class="text-[10px] text-gray-400 dark:text-gray-500 mt-1 px-1">🎯 Echtes Limit: Ø-Größe der tatsächlichen <b>Gewinner</b>-Trades in diesem Bucket (±\${vts.winPct.toFixed(2)}%), nicht der Durchschnitt über alle Trades. Trifft ca. in \${vts.hitRate}% der Fälle (sonst meist Stop). R:R ≈ \${(vts.winPct/STOP_PCT).toFixed(1)}:1 gegen den festen \${STOP_PCT}%-Stop, max. \${HOLD_DAYS} Handelstage Haltedauer.</div>
     \${volRegime ? \`
     <div class="text-[11px] text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
       <div>🎯 P(Touch Stop in \${HOLD_DAYS}d) = \${(volRegime.pTouchStop*100).toFixed(0)}% (σ=\${(volRegime.sigma*100).toFixed(1)}%)</div>
@@ -125,7 +132,9 @@ const TOOLS = [
   file: 'SMART-MONTHLY-EDGE.html', title: 'Smart Monthly Edge', icon: 'fa-calendar-days',
   heading: 'SMART MONTHLY EDGE', sub: 'Monats-Momentum (Broker-AI "Monthly") · bester Edge im volatilen Regime',
   backtest: { n: 5018, avgRet: 0.6901, winRate: 34.91, sharpeLike: 1.389, bestBucket: 'near_highP', robust: true,
-    buckets: { far_lowP: -0.2037, mid_P: 0.1676, near_highP: 0.6901 } },
+    buckets: { far_lowP: -0.2037, mid_P: 0.1676, near_highP: 0.6901 },
+    winBuckets: { far_lowP: 3.3155, mid_P: 4.9328, near_highP: 9.0082 },
+    winRateBuckets: { far_lowP: 44.85, mid_P: 42.83, near_highP: 34.91 } },
   detectorBody: `
     const monthlyData = await API.eod.historical(symbol, { from: lastFridayPrevMonth(), to: lastFridayPrevMonth() });
     monthlyData.sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -155,7 +164,9 @@ const TOOLS = [
   file: 'SMART-DENARIUS-EDGE.html', title: 'Smart Denarius Edge', icon: 'fa-bolt',
   heading: 'SMART DENARIUS EDGE', sub: '2-Tage-Momentum-Spread (NOVEM "Denarius") · bester Edge im volatilen Regime',
   backtest: { n: 5057, avgRet: 0.4668, winRate: 34.19, sharpeLike: 0.995, bestBucket: 'near_highP', robust: true,
-    buckets: { far_lowP: null, mid_P: 0.209, near_highP: 0.4668 } },
+    buckets: { far_lowP: null, mid_P: 0.209, near_highP: 0.4668 },
+    winBuckets: { far_lowP: 3.3232, mid_P: 4.9775, near_highP: 8.6108 },
+    winRateBuckets: { far_lowP: 45.41, mid_P: 43.1, near_highP: 34.19 } },
   detectorBody: `
     const data = await API.eod.historical(symbol, { from: isoDaysAgo(14) });
     data.sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -173,7 +184,9 @@ const TOOLS = [
   file: 'SMART-SPREAD-EDGE.html', title: 'Smart Spread Edge', icon: 'fa-chart-line',
   heading: 'SMART SPREAD EDGE', sub: '2-Tage-Momentum-Spread (Broker-AI "Spread") · bester Edge im volatilen Regime',
   backtest: { n: 5054, avgRet: 0.4653, winRate: 34.19, sharpeLike: 0.992, bestBucket: 'near_highP', robust: true,
-    buckets: { far_lowP: -0.1332, mid_P: 0.2087, near_highP: 0.4653 } },
+    buckets: { far_lowP: -0.1332, mid_P: 0.2087, near_highP: 0.4653 },
+    winBuckets: { far_lowP: 3.3216, mid_P: 4.9752, near_highP: 8.6058 },
+    winRateBuckets: { far_lowP: 45.42, mid_P: 43.11, near_highP: 34.19 } },
   note: 'Methodisch identisch mit Smart Denarius Edge (gleiche Formel, unabhängig aus zwei verschiedenen Quell-Dateien validiert) -- bewusst separat gelistet, Übereinstimmung ist Konsistenz-Check, kein Zufall.',
   detectorBody: `
     const data = await API.eod.historical(symbol, { from: isoDaysAgo(14) });
@@ -192,7 +205,9 @@ const TOOLS = [
   file: 'SMART-MIDPOINT-EDGE.html', title: 'Smart Midpoint Edge', icon: 'fa-arrows-up-down',
   heading: 'SMART MIDPOINT EDGE', sub: 'Intraday-Mittelpunkt (Broker-AI "Midpoint") · bester Edge im volatilen Regime',
   backtest: { n: 5056, avgRet: 0.4395, winRate: 34.16, sharpeLike: 0.941, bestBucket: 'near_highP', robust: true,
-    buckets: { far_lowP: -0.0443, mid_P: 0.1821, near_highP: 0.4395 } },
+    buckets: { far_lowP: -0.0443, mid_P: 0.1821, near_highP: 0.4395 },
+    winBuckets: { far_lowP: 3.3611, mid_P: 4.9094, near_highP: 8.5697 },
+    winRateBuckets: { far_lowP: 46.48, mid_P: 43.26, near_highP: 34.16 } },
   detectorBody: `
     const data = await API.eod.historical(symbol, { from: isoDaysAgo(5) });
     data.sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -212,7 +227,9 @@ const TOOLS = [
   file: 'SMART-WEEKLYSMA-EDGE.html', title: 'Smart WeeklySMA Edge', icon: 'fa-wave-square',
   heading: 'SMART WEEKLYSMA EDGE', sub: '3er-SMA-Crossover (Broker-AI "WeeklySMA") · bester Edge im volatilen Regime',
   backtest: { n: 5041, avgRet: 0.3741, winRate: 33.13, sharpeLike: 0.794, bestBucket: 'near_highP', robust: true,
-    buckets: { far_lowP: -0.2102, mid_P: 0.2251, near_highP: 0.3741 } },
+    buckets: { far_lowP: -0.2102, mid_P: 0.2251, near_highP: 0.3741 },
+    winBuckets: { far_lowP: 3.3123, mid_P: 4.9551, near_highP: 8.7193 },
+    winRateBuckets: { far_lowP: 44.6, mid_P: 43.42, near_highP: 33.13 } },
   detectorBody: `
     const data = await API.eod.historical(symbol, { from: isoDaysAgo(12) });
     data.sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -231,7 +248,9 @@ const TOOLS = [
   file: 'SMART-CONSULTUS-EDGE.html', title: 'Smart Consultus Edge', icon: 'fa-compress',
   heading: 'SMART CONSULTUS EDGE', sub: 'Kompressions-Breakout, täglich (NOVEM "Consultus Daily") · bester Edge im volatilen Regime',
   backtest: { n: 2532, avgRet: 0.3458, winRate: 32.58, sharpeLike: 0.739, bestBucket: 'near_highP', robust: true,
-    buckets: { far_lowP: null, mid_P: 0.245, near_highP: 0.3458 } },
+    buckets: { far_lowP: null, mid_P: 0.245, near_highP: 0.3458 },
+    winBuckets: { far_lowP: 3.2176, mid_P: 4.9117, near_highP: 8.7672 },
+    winRateBuckets: { far_lowP: 44.86, mid_P: 43.84, near_highP: 32.58 } },
   detectorBody: `
     const data = await API.eod.historical(symbol, { from: isoDaysAgo(25) });
     data.sort((a,b)=>new Date(a.date)-new Date(b.date));
@@ -262,7 +281,9 @@ const TOOLS = [
   file: 'SMART-CORPUS-EDGE.html', title: 'Smart Corpus Edge', icon: 'fa-layer-group',
   heading: 'SMART CORPUS EDGE', sub: 'Kerzenkörper-Kompression (NOVEM "Corpus Parvus") · bester Edge im volatilen Regime',
   backtest: { n: 2548, avgRet: 0.3201, winRate: 32.61, sharpeLike: 0.686, bestBucket: 'near_highP', robust: true,
-    buckets: { far_lowP: null, mid_P: null, near_highP: 0.3201 } },
+    buckets: { far_lowP: null, mid_P: null, near_highP: 0.3201 },
+    winBuckets: { far_lowP: null, mid_P: null, near_highP: 8.7301 },
+    winRateBuckets: { far_lowP: 45.43, mid_P: 43.43, near_highP: 32.61 } },
   detectorBody: `
     const data = await API.eod.historical(symbol, { from: isoDaysAgo(25) });
     data.sort((a,b)=>new Date(a.date)-new Date(b.date));
@@ -291,7 +312,9 @@ const TOOLS = [
   file: 'SMART-HIDDENSMASH-EDGE.html', title: 'Smart Hidden-Smash Edge', icon: 'fa-ghost',
   heading: 'SMART HIDDEN-SMASH EDGE', sub: 'Stop-Hunt / Liquidity-Trap (NOVEM "Hidden Smash") · bester Edge im mittleren Regime',
   backtest: { n: 10074, avgRet: 0.1859, winRate: 43.39, sharpeLike: 0.584, bestBucket: 'mid_P', robust: true,
-    buckets: { far_lowP: null, mid_P: 0.1859, near_highP: null } },
+    buckets: { far_lowP: null, mid_P: 0.1859, near_highP: null },
+    winBuckets: { far_lowP: null, mid_P: 4.8794, near_highP: null },
+    winRateBuckets: { far_lowP: 47.49, mid_P: 43.39, near_highP: 33.44 } },
   detectorBody: `
     const data = await API.eod.historical(symbol, { from: isoDaysAgo(10) });
     data.sort((a,b)=>new Date(a.date)-new Date(b.date));
@@ -310,7 +333,9 @@ const TOOLS = [
   file: 'SMART-VOLUMINA-EDGE.html', title: 'Smart Volumina Edge', icon: 'fa-chart-column',
   heading: 'SMART VOLUMINA EDGE', sub: 'Volumen-Kompressions-Breakout (NOVEM "Volumina") · bester Edge im volatilen Regime',
   backtest: { n: 2621, avgRet: 0.2511, winRate: 31.36, sharpeLike: 0.539, bestBucket: 'near_highP', robust: true,
-    buckets: { far_lowP: null, mid_P: 0.214, near_highP: 0.2511 } },
+    buckets: { far_lowP: null, mid_P: 0.214, near_highP: 0.2511 },
+    winBuckets: { far_lowP: null, mid_P: 4.9331, near_highP: 9.0256 },
+    winRateBuckets: { far_lowP: 45.58, mid_P: 43.57, near_highP: 31.36 } },
   detectorBody: `
     const data = await API.eod.historical(symbol, { from: isoDaysAgo(25) });
     data.sort((a,b)=>new Date(a.date)-new Date(b.date));
@@ -337,7 +362,9 @@ const TOOLS = [
   file: 'SMART-ARGENTUM-EDGE.html', title: 'Smart Argentum Edge', icon: 'fa-coins',
   heading: 'SMART ARGENTUM EDGE', sub: 'Cross-sektionaler Relative-Stärke Z-Score (NOVEM "Argentum") · bedingt robuster Edge im mittleren Regime',
   backtest: { n: 16920, avgRet: 0.1749, winRate: 42.88, sharpeLike: 0.545, bestBucket: 'mid_P', robust: true, caveat: true,
-    buckets: { far_lowP: null, mid_P: 0.1749, near_highP: null } },
+    buckets: { far_lowP: null, mid_P: 0.1749, near_highP: null },
+    winBuckets: { far_lowP: null, mid_P: 4.9624, near_highP: null },
+    winRateBuckets: { far_lowP: 46.87, mid_P: 42.88, near_highP: 33.06 } },
   detectorBody: `
     const UNIVERSE = ['AAPL.US','MSFT.US','GOOGL.US','AMZN.US','NVDA.US','META.US','TSLA.US','JPM.US','JNJ.US','PG.US','SAP.XETRA','SIE.XETRA','ALV.XETRA','BAS.XETRA','DTE.XETRA'];
     const basket = Array.from(new Set([symbol, ...UNIVERSE]));
@@ -373,6 +400,8 @@ const TOOLS = [
 
 function buildTool(spec) {
   const buckets = Object.entries(spec.backtest.buckets).map(([k,v]) => `${k}: ${v === null ? 'null' : v}`).join(', ');
+  const winBuckets = Object.entries(spec.backtest.winBuckets).map(([k,v]) => `${k}: ${v === null ? 'null' : v}`).join(', ');
+  const winRateBuckets = Object.entries(spec.backtest.winRateBuckets).map(([k,v]) => `${k}: ${v === null ? 'null' : v}`).join(', ');
   return `${SHARED_HEAD(spec.title)}
   <header class="bg-white dark:bg-gray-900 shadow-lg">
     <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -410,7 +439,7 @@ function buildTool(spec) {
     <p class="text-xs text-gray-400 mt-4">Keine Anlageberatung. Smart Stop/Target und Vola-Bucket basieren auf historischer Drift/Volatilität -- keine Garantie für zukünftiges Verhalten.</p>
   </main>
 <script>
-  const BACKTEST = { n: ${spec.backtest.n}, avgRet: ${spec.backtest.avgRet}, winRate: ${spec.backtest.winRate}, sharpeLike: ${spec.backtest.sharpeLike}, bestBucket: '${spec.backtest.bestBucket}', robust: ${spec.backtest.robust}, buckets: { ${buckets} } };
+  const BACKTEST = { n: ${spec.backtest.n}, avgRet: ${spec.backtest.avgRet}, winRate: ${spec.backtest.winRate}, sharpeLike: ${spec.backtest.sharpeLike}, bestBucket: '${spec.backtest.bestBucket}', robust: ${spec.backtest.robust}, buckets: { ${buckets} }, winBuckets: { ${winBuckets} }, winRateBuckets: { ${winRateBuckets} } };
 ${SHARED_SCRIPT_HEAD}
 ${spec.extraHelpers}
 ${RESULT_CARD}

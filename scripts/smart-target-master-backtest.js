@@ -42,11 +42,17 @@ function summarize(trades, retKey) {
   const avg = mean(rets);
   const sorted = rets.slice().sort((a, b) => a - b);
   const median = n % 2 ? sorted[(n - 1) / 2] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
-  const wins = rets.filter(r => r > 0).length;
+  const winTrades = rets.filter(r => r > 0);
+  const lossTrades = rets.filter(r => r <= 0);
+  const wins = winTrades.length;
   const std = stdev(rets, avg);
   const stopRate = +((trades.filter(t => t.stopped).length / n) * 100).toFixed(2);
   return {
     n, avgRet: +avg.toFixed(4), medianRet: +median.toFixed(4), winRate: +((wins / n) * 100).toFixed(2),
+    // avgWin/avgLoss: real achieved trade outcomes -- used for an actual tradeable target price
+    // instead of the all-trades-average expectancy (which isn't a price level, see user report).
+    avgWin: winTrades.length ? +mean(winTrades).toFixed(4) : null,
+    avgLoss: lossTrades.length ? +mean(lossTrades).toFixed(4) : null,
     stdDev: +std.toFixed(4), sharpeLike: std > 0 ? +((avg / std) * Math.sqrt(252)).toFixed(3) : 0, stopRate
   };
 }
@@ -275,7 +281,7 @@ for (const [family, signals] of [['novem', novemMaster], ['brokerAi', brokerAi]]
   for (const [name, data] of Object.entries(signals)) {
     for (const [bucket, s] of Object.entries(data.volFilter)) {
       if (!s.n || s.n < MIN_N) continue;
-      combos.push({ family, signal: name, bucket, n: s.n, avgRet: s.avgRet, medianRet: s.medianRet, winRate: s.winRate, sharpeLike: s.sharpeLike, olderHalf: s.olderHalf, newerHalf: s.newerHalf });
+      combos.push({ family, signal: name, bucket, n: s.n, avgRet: s.avgRet, medianRet: s.medianRet, winRate: s.winRate, avgWin: s.avgWin, avgLoss: s.avgLoss, sharpeLike: s.sharpeLike, olderHalf: s.olderHalf, newerHalf: s.newerHalf });
     }
   }
 }
