@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENITUS HEIKIN-NARROW // Backtest</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7fb;--surface:#ffffff;--panel:#eaf1f6;--card:#ffffff;--border:#d6e2ea;--accent:#0e7490;--green:#15803d;--red:#b91c1c;--gold:#b45309;--muted:#5f7277;--text:#1c2e34;--bright:#0b1620;--mono:'JetBrains Mono',monospace;--head:'Orbitron',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:var(--mono);}
+header{position:sticky;top:0;z-index:200;background:rgba(244,247,251,.94);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.logo-name{font-family:var(--head);font-size:15px;letter-spacing:3px;color:var(--bright);}
+.logo-sub{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px;}
+.back{font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;border:1px solid var(--border);padding:7px 12px;border-radius:4px;}
+.wrap{max-width:1150px;margin:0 auto;padding:22px 24px 70px;}
+.intro{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8;max-width:950px;margin-bottom:16px;border-left:2px solid var(--accent);padding-left:14px;}
+.intro b{color:var(--text)}
+.intro a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:10px;}
+th{font-family:var(--head);font-size:7.5px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:7px 5px;border-bottom:1px solid var(--border);white-space:nowrap;}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;}
+td{padding:6px 5px;border-bottom:1px solid rgba(14,116,144,.15);white-space:nowrap;}
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.loading,.error{font-family:var(--mono);font-size:11px;color:var(--muted);padding:30px 0;text-align:center;}
+.error{color:var(--red);}
+.source-note{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-top:30px;border-top:1px solid var(--border);padding-top:14px;}
+.pos{color:var(--green);} .neg{color:var(--red);}
+.best{background:rgba(21,128,61,.08);} .excluded{opacity:.5;}
+h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin:28px 0 12px;text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:7px;}
+h3{font-family:var(--head);font-size:10px;letter-spacing:1px;color:var(--accent);margin:16px 0 8px;text-transform:uppercase;}
+.finding{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:11px;line-height:1.7;margin:16px 0;}
+.finding b{color:var(--bright)}
+.caveat{font-size:10.5px;color:var(--muted);line-height:1.8;background:var(--panel);border-left:2px solid var(--gold);padding:10px 14px;margin:16px 0;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+.bstat{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px 10px;text-align:center;}
+.bstat b{font-family:var(--head);font-size:16px;display:block;color:var(--bright);}
+.bstat b.pos{color:var(--green);} .bstat b.neg{color:var(--red);}
+.bstat span{font-size:7.5px;color:var(--muted);letter-spacing:.3px;}
+.robust-ok{color:var(--green);font-weight:700;} .robust-bad{color:var(--red);font-weight:700;}
+@media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:360px){.stat-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo-name">HEIKIN-NARROW BACKTEST</div><div class="logo-sub">NARROW-RANGE HEIKIN-ASHI ENTRY, STARKE-KERZE-EXIT</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="back" href="strategies-hub.html">← Strategien-Hub</a>
+    <a class="back" href="markov-chain-backtest.html">🎲 Markov-Chain-Backtest</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="intro">
+  Nutzer-Konzept, formalisiert: <b>"nicht einsteigen, wenn der Markt heiß ist"</b> -- Einstieg nur bei einer
+  <b>engen (ruhigen) Heikin-Ashi-Kerze</b> (NR4/NR7: die Range der letzten 4 bzw. 7 HA-Balken ist am
+  Einstiegsbalken am kleinsten), Richtung = Farbe dieser Kerze (Fortsetzung) gegen ihre Umkehr getestet.
+  Ausstieg bei der ersten <b>starken, in die eigene Richtung laufenden</b> Heikin-Ashi-Kerze (größte Range der
+  letzten 4/7 Balken UND passende Farbe) -- plus Fixzeit-/Stop-Vergleichsregeln als Baseline. Entry/Exit-PREISE
+  immer echte Marktkurse, nie der synthetische HA-Kurs. Gleiches 52-Titel-Universum wie
+  <a href="markov-chain-backtest.html">Markov-Chain-Backtest</a>, gleiche Zweiperioden-Robustheitsprüfung.
+  </div>
+
+  <div id="findingBox" class="loading">Lade Backtest-Ergebnis…</div>
+</div>
+<script>
+function fmtPct(v, dp) { dp = dp == null ? 3 : dp; return (v==null?'—':(v>=0?'+':'') + v.toFixed(dp) + '%'); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+const TF_LABELS = { hourly:'Stündlich', daily:'Täglich', weekly:'Wöchentlich', monthly:'Monatlich' };
+const EXIT_LABELS = {
+  horizon_1h:'Fix 1 Stunde', horizon_3h:'Fix 3 Stunden', horizon_5h:'Fix 5 Stunden', horizon_10h:'Fix 10 Stunden',
+  horizon_1d:'Fix 1 Tag', horizon_3d:'Fix 3 Tage', horizon_5d:'Fix 5 Tage', horizon_10d:'Fix 10 Tage',
+  horizon_1w:'Fix 1 Woche', horizon_2w:'Fix 2 Wochen', horizon_4w:'Fix 4 Wochen', horizon_8w:'Fix 8 Wochen',
+  horizon_1m:'Fix 1 Monat', horizon_2m:'Fix 2 Monate', horizon_3m:'Fix 3 Monate',
+  stop4pct_10d:'10 Tage + -4%-Stop',
+  strong_favorable:'Starke Kerze in Richtung (Exit @ nächster Open) ✓',
+  strong_favorable_naive_close:'Starke Kerze (Exit @ EIGENEM Close) ⚠',
+  strong_favorable_naive_open:'Starke Kerze (Exit @ EIGENEM Open) ⚠'
+};
+const UNRELIABLE_KEYS = ['strong_favorable_naive_close','strong_favorable_naive_open'];
+const HYP_LABELS = { continuation: 'Fortsetzung (Kerzenfarbe)', reversal: 'Umkehr' };
+
+function robustBadge(stat) {
+  if (!stat || !stat.olderHalf || !stat.newerHalf || !stat.olderHalf.n || !stat.newerHalf.n) return '<span class="muted">—</span>';
+  const o = stat.olderHalf.sharpeLike, n = stat.newerHalf.sharpeLike;
+  const ok = o > 0 && n > 0 && n >= o * 0.5;
+  return ok ? '<span class="robust-ok">✓ robust</span>' : '<span class="robust-bad">✗ nicht robust</span>';
+}
+
+function exitTable(hypSummaries, winnerHyp, winnerKey) {
+  const keys = Object.keys(hypSummaries.continuation);
+  const rows = [];
+  for (const hyp of ['continuation','reversal']) {
+    for (const key of keys) {
+      const s = hypSummaries[hyp][key];
+      if (!s || !s.n) continue;
+      rows.push({ hyp, key, s, isWinner: hyp===winnerHyp && key===winnerKey, unreliable: UNRELIABLE_KEYS.includes(key) });
+    }
+  }
+  rows.sort((a,b) => (b.s.sharpeLike||0) - (a.s.sharpeLike||0));
+  const body = rows.map(r => `
+    <tr class="${r.isWinner?'best':''} ${r.unreliable?'excluded':''}">
+      <td>${HYP_LABELS[r.hyp]}</td>
+      <td>${EXIT_LABELS[r.key]||r.key}${r.isWinner?' ★':''}</td>
+      <td class="num">${r.s.n.toLocaleString('de-DE')}</td>
+      <td class="num ${r.s.avgRet>=0?'pos':'neg'}">${fmtPct(r.s.avgRet)}</td>
+      <td class="num">${r.s.winRate}%</td>
+      <td class="num">${r.s.stopRate!=null?r.s.stopRate+'%':(r.s.unresolvedRate!=null?r.s.unresolvedRate+'% unresolved':'—')}</td>
+      <td class="num">${r.s.sharpeLike}</td>
+      <td class="num">${r.unreliable?'<span class="muted">ausgeschlossen</span>':robustBadge(r.s)}</td>
+    </tr>`).join('');
+  return `<div class="table-wrap"><table><thead><tr><th>Hypothese</th><th>Exit-Regel</th><th class="num">N</th><th class="num">Ø Rendite</th>
+    <th class="num">Trefferquote</th><th class="num">Stop/Unresolved</th><th class="num">Sharpe-ähnlich</th><th class="num">2-Perioden-Check</th></tr></thead>
+    <tbody>${body}</tbody></table></div>`;
+}
+
+function leaderboardTable(leaderboard, fullCount) {
+  const rows = leaderboard.map((r,i) => `
+    <tr class="${i===0?'best':''}">
+      <td><b>${r.symbol}</b></td>
+      <td class="num">${r.n.toLocaleString('de-DE')}</td>
+      <td class="num ${r.avgRet>=0?'pos':'neg'}">${fmtPct(r.avgRet)}</td>
+      <td class="num">${r.winRate}%</td>
+      <td class="num">${r.sharpeLike}</td>
+      <td class="num">${r.robust?'<span class="robust-ok">✓</span>':'<span class="robust-bad">✗</span>'}</td>
+    </tr>`).join('');
+  return `<div class="table-wrap"><table><thead><tr><th>Symbol</th><th class="num">N Trades</th>
+    <th class="num">Ø Rendite</th><th class="num">Trefferquote</th><th class="num">Sharpe-ähnlich</th><th class="num">Robust?</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>
+    <div class="caveat" style="margin-top:6px;">Top 10 + schwächste 5 von ${fullCount} Symbolen, feste universums-weite Gewinner-Regel (nicht pro Symbol neu optimiert).</div>`;
+}
+
+async function load() {
+  try {
+    const res = await fetch('data/heikin-narrow-backtest-result.json', { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    const tfKeys = ['hourly','daily','weekly','monthly'];
+
+    const summaryRows = [];
+    for (const tfBase of tfKeys) {
+      for (const nrN of [4,7]) {
+        const tf = d.timeframes[tfBase + '_nr' + nrN];
+        const w = tf.winnerBest;
+        summaryRows.push(`<tr>
+          <td><b>${TF_LABELS[tfBase]}</b></td><td>NR${nrN}</td>
+          <td>${HYP_LABELS[tf.winnerHyp]}</td><td>${EXIT_LABELS[w.key]||w.key}</td>
+          <td class="num">${tf.totalSignals.toLocaleString('de-DE')}</td>
+          <td class="num ${w.avgRet>=0?'pos':'neg'}">${fmtPct(w.avgRet)}</td>
+          <td class="num">${w.winRate}%</td>
+          <td class="num">${w.sharpeLike}</td>
+          <td class="num">${robustBadge(w)}</td>
+        </tr>`);
+      }
+    }
+
+    const daily4 = d.timeframes.daily_nr4.winnerBest, daily7 = d.timeframes.daily_nr7.winnerBest;
+    const hEx4 = d.timeframes.hourly_nr4.hypSummaries.reversal;
+
+    document.getElementById('findingBox').outerHTML = `
+      <div class="finding">
+      <b>Täglich ist der klare Treffer:</b> enge Heikin-Ashi-Kerze (NR4 ODER NR7) als Einstiegsfilter,
+      Fortsetzungsrichtung, 10-Tage/-4%-Stop als Ausstieg (nicht die "starke Kerze"-Regel des Nutzers selbst,
+      die auf Täglich schwächer abschneidet) -- Sharpe-ähnlich <b class="pos">${daily4.sharpeLike} (NR4) / ${daily7.sharpeLike} (NR7)</b>,
+      <b class="pos">beide robust über beide Zeithälften</b>. Das ist spürbar stärker als alles aus dem
+      <a href="markov-chain-backtest.html">reinen Markov-Chain-Backtest</a> (dort max. 0,54, nicht robust) --
+      die "nicht ins heiße Geschehen einsteigen"-Logik des Nutzers trägt auf Tagesbasis tatsächlich einen
+      echten, validierten Edge. Stündlich zeigt einen schwächeren, aber nach Artefakt-Bereinigung ebenfalls
+      robusten Edge für die EIGENE "starke Kerze"-Exit-Regel (Sharpe-ähnlich ${hEx4.strong_favorable.sharpeLike}).
+      Wöchentlich/Monatlich: schwach bis uneinheitlich.
+      </div>
+
+      <h2>Methodik-Hinweis: dieselbe Exit-Falle, diesmal von Anfang an erwartet</h2>
+      <div class="finding">
+      Die "starke Kerze in meine Richtung"-Regel wählt den Ausstiegszeitpunkt anhand einer Eigenschaft GENAU
+      DES Balkens, an dem sie (naiv) aussteigen würde -- dieselbe Selbstreferenz wie beim Markov-Chain-Backtest.
+      Am Beispiel Stündlich/Umkehr/NR4 mit allen drei Varianten nebeneinander:<br><br>
+      <b>Exit @ EIGENEM Close des Auslöse-Balkens:</b> Sharpe-ähnlich ${hEx4.strong_favorable_naive_close.sharpeLike},
+      Trefferquote ${hEx4.strong_favorable_naive_close.winRate}%.<br>
+      <b>Exit @ EIGENEM Open des Auslöse-Balkens:</b> Sharpe-ähnlich ${hEx4.strong_favorable_naive_open.sharpeLike}
+      -- <b class="r">kippt komplett ins Negative</b>, Beweis für das Artefakt (derselbe Mechanismus wie beim
+      Markov-Chain-Backtest: welcher Balken zum Aussteigen ausgewählt wird, hängt bereits von dessen eigener
+      Kursbewegung ab).<br>
+      <b>Korrigiert -- Exit @ Open des NÄCHSTEN Balkens</b> (erst der Auslöse-Balken muss vollständig
+      geschlossen sein, genau dieselbe Disziplin wie beim Einstieg): Sharpe-ähnlich ${hEx4.strong_favorable.sharpeLike}
+      -- deutlich moderater als die naive Close-Variante, aber stabil und nicht mehr vorzeichen-empfindlich.
+      <b>Nur diese korrigierte Variante zählt für die Verdikte</b>, beide naiven Varianten sind in den
+      Tabellen unten ausgegraut.
+      </div>
+
+      <h2>Zusammenfassung: beste Regel je Zeitebene × NR-Fenster</h2>
+      <div class="table-wrap"><table><thead><tr><th>Zeitebene</th><th>NR-Fenster</th><th>Hypothese</th><th>Beste Regel</th>
+      <th class="num">Signale</th><th class="num">Ø Rendite</th><th class="num">Trefferquote</th>
+      <th class="num">Sharpe-ähnlich</th><th class="num">2-Perioden-Check</th></tr></thead><tbody>${summaryRows.join('')}</tbody></table></div>
+
+      <div id="tfSections"></div>
+
+      <div class="caveat">
+      <b>Einschränkungen, ehrlich benannt:</b><br>
+      • Heikin-Ashi ist ein reiner Signal-Filter -- Entry/Exit-Preise sind immer der echte Markt-Open/Close,
+      nie der synthetische HA-Kurs (der ist nicht handelbar).<br>
+      • Richtung wird einheitlich über das gesamte Universum getestet (Fortsetzung vs. Umkehr), nicht pro
+      Symbol optimiert.<br>
+      • Die "starke Kerze"-Regel des Nutzers hat KEINEN Verlust-Stopp -- sie wartet bis zu 20 Balken (bzw.
+      8/6 bei Wochen/Monat) auf eine günstige starke Kerze; wenn keine kommt, wird zum Cap-Zeitpunkt glattgestellt
+      ("unresolved", in der Trefferquote/Ø-Rendite bereits enthalten, nicht herausgerechnet).<br>
+      • 52 liquide Standardwerte, 3 Jahre täglich bzw. ~1 Jahr stündlich, Wochen/Monat resampled -- identisches
+      Universum wie der Markov-Chain-Backtest.<br>
+      • Keine Transaktionskosten/Spreads/Slippage eingerechnet.
+      </div>
+
+      <div class="source-note">
+      ${d.meta.universe} Titel · Berechnet ${new Date(d.meta.generatedAt).toLocaleString('de-DE')} ·
+      Live-Version der zugrundeliegenden Markov/HA-Logik: <a href="https://babybounce500.github.io/neural-kommandozentrale/trading/KOMMANDOZENTRALE-V2.html">🎲 Intraday Markov in der KOMMANDOZENTRALE</a>.
+      </div>
+    `;
+
+    const sections = tfKeys.map(tfBase => {
+      const sub = [4,7].map(nrN => {
+        const tf = d.timeframes[tfBase + '_nr' + nrN];
+        const w = tf.winnerBest;
+        return `
+        <h3>NR${nrN} (${tf.totalSignals.toLocaleString('de-DE')} Signale, ${tf.usedSymbols} Symbole)</h3>
+        <div class="stat-grid">
+          <div class="bstat"><b class="${w.avgRet>=0?'pos':'neg'}">${fmtPct(w.avgRet)}</b><span>Ø RENDITE (BESTE REGEL)</span></div>
+          <div class="bstat"><b>${w.winRate}%</b><span>TREFFERQUOTE</span></div>
+          <div class="bstat"><b class="${w.sharpeLike>=0?'pos':'neg'}">${w.sharpeLike}</b><span>SHARPE-ÄHNLICH</span></div>
+          <div class="bstat"><b>${robustBadge(w)}</b><span>2-PERIODEN-CHECK</span></div>
+        </div>
+        ${exitTable(tf.hypSummaries, tf.winnerHyp, w.key)}
+        ${leaderboardTable(tf.leaderboard, tf.leaderboardFullCount)}
+        `;
+      }).join('');
+      return `<h2>${TF_LABELS[tfBase]}</h2>${sub}`;
+    }).join('');
+    document.getElementById('tfSections').innerHTML = sections;
+  } catch (e) {
+    document.getElementById('findingBox').innerHTML = '<div class="error">Fehler beim Laden: ' + e.message + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
