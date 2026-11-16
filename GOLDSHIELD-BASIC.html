@@ -432,49 +432,9 @@
       text-shadow: 0 0 10px rgba(255,255,255,.2);
     }
 
-    .sentiment-section, .score-section { margin-bottom: .75rem; }
-
-    .section-title {
-      text-align: center; font-size: .7rem; text-transform: uppercase;
-      margin-bottom: .5rem; color: var(--muted);
-      letter-spacing: .12em; font-weight: 700; font-family: var(--font-orb);
-    }
-
-    .sentiment-bar {
-      background: rgba(0,212,255,.15); border: 1px solid var(--cyan);
-      padding: .6rem; border-radius: 6px; text-align: center;
-      font-weight: 700; color: var(--bright); font-size: .9rem;
-      font-family: var(--font-orb); letter-spacing: .06em;
-      text-shadow: 0 0 10px rgba(255,255,255,.3);
-    }
-
-    .score-display {
-      background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.3);
-      padding: .75rem; border-radius: 6px; text-align: center;
-    }
-    .score-value {
-      font-size: 1.8rem; font-weight: 900; color: var(--cyan); line-height: 1.2;
-      font-family: var(--font-orb);
-      text-shadow: 0 0 20px var(--cyan-glow);
-    }
-    .score-label { font-size: .75rem; color: var(--muted); font-family: var(--font-mono); }
-
-    .ai-recommendation {
-      background: rgba(0,212,255,.06); border: 1px solid rgba(0,212,255,.2);
-      padding: .75rem; border-radius: 6px; font-size: .82rem;
-      color: var(--bright); line-height: 1.6; font-family: var(--font-mono);
-    }
-
-    /* ── ADVANCED SIGNALS (Trend-Score / Weekly-Channel / RSI) ──────── */
-    .signals-section { margin-bottom: 1.25rem; }
-    .signals-header { text-align: center; margin-bottom: 1rem; }
-    .signals-header h3 {
-      font-size: 1.05rem; color: var(--bright); margin-bottom: .4rem;
-      font-family: var(--font-orb); letter-spacing: .08em;
-      text-shadow: 0 0 12px rgba(255,255,255,.25);
-    }
-    .signals-header h3 i { color: var(--cyan); margin-right: .5rem; }
-    .signals-header p { font-size: .8rem; color: rgba(255,255,255,.6); max-width: 650px; margin: 0 auto; }
+    /* ── ADVANCED SIGNALS (Trend-Score / Weekly-Channel / RSI) ──────────
+       Replaces the old 2-factor sentiment/score/recommendation block --
+       that logic now lives on the main page per the user, removed here. */
     .premium-badge-inline {
       display: inline-block; vertical-align: middle; margin-left: .5rem;
       padding: .15rem .5rem; border-radius: 4px; font-size: .55rem;
@@ -482,21 +442,30 @@
       box-shadow: 0 0 8px var(--cyan-glow);
     }
 
-    .signals-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem;
+    .signal-row {
+      background: rgba(0,212,255,.06); border: 1px solid rgba(0,212,255,.2);
+      border-radius: 8px; padding: .65rem .8rem; margin-bottom: .6rem;
     }
-    @media (max-width: 768px) { .signals-grid { grid-template-columns: 1fr; gap: .6rem; } }
+    .signal-row:last-of-type { margin-bottom: 0; }
+    .signal-row-top {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: .35rem; gap: .5rem;
+    }
+    .signal-row-label {
+      font-size: .78rem; font-weight: 700; color: var(--bright);
+      font-family: var(--font-orb); letter-spacing: .04em;
+    }
+    .signal-sub { display: block; font-size: .62rem; color: var(--muted); font-weight: 400; letter-spacing: .03em; margin-top: .1rem; }
 
-    .signal-card .card-content { text-align: center; }
     .signal-value {
-      font-size: 1.6rem; font-weight: 800; font-family: var(--font-orb);
-      color: var(--bright); margin-bottom: .4rem; line-height: 1.2;
-      text-shadow: 0 0 14px rgba(255,255,255,.2);
+      font-size: 1.3rem; font-weight: 800; font-family: var(--font-orb);
+      color: var(--bright); margin-bottom: .25rem; line-height: 1.2;
+      text-shadow: 0 0 12px rgba(255,255,255,.18);
     }
     .signal-badge {
-      display: inline-block; padding: .3rem .9rem; border-radius: 20px;
-      font-size: .78rem; font-weight: 700; font-family: var(--font-orb);
-      letter-spacing: .06em; margin-bottom: .5rem;
+      display: inline-block; padding: .25rem .7rem; border-radius: 20px;
+      font-size: .68rem; font-weight: 700; font-family: var(--font-orb);
+      letter-spacing: .05em; white-space: nowrap;
     }
     .signal-badge.bullish, .signal-badge.long {
       background: rgba(0,255,136,.15); color: var(--green); border: 1px solid rgba(0,255,136,.4);
@@ -507,11 +476,11 @@
     .signal-badge.neutral, .signal-badge.flat {
       background: rgba(0,212,255,.1); color: var(--muted); border: 1px solid var(--border-color);
     }
-    .signal-detail { font-size: .75rem; color: rgba(255,255,255,.55); line-height: 1.5; }
+    .signal-detail { font-size: .72rem; color: rgba(255,255,255,.5); line-height: 1.45; }
 
     .signals-footnote {
-      font-size: .72rem; color: rgba(255,255,255,.45); text-align: center;
-      max-width: 800px; margin: .9rem auto 0; line-height: 1.6;
+      font-size: .68rem; color: rgba(255,255,255,.4); text-align: center;
+      margin-top: .8rem; line-height: 1.5;
     }
 
     /* ── CHARTS ─────────────────────────────────────────────── */
@@ -533,6 +502,10 @@
     @media (max-width: 1200px) { .chart-container { height: 260px; } }
     @media (max-width: 768px)  { .chart-container { height: 240px; padding: .7rem; } }
     @media (max-width: 480px)  { .chart-container { height: 220px; padding: .65rem; } }
+
+    .rsi-chart-container { height: 170px; }
+    @media (max-width: 768px) { .rsi-chart-container { height: 150px; } }
+    .chart-subtitle { font-size: .68rem; color: var(--muted); font-weight: 400; font-family: var(--font-mono); letter-spacing: 0; }
 
     .chart-header {
       display: flex; justify-content: space-between; align-items: center;
@@ -889,66 +862,42 @@
         <div class="analysis-card">
           <div class="analysis-header">
             <i class="fas fa-shield-alt"></i>
-            <h3>GOLDSHIELD AI ANALYSIS</h3>
+            <h3>GOLDSHIELD AI ANALYSIS <span class="premium-badge-inline">PREMIUM</span></h3>
           </div>
-          <div class="sentiment-section">
-            <h4 class="section-title">MARKET SENTIMENT</h4>
-            <div class="sentiment-bar" role="status" aria-live="polite">Loading...</div>
-          </div>
-          <div class="score-section">
-            <h4 class="section-title">TECHNICAL SCORE</h4>
-            <div class="score-display">
-              <div class="score-value">-</div>
-              <div class="score-label">OUT OF 2</div>
+
+          <div class="signal-row" id="trend-score-card">
+            <div class="signal-row-top">
+              <span class="signal-row-label">TREND-SCORE <span class="signal-sub">SMA 3/20/50/100</span></span>
+              <span class="signal-badge neutral" id="trend-score-badge">LADE…</span>
             </div>
-          </div>
-          <div class="recommendation-section">
-            <h4 class="section-title">AI RECOMMENDATION</h4>
-            <div class="ai-recommendation" role="status" aria-live="polite">Loading stock data...</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="signals-section">
-      <div class="signals-header">
-        <h3><i class="fas fa-layer-group"></i> ADVANCED SIGNALS <span class="premium-badge-inline">PREMIUM</span></h3>
-        <p>Drei eigenständige, einzelsymbol-taugliche Engines aus der GoldShield-Analyse-Suite — portiert aus den validierten Portfolio-Tools des Archivs.</p>
-      </div>
-      <div class="signals-grid">
-
-        <div class="card signal-card" id="trend-score-card">
-          <h3 class="card-title">TREND-SCORE (SMA 3/20/50/100)</h3>
-          <div class="card-content">
             <div class="signal-value" id="trend-score-value">—</div>
-            <div class="signal-badge neutral" id="trend-score-badge">LADE…</div>
             <div class="signal-detail" id="trend-score-detail">—</div>
           </div>
-        </div>
 
-        <div class="card signal-card" id="weekly-signal-card">
-          <h3 class="card-title">DIESE WOCHE (3-WOCHEN-KANAL)</h3>
-          <div class="card-content">
+          <div class="signal-row" id="weekly-signal-card">
+            <div class="signal-row-top">
+              <span class="signal-row-label">DIESE WOCHE <span class="signal-sub">3-Wochen-Kanal</span></span>
+              <span class="signal-badge neutral" id="weekly-signal-badge">LADE…</span>
+            </div>
             <div class="signal-value" id="weekly-signal-value">—</div>
-            <div class="signal-badge neutral" id="weekly-signal-badge">LADE…</div>
             <div class="signal-detail" id="weekly-signal-detail">—</div>
           </div>
-        </div>
 
-        <div class="card signal-card" id="rsi-ampel-card">
-          <h3 class="card-title">RSI(14) AMPEL</h3>
-          <div class="card-content">
+          <div class="signal-row" id="rsi-ampel-card">
+            <div class="signal-row-top">
+              <span class="signal-row-label">RSI(14) <span class="signal-sub">Wilder-Glättung</span></span>
+              <span class="signal-badge neutral" id="rsi-ampel-badge">LADE…</span>
+            </div>
             <div class="signal-value" id="rsi-ampel-value">—</div>
-            <div class="signal-badge neutral" id="rsi-ampel-badge">LADE…</div>
             <div class="signal-detail" id="rsi-ampel-detail">—</div>
           </div>
-        </div>
 
-      </div>
-      <div class="signals-footnote">
-        Trend-Score und Wochen-Kanal sind dieselben Engines, die in den validierten Portfolio-Backtests der
-        Suite laufen (Donchian-Wochenkanal: Sharpe 0.56 auf DAX-37) -- auf dieses einzelne Symbol angewendet,
-        ohne eigene Einzeltitel-Validierung. Keine Anlageberatung.
+          <div class="signals-footnote">
+            Trend-Score und Wochen-Kanal sind dieselben Engines, die in den validierten Portfolio-Backtests
+            der Suite laufen (Donchian-Wochenkanal: Sharpe 0.56 auf DAX-37) -- auf dieses einzelne Symbol
+            angewendet, ohne eigene Einzeltitel-Validierung. Keine Anlageberatung.
+          </div>
+        </div>
       </div>
     </section>
 
@@ -975,6 +924,14 @@
           </div>
           <canvas id="weekChart"></canvas>
         </div>
+      </div>
+
+      <div class="chart-container rsi-chart-container">
+        <div class="chart-header">
+          <h3 class="chart-title">RSI(14) Oscillator <span class="chart-subtitle">· 30/70 Referenzlinien</span></h3>
+          <button class="expand-button" data-testid="button-expand-rsi"><i class="fas fa-expand-alt"></i></button>
+        </div>
+        <canvas id="rsiChart"></canvas>
       </div>
     </section>
     <br><br>
@@ -1220,17 +1177,38 @@
       return companies[symbol] || symbol;
     }
 
+    // Overlay style for the SMA/channel "addons" -- same dashed-line convention for both charts.
+    function overlayDataset(label, data, color) {
+      return { label, data, borderColor: color, backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [5,3], pointRadius: 0, fill: false, tension: 0 };
+    }
+
     const yearData = {
       labels: generateDates(365, 'day'),
-      datasets: [{ label:'Price', data:generatePriceData(365,200,280,20), backgroundColor:'rgba(0,212,255,0.12)', borderColor:'rgba(0,212,255,1)', borderWidth:2, pointRadius:0, fill:true, tension:0.1 }]
+      datasets: [
+        { label:'Price', data:generatePriceData(365,200,280,20), backgroundColor:'rgba(0,212,255,0.12)', borderColor:'rgba(0,212,255,1)', borderWidth:2, pointRadius:0, fill:true, tension:0.1 },
+        overlayDataset('SMA20', [], 'rgba(255,215,0,0.85)'),
+        overlayDataset('SMA50', [], 'rgba(0,255,136,0.75)')
+      ]
     };
     const monthData = {
       labels: generateDates(30, 'day'),
-      datasets: [{ label:'Price', data:generatePriceData(30,245,275,10), backgroundColor:'rgba(0,212,255,0.12)', borderColor:'rgba(0,212,255,1)', borderWidth:2, pointRadius:1, fill:true, tension:0.1 }]
+      datasets: [
+        { label:'Price', data:generatePriceData(30,245,275,10), backgroundColor:'rgba(0,212,255,0.12)', borderColor:'rgba(0,212,255,1)', borderWidth:2, pointRadius:1, fill:true, tension:0.1 },
+        overlayDataset('3W-Kanal Hoch', [], 'rgba(0,255,136,0.65)'),
+        overlayDataset('3W-Kanal Tief', [], 'rgba(255,0,60,0.65)')
+      ]
     };
     const weekData = {
       labels: generateDates(7, 'day'),
       datasets: [{ label:'Price', data:generatePriceData(7,258,272,5), backgroundColor:'rgba(0,212,255,0.12)', borderColor:'rgba(0,212,255,1)', borderWidth:2, pointRadius:2, fill:true, tension:0.1 }]
+    };
+    const rsiData = {
+      labels: generateDates(90, 'day'),
+      datasets: [
+        { label:'RSI(14)', data:[], borderColor:'rgba(0,212,255,1)', backgroundColor:'rgba(0,212,255,0.08)', borderWidth:1.5, pointRadius:0, fill:false, tension:0.15 },
+        overlayDataset('Überkauft (70)', new Array(91).fill(70), 'rgba(255,0,60,0.55)'),
+        overlayDataset('Überverkauft (30)', new Array(91).fill(30), 'rgba(0,255,136,0.55)')
+      ]
     };
 
     const chartOptions = {
@@ -1242,6 +1220,19 @@
       scales: {
         x: { grid:{ display:false, color:'rgba(0,212,255,0.06)' }, ticks:{ color:'rgba(255,255,255,0.55)', maxTicksLimit:8, maxRotation:0 } },
         y: { grid:{ color:'rgba(0,212,255,0.06)' }, ticks:{ color:'rgba(255,255,255,0.55)' } }
+      },
+      interaction: { mode:'nearest', axis:'x', intersect:false }
+    };
+
+    const rsiChartOptions = {
+      responsive:true, maintainAspectRatio:false,
+      plugins: {
+        legend: { display:false },
+        tooltip: { mode:'index', intersect:false, backgroundColor:'rgba(5,6,8,0.9)', titleColor:'#fff', bodyColor:'rgba(0,212,255,0.9)', borderColor:'rgba(0,212,255,0.4)', borderWidth:1 }
+      },
+      scales: {
+        x: { grid:{ display:false }, ticks:{ color:'rgba(255,255,255,0.55)', maxTicksLimit:6, maxRotation:0 } },
+        y: { min:0, max:100, grid:{ color:'rgba(0,212,255,0.06)' }, ticks:{ color:'rgba(255,255,255,0.55)', stepSize:25 } }
       },
       interaction: { mode:'nearest', axis:'x', intersect:false }
     };
@@ -1287,11 +1278,13 @@
     function openChartModal(chartType) {
       const modal = document.getElementById('chart-modal');
       const modalTitle = document.getElementById('modal-chart-title');
-      const titles = { 'year':'1 Year Trend - Full Screen','month':'1 Month Trend - Full Screen','week':'1 Week Trend - Full Screen' };
+      const titles = { 'year':'1 Year Trend - Full Screen','month':'1 Month Trend - Full Screen','week':'1 Week Trend - Full Screen','rsi':'RSI(14) Oscillator - Full Screen' };
       modalTitle.textContent = titles[chartType] || 'Chart';
       const sourceChart = Chart.getChart(`${chartType}Chart`);
       if (!sourceChart) return;
-      currentModalChartData = { labels:sourceChart.data.labels, data:sourceChart.data.datasets[0].data, type:chartType };
+      // copy ALL datasets (price + SMA/channel/RSI overlays), not just the first, so the
+      // full-screen view keeps the same addons as the inline chart.
+      currentModalChartData = { labels:sourceChart.data.labels, datasets:sourceChart.data.datasets, type:chartType };
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
       setTimeout(() => { createModalChart(); }, 100);
@@ -1307,17 +1300,19 @@
     function createModalChart() {
       if (modalChartInstance) modalChartInstance.destroy();
       const ctx = document.getElementById('modalChart');
+      const isRsi = currentModalChartData.type === 'rsi';
+      const yScale = isRsi ? { min:0, max:100, grid:{color:'rgba(0,212,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.55)'} } : { grid:{color:'rgba(0,212,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.55)'} };
       modalChartInstance = new Chart(ctx, {
         type:'line',
-        data: { labels:currentModalChartData.labels, datasets:[{ label:'Price', data:currentModalChartData.data, backgroundColor:'rgba(0,212,255,0.12)', borderColor:'rgba(0,212,255,1)', borderWidth:2, pointRadius:currentModalChartData.type==='year'?0:2, fill:true, tension:0.1 }] },
-        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(5,6,8,0.9)',titleColor:'#fff',bodyColor:'rgba(0,212,255,0.9)',borderColor:'rgba(0,212,255,0.4)',borderWidth:1} }, scales:{ x:{grid:{display:true,color:'rgba(0,212,255,0.06)'},ticks:{color:'rgba(255,255,255,0.55)',maxRotation:0}}, y:{grid:{color:'rgba(0,212,255,0.06)'},ticks:{color:'rgba(255,255,255,0.55)'}} } }
+        data: { labels:currentModalChartData.labels, datasets:currentModalChartData.datasets },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(5,6,8,0.9)',titleColor:'#fff',bodyColor:'rgba(0,212,255,0.9)',borderColor:'rgba(0,212,255,0.4)',borderWidth:1} }, scales:{ x:{grid:{display:true,color:'rgba(0,212,255,0.06)'},ticks:{color:'rgba(255,255,255,0.55)',maxRotation:0}}, y:yScale } }
       });
     }
 
     function updateChartColors(theme) {
       const textColor = 'rgba(255,255,255,0.55)';
       const gridColor = 'rgba(0,212,255,0.06)';
-      ['yearChart','monthChart','weekChart'].forEach(chartId => {
+      ['yearChart','monthChart','weekChart','rsiChart'].forEach(chartId => {
         const chart = Chart.getChart(chartId);
         if (chart) { chart.options.scales.x.grid.color=gridColor; chart.options.scales.x.ticks.color=textColor; chart.options.scales.y.grid.color=gridColor; chart.options.scales.y.ticks.color=textColor; chart.update(); }
       });
@@ -1328,6 +1323,7 @@
       const yearChart = new Chart(document.getElementById('yearChart'), { type:'line', data:yearData, options:chartOptions });
       const monthChart = new Chart(document.getElementById('monthChart'), { type:'line', data:monthData, options:chartOptions });
       const weekChart = new Chart(document.getElementById('weekChart'), { type:'line', data:weekData, options:chartOptions });
+      const rsiChart = new Chart(document.getElementById('rsiChart'), { type:'line', data:rsiData, options:rsiChartOptions });
       setupSearch();
       const mobileMenuBtn = document.getElementById('mobile-menu-btn');
       const navLinks = document.querySelector('.nav-links');
@@ -1454,29 +1450,22 @@
       return 100-(100/(1+avgGain/avgLoss));
     }
 
-    function calculateSMA(prices, period) {
-      if(prices.length<period)return prices[prices.length-1];
-      return prices.slice(-period).reduce((sum,p)=>sum+p,0)/period;
-    }
-
-    function calculateVolatility(historicalData) {
-      if(historicalData.length===0)return 0;
-      const latest = historicalData[historicalData.length-1];
-      return ((latest.high-latest.low)/latest.low)*100;
-    }
-
-    function calculateMomentum(prices, period=10) {
-      if(prices.length<period+1)return 0;
-      const current=prices[prices.length-1], past=prices[prices.length-1-period];
-      return((current-past)/past)*100;
-    }
-
-    function calculateSentiment(momentum, currentPrice, sma20) {
-      const priceAboveSMA20 = currentPrice > sma20;
-      const momentumPositive = momentum > 0;
-      if(momentumPositive&&priceAboveSMA20) return{sentiment:'Bullish',sentimentScore:100,technicalScore:2};
-      else if(!momentumPositive&&!priceAboveSMA20) return{sentiment:'Bearish',sentimentScore:0,technicalScore:0};
-      else return{sentiment:'Neutral',sentimentScore:50,technicalScore:1};
+    // Same Wilder-smoothed RSI, but returns one value per bar (for the oscillator chart)
+    // instead of just the latest -- first `period` entries are null (not enough history yet).
+    function calculateRSISeries(prices, period = 14) {
+      const out = new Array(prices.length).fill(null);
+      if (prices.length < period + 1) return out;
+      let gains = 0, losses = 0;
+      for (let i = 1; i <= period; i++) { const change = prices[i]-prices[i-1]; if(change>=0)gains+=change; else losses-=change; }
+      let avgGain = gains/period, avgLoss = losses/period;
+      out[period] = avgLoss === 0 ? 100 : 100 - (100/(1+avgGain/avgLoss));
+      for (let i = period+1; i < prices.length; i++) {
+        const change = prices[i]-prices[i-1];
+        if(change>=0){avgGain=((avgGain*(period-1))+change)/period;avgLoss=(avgLoss*(period-1))/period;}
+        else{avgGain=(avgGain*(period-1))/period;avgLoss=((avgLoss*(period-1))-change)/period;}
+        out[i] = avgLoss===0 ? 100 : 100-(100/(1+avgGain/avgLoss));
+      }
+      return out;
     }
 
     /* ════════════════════════════════════════════════════════
@@ -1615,37 +1604,53 @@
           <tr><td>52W RANGE</td><td>$${data.weekLow.toFixed(2)} - $${data.weekHigh.toFixed(2)}</td></tr>
           <tr><td>SPREAD</td><td>${spread}%</td></tr>`;
       }
-      const analysisCard = document.querySelector('.analysis-card');
-      if(analysisCard&&data.historical&&data.historical.length>0){
-        const prices = data.historical.map(item=>item.close);
-        const rsi=calculateRSI(prices), sma20=calculateSMA(prices,20), sma50=calculateSMA(prices,50), volatility=calculateVolatility(data.historical), momentum=calculateMomentum(prices,10);
-        const sentimentData = calculateSentiment(momentum, data.price, sma20);
-        const sentimentBar = analysisCard.querySelector('.sentiment-bar');
-        if(sentimentBar){
-          sentimentBar.textContent = `${sentimentData.sentiment} ${sentimentData.sentimentScore}%`;
-          sentimentBar.style.backgroundColor = sentimentData.sentiment==='Bullish'?'rgba(0,255,136,.2)':sentimentData.sentiment==='Bearish'?'rgba(255,0,60,.2)':'rgba(0,212,255,.15)';
-          sentimentBar.style.borderColor = sentimentData.sentiment==='Bullish'?'rgba(0,255,136,.6)':sentimentData.sentiment==='Bearish'?'rgba(255,0,60,.6)':'rgba(0,212,255,.6)';
-          sentimentBar.style.color = sentimentData.sentiment==='Bullish'?'#00ff88':sentimentData.sentiment==='Bearish'?'#ff003c':'#00d4ff';
-        }
-        const scoreValue = analysisCard.querySelector('.score-value');
-        if(scoreValue) scoreValue.textContent = sentimentData.technicalScore.toFixed(1);
-        const recommendation = analysisCard.querySelector('.ai-recommendation');
-        if(recommendation){
-          let recommendationText='';
-          if(sentimentData.sentiment==='Bullish') recommendationText=`BULLISH SETUP: Price above SMA20 with positive momentum. Consider buying dips with 2-3% position size. Target resistance levels, use SMA20 as dynamic stop.`;
-          else if(sentimentData.sentiment==='Bearish') recommendationText=`BEARISH STRUCTURE: Price below SMA20 with negative momentum. Avoid new longs, consider profit-taking. Watch for break below recent lows.`;
-          else recommendationText=`NEUTRAL RANGE: Mixed signals present. Wait for clear breakout above SMA20 or momentum acceleration before positioning.`;
-          recommendation.innerHTML=`<p style="margin-bottom:.5rem;line-height:1.4;">${recommendationText}</p><div style="margin-top:.5rem;padding-top:.5rem;border-top:1px solid rgba(0,212,255,.15);"><div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.7);"><div>RSI: ${rsi.toFixed(1)}</div><div>MOMENTUM: ${momentum.toFixed(1)}%</div><div>SMA20: $${sma20.toFixed(2)}</div><div>VOLATILITY: ${volatility.toFixed(1)}%</div></div></div>`;
-        }
-      }
+      // Old 2-factor sentiment/score/recommendation block removed here --
+      // that logic now lives on the main page; this card is fully handled
+      // by updateAdvancedSignals() below.
+    }
+
+    // Rolling SMA across a whole series (for chart overlays) -- null until enough history.
+    function smaSeries(values, period) {
+      const out = new Array(values.length).fill(null);
+      for (let i = period - 1; i < values.length; i++) out[i] = smaSimple(values.slice(0, i + 1), period);
+      return out;
     }
 
     function renderCharts(historicalData) {
       if(!historicalData||historicalData.length===0){console.error('No historical data available for charts');return;}
       const dates=historicalData.map(item=>item.date), prices=historicalData.map(item=>item.close);
-      const yearChart=Chart.getChart('yearChart'); if(yearChart){yearChart.data.labels=dates.slice(-365);yearChart.data.datasets[0].data=prices.slice(-365);yearChart.update();}
-      const monthChart=Chart.getChart('monthChart'); if(monthChart){monthChart.data.labels=dates.slice(-30);monthChart.data.datasets[0].data=prices.slice(-30);monthChart.update();}
+
+      const yearChart=Chart.getChart('yearChart');
+      if(yearChart){
+        yearChart.data.labels = dates.slice(-365);
+        yearChart.data.datasets[0].data = prices.slice(-365);
+        yearChart.data.datasets[1].data = smaSeries(prices, 20).slice(-365);
+        yearChart.data.datasets[2].data = smaSeries(prices, 50).slice(-365);
+        yearChart.update();
+      }
+
+      const monthChart=Chart.getChart('monthChart');
+      if(monthChart){
+        const monthDates = dates.slice(-30);
+        monthChart.data.labels = monthDates;
+        monthChart.data.datasets[0].data = prices.slice(-30);
+        const weekly = buildWeeklyChannelSignal(historicalData);
+        monthChart.data.datasets[1].data = weekly ? new Array(monthDates.length).fill(weekly.channelHigh) : [];
+        monthChart.data.datasets[2].data = weekly ? new Array(monthDates.length).fill(weekly.channelLow) : [];
+        monthChart.update();
+      }
+
       const weekChart=Chart.getChart('weekChart'); if(weekChart){weekChart.data.labels=dates.slice(-7);weekChart.data.datasets[0].data=prices.slice(-7);weekChart.update();}
+
+      const rsiChart=Chart.getChart('rsiChart');
+      if(rsiChart){
+        const rsiDates = dates.slice(-90);
+        rsiChart.data.labels = rsiDates;
+        rsiChart.data.datasets[0].data = calculateRSISeries(prices, 14).slice(-90);
+        rsiChart.data.datasets[1].data = new Array(rsiDates.length).fill(70);
+        rsiChart.data.datasets[2].data = new Array(rsiDates.length).fill(30);
+        rsiChart.update();
+      }
     }
   </script>
 <script src="https://i.replit.com/script.js" async="" data-website-id="4e165485-82c8-48d6-a5ec-3afb111b2639"></script></body>
