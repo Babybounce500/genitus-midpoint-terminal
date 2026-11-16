@@ -51,11 +51,16 @@ h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);m
   </div>
 </header>
 <div class="wrap">
+  <div class="finding" style="border-color:var(--green);">
+  <b>Update:</b> Alle 5 Funde unten sind seitdem im Live-Tool behoben -- Layout/Charts/Position-Sizer
+  unverändert, Signal-Logik ersetzt durch den unten validierten Heikin-Narrow-NR7-Edge, Entry/Stop
+  korrigiert, Datenquelle gewechselt. <a href="TEMPO-TRADER.html">Aktuelle Version öffnen ↗</a>
+  </div>
   <div class="intro">
-  <b>TEMPO-TRADER.html</b> (Live-Tool) verspricht: Tempo = |ΔKurs heute| − |ΔKurs gestern|. Negativ
-  (Markt bremst) + Trendfilter (SMA-20) → Einstieg, sonst warten. Vor dem Backtest wurde das Tool
-  zeilenweise auditiert -- 5 konkrete Probleme gefunden, zwei davon kritisch genug, um das Live-Tool
-  so nicht zu vertrauen.
+  <b>TEMPO-TRADER.html</b> (Live-Tool, Stand vor der Reparatur) versprach: Tempo = |ΔKurs heute| −
+  |ΔKurs gestern|. Negativ (Markt bremst) + Trendfilter (SMA-20) → Einstieg, sonst warten. Vor dem
+  Backtest wurde das Tool zeilenweise auditiert -- 5 konkrete Probleme gefunden, zwei davon kritisch
+  genug, um das Live-Tool so nicht zu vertrauen. Historischer Audit/Backtest unten unverändert erhalten.
   </div>
 
   <h2>Code-Audit (vor dem Backtest, 5 Funde)</h2>
