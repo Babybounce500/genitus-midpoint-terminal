@@ -142,6 +142,17 @@ h2{font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);m
       robust über beide Zeithälften (teils dramatischer Vorzeichenwechsel). Fazit: die immer wiederkehrende
       Stärke von "10 Tage halten + -4%-Stop" selbst, nicht die TA-Logik, trägt den Großteil des Ergebnisses.</div>
     </a>
+    <a class="card" href="tempo-trader-backtest.html">
+      <div class="badge null">5 CODE-BUGS + KEIN EDGE</div>
+      <div class="card-title">TEMPO TRADER (AUDIT + BACKTEST)</div>
+      <div class="card-tag">|ΔK heute|-|ΔK gestern|-Verlangsamungs-Signal, SMA-20-Trendfilter -- TEMPO-TRADER.html</div>
+      <div class="card-verdict">Code-Audit zuerst: <b class="r">Lookahead-Bug</b> (Einstieg = heutiges High/Low,
+      zum Signalzeitpunkt schon Vergangenheit), <b class="r">fixer 1-Punkt-Stop</b> (0,07%-4% des Kurses je
+      nach Titel), <b class="r">"Stop Manager" ist reine UI-Deko</b> (bewegt den Stop nie). Backtest mit
+      korrigiertem Entry: Kernidee zeigt auf sauberen Fixzeit-Exits <b class="r">keinen Edge</b> (Sharpe ~0).
+      Der fixe Original-Stop hat nur <b class="r">15% Trefferquote</b>. Der erstmals ECHT gebaute Stop-Manager
+      ist sogar schlechter als gar kein Risikomanagement.</div>
+    </a>
   </div>
 
   <h2>🤖 Broker-AI Signals (4 Signale aus broker-ai-trade-signals.html)</h2>
