@@ -270,12 +270,56 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 14px;
-      gap: 12px;
+      gap: 10px;
       background: var(--bg);
     }
 
     .side::-webkit-scrollbar { width: 3px; }
     .side::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── SIDE TABS (so no topic needs a long scroll to reach) ── */
+    .side-tabs {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      padding-bottom: 10px;
+      background: var(--bg);
+      z-index: 5;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .side-tab {
+      flex: 1;
+      font-family: var(--font-orb);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 9px 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--white-dim);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .side-tab:hover { color: var(--white); border-color: var(--border-hi); }
+    .side-tab.active {
+      background: var(--white);
+      color: var(--bg);
+      border-color: var(--white);
+      box-shadow: var(--glow-sm);
+      text-shadow: none;
+    }
+
+    .side-panels { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    .side-panel { display: none; flex-direction: column; gap: 12px; padding-top: 12px; animation: fadeIn 0.18s ease; }
+    .side-panel.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 
     /* ── CARDS ── */
     .card {
@@ -683,112 +727,130 @@
   <!-- SIDE PANEL -->
   <div class="side">
 
-    <!-- SIGNAL CARD -->
-    <div class="card">
-      <div class="card-title">SIGNAL</div>
-      <div id="signal-box" class="neutral">
-        <div id="signal-text">WARTEN</div>
-        <div id="signal-sub">LADE DATEN…</div>
-      </div>
-
-      <div class="data-row">
-        <span class="data-label">REFERENZ (letzter Schluss)</span>
-        <span class="data-val" id="entry-val">—</span>
-      </div>
-      <div class="data-row">
-        <span class="data-label">STOP LOSS</span>
-        <span class="data-val down" id="stop-val">—</span>
-      </div>
-      <div class="data-row">
-        <span class="data-label">RISIKOABSTAND</span>
-        <span class="data-val gold" id="risk-val">—</span>
-      </div>
-      <div class="data-row">
-        <span class="data-label">EXIT-REGEL</span>
-        <span class="data-val" id="time-stop-val" style="white-space:normal; text-align:right; max-width:60%;">—</span>
-      </div>
-      <div style="font-size:9px; color:var(--white-dim); margin-top:8px; font-family:var(--font-mono)">
-        Entry = nächste Eröffnung nach Signal, nicht der hier gezeigte Referenzkurs (nicht mehr handelbar, Signal braucht den heutigen Schluss).
-      </div>
+    <div class="side-tabs" id="side-tabs">
+      <button class="side-tab active" data-panel="signal" type="button">📡 SIGNAL</button>
+      <button class="side-tab" data-panel="sizer" type="button">💰 SIZER</button>
+      <button class="side-tab" data-panel="info" type="button">📊 INFO</button>
     </div>
 
-    <!-- BACKTEST VALIDATION -->
-    <div class="card">
-      <div class="card-title">BACKTEST-VALIDIERUNG (52 Titel, 3 Jahre)</div>
-      <div class="stop-stages">
-        <div class="stop-stage active">
-          <span id="val-sharpe">—</span><span class="stage-name">SHARPE-ÄHNL.</span>
-        </div>
-        <div class="stop-stage active">
-          <span id="val-winrate">—</span><span class="stage-name">TREFFERQUOTE</span>
-        </div>
-        <div class="stop-stage active">
-          <span id="val-robust">—</span><span class="stage-name">2-PERIODEN</span>
-        </div>
-      </div>
-      <div style="font-size:9px; color:var(--white-dim); line-height:1.7; font-family:var(--font-mono)">
-        Diese Zeitebene (<span id="val-n">—</span> Trades im Backtest) ist über beide Zeithälften
-        robust, aber mit entsprechend kalibrierter Erwartung -- Wöchentlich/Monatlich sind deutlich
-        schwächer als Täglich. Voller Report:
-        <a href="https://babybounce500.github.io/genitus-midpoint-terminal/heikin-narrow-backtest.html" target="_blank" rel="noopener" style="color:var(--white);">Heikin-Narrow-Backtest ↗</a>
-      </div>
-    </div>
+    <div class="side-panels">
 
-    <!-- SETUP STATUS -->
-    <div class="card">
-      <div class="card-title">HEIKIN-ASHI NARROW-RANGE STATUS</div>
-      <div class="data-row">
-        <span class="data-label">LETZTE HA-RANGE</span>
-        <span class="data-val" id="ha-range-val">—</span>
-      </div>
-      <div class="data-row">
-        <span class="data-label">NR-FENSTER</span>
-        <span class="data-val" id="nr-window-val">—</span>
-      </div>
-      <div class="data-row">
-        <span class="data-label">SETUP AKTIV?</span>
-        <span class="data-val" id="setup-active-val">—</span>
-      </div>
-    </div>
+      <!-- PANEL: SIGNAL -->
+      <div class="side-panel active" data-panel="signal">
+        <div class="card">
+          <div class="card-title">SIGNAL</div>
+          <div id="signal-box" class="neutral">
+            <div id="signal-text">WARTEN</div>
+            <div id="signal-sub">LADE DATEN…</div>
+          </div>
 
-    <!-- POSITION SIZER -->
-    <div class="card">
-      <div class="card-title">POSITION SIZER</div>
-      <div class="pos-inputs">
-        <div class="pos-input-row">
-          <label>KAPITAL (€)</label>
-          <input type="number" id="account-size" value="10000" step="1000">
+          <div class="data-row">
+            <span class="data-label">REFERENZ (letzter Schluss)</span>
+            <span class="data-val" id="entry-val">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">STOP LOSS (ca.)</span>
+            <span class="data-val down" id="stop-val">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">RISIKOABSTAND (ca.)</span>
+            <span class="data-val gold" id="risk-val">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">EXIT-REGEL</span>
+            <span class="data-val" id="time-stop-val" style="white-space:normal; text-align:right; max-width:60%;">—</span>
+          </div>
+          <div style="font-size:9px; color:var(--white-dim); margin-top:8px; font-family:var(--font-mono)">
+            Entry = nächste Eröffnung nach Signal, nicht der hier gezeigte Referenzkurs (nicht mehr
+            handelbar, Signal braucht den heutigen Schluss). Stop/Risikoabstand sind auf Basis des
+            Referenzkurses geschätzt ("ca.") -- der tatsächliche Stop wird erst nach der echten
+            Eröffnung auf Basis des wirklichen Einstiegspreises final, kann durch Overnight-Gaps
+            leicht abweichen.
+          </div>
         </div>
-        <div class="pos-input-row">
-          <label>RISIKO (1R = %)</label>
-          <input type="number" id="risk-pct" value="1" step="0.5" min="0.1" max="5">
-        </div>
-      </div>
-      <div class="pos-result" id="pos-result">
-        <div class="pos-result-row"><span class="pr-label">1R RISIKOBETRAG</span><span class="pr-val" id="r-amount">—</span></div>
-        <div class="pos-result-row"><span class="pr-label">STOP-DISTANZ</span><span class="pr-val" id="stop-dist">—</span></div>
-        <div class="pos-result-row"><span class="pr-label">ANZAHL EINHEITEN</span><span class="pr-val" id="units">—</span></div>
-        <div class="pos-result-row"><span class="pr-label">POSITIONSGRÖSSE</span><span class="pr-val" id="pos-size">—</span></div>
-      </div>
-    </div>
 
-    <!-- SYSTEM LOGIC -->
-    <div class="card">
-      <div class="card-title">SYSTEM LOGIK (Heikin-Narrow, validiert)</div>
-      <div class="theory-box">
-        <b>Einstieg nur bei einer "engen" Heikin-Ashi-Kerze</b> (NR7 = die Range der letzten 7
-        HA-Balken ist am aktuellen Balken am kleinsten) -- "nicht einsteigen, wenn der Markt heiß
-        ist".<br><br>
-        <b style="color:rgba(0,255,136,0.8)">● LONG:</b> enge Kerze ist grün (HA-Close ≥ HA-Open)<br>
-        <b style="color:rgba(255,34,68,0.7)">● SHORT:</b> enge Kerze ist rot<br><br>
-        <b>Exit:</b> Täglich -- 10 Tage ODER -4% Stop. Wöchentlich -- fix 4 Wochen. Monatlich --
-        fix 1 Monat. Kein Trendfilter, keine gestaffelte Stop-Nachführung -- beides wurde
-        rückgetestet und hat auf diesem Universum nicht geholfen.<br><br>
-        <b>These:</b> Volatilitätskompression geht Expansion voraus; der Einstieg erfolgt während
-        der Ruhephase, nicht erst wenn die Bewegung schon läuft. Ersetzt die ursprüngliche
-        "Tempo"-Logik dieses Tools, die im Backtest keinen Edge zeigte (Details:
-        <a href="https://babybounce500.github.io/genitus-midpoint-terminal/tempo-trader-backtest.html" target="_blank" rel="noopener" style="color:var(--white);">Audit-Report ↗</a>).
+        <div class="card">
+          <div class="card-title">HEIKIN-ASHI NARROW-RANGE STATUS</div>
+          <div class="data-row">
+            <span class="data-label">LETZTE HA-RANGE</span>
+            <span class="data-val" id="ha-range-val">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">NR-FENSTER</span>
+            <span class="data-val" id="nr-window-val">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">SETUP AKTIV?</span>
+            <span class="data-val" id="setup-active-val">—</span>
+          </div>
+        </div>
       </div>
+
+      <!-- PANEL: SIZER -->
+      <div class="side-panel" data-panel="sizer">
+        <div class="card">
+          <div class="card-title">POSITION SIZER</div>
+          <div class="pos-inputs">
+            <div class="pos-input-row">
+              <label>KAPITAL (€)</label>
+              <input type="number" id="account-size" value="10000" step="1000">
+            </div>
+            <div class="pos-input-row">
+              <label>RISIKO (1R = %)</label>
+              <input type="number" id="risk-pct" value="1" step="0.5" min="0.1" max="5">
+            </div>
+          </div>
+          <div class="pos-result" id="pos-result">
+            <div class="pos-result-row"><span class="pr-label">1R RISIKOBETRAG</span><span class="pr-val" id="r-amount">—</span></div>
+            <div class="pos-result-row"><span class="pr-label">STOP-DISTANZ (ca.)</span><span class="pr-val" id="stop-dist">—</span></div>
+            <div class="pos-result-row"><span class="pr-label">ANZAHL EINHEITEN</span><span class="pr-val" id="units">—</span></div>
+            <div class="pos-result-row"><span class="pr-label">POSITIONSGRÖSSE</span><span class="pr-val" id="pos-size">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL: INFO -->
+      <div class="side-panel" data-panel="info">
+        <div class="card">
+          <div class="card-title">BACKTEST-VALIDIERUNG (52 Titel, 3 Jahre)</div>
+          <div class="stop-stages">
+            <div class="stop-stage active">
+              <span id="val-sharpe">—</span><span class="stage-name">SHARPE-ÄHNL.</span>
+            </div>
+            <div class="stop-stage active">
+              <span id="val-winrate">—</span><span class="stage-name">TREFFERQUOTE</span>
+            </div>
+            <div class="stop-stage active">
+              <span id="val-robust">—</span><span class="stage-name">2-PERIODEN</span>
+            </div>
+          </div>
+          <div style="font-size:9px; color:var(--white-dim); line-height:1.7; font-family:var(--font-mono)">
+            Diese Zeitebene (<span id="val-n">—</span> Trades im Backtest) ist über beide Zeithälften
+            robust, aber mit entsprechend kalibrierter Erwartung -- Wöchentlich/Monatlich sind deutlich
+            schwächer als Täglich. Voller Report:
+            <a href="https://babybounce500.github.io/genitus-midpoint-terminal/heikin-narrow-backtest.html" target="_blank" rel="noopener" style="color:var(--white);">Heikin-Narrow-Backtest ↗</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">SYSTEM LOGIK (Heikin-Narrow, validiert)</div>
+          <div class="theory-box">
+            <b>Einstieg nur bei einer "engen" Heikin-Ashi-Kerze</b> (NR7 = die Range der letzten 7
+            HA-Balken ist am aktuellen Balken am kleinsten) -- "nicht einsteigen, wenn der Markt heiß
+            ist".<br><br>
+            <b style="color:rgba(0,255,136,0.8)">● LONG:</b> enge Kerze ist grün (HA-Close ≥ HA-Open)<br>
+            <b style="color:rgba(255,34,68,0.7)">● SHORT:</b> enge Kerze ist rot<br><br>
+            <b>Exit:</b> Täglich -- 10 Tage ODER -4% Stop. Wöchentlich -- fix 4 Wochen. Monatlich --
+            fix 1 Monat. Kein Trendfilter, keine gestaffelte Stop-Nachführung -- beides wurde
+            rückgetestet und hat auf diesem Universum nicht geholfen.<br><br>
+            <b>These:</b> Volatilitätskompression geht Expansion voraus; der Einstieg erfolgt während
+            der Ruhephase, nicht erst wenn die Bewegung schon läuft. Ersetzt die ursprüngliche
+            "Tempo"-Logik dieses Tools, die im Backtest keinen Edge zeigte (Details:
+            <a href="https://babybounce500.github.io/genitus-midpoint-terminal/tempo-trader-backtest.html" target="_blank" rel="noopener" style="color:var(--white);">Audit-Report ↗</a>).
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </div>
@@ -1186,6 +1248,16 @@
 
   // Auto-load on start
   window.addEventListener('load', () => setTimeout(load, 300));
+
+  /* ── SIDE TABS ── */
+  document.querySelectorAll('.side-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.side-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`.side-panel[data-panel="${btn.dataset.panel}"]`).classList.add('active');
+    });
+  });
 
   /* ── MOBILE CONTROLS ── */
   function toggleControls() {
