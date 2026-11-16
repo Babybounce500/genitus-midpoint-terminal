@@ -1,0 +1,547 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOMVS AVREA — Fund Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --neon-green:  #00ff88;
+      --neon-cyan:   #00ffff;
+      --neon-gold:   #ffd700;
+      --bg-dark:     #0a0e27;
+      --bg-dark-rgb: 10,14,39;
+      --bg-card:     #0f1535;
+      --muted:       #4ddce8;
+    }
+    :root[data-theme="light"] {
+      --neon-green:  #067a3e;
+      --neon-cyan:   #0f7a96;
+      --neon-gold:   #8a6d00;
+      --bg-dark:     #f2f5fa;
+      --bg-dark-rgb: 244,245,250;
+      --bg-card:     #ffffff;
+      --muted:       #0f7a96;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 2px; }
+    body { background: var(--bg-dark); color: var(--neon-green); font-family: 'Orbitron', monospace; transition: background-color .2s ease, color .2s ease; }
+
+    .header {
+      background: rgba(var(--bg-dark-rgb),.95);
+      border-bottom: 1px solid rgba(0,255,136,.25);
+      padding: 0 32px;
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .header-inner {
+      max-width: 1400px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px; gap: 24px;
+    }
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .logo-gem {
+      width: 32px; height: 32px; background: var(--neon-gold);
+      clip-path: polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);
+      box-shadow: 0 0 14px var(--neon-gold);
+    }
+    .logo-text h1 { font-size: 13px; font-weight: 900; letter-spacing: 2px; color: var(--neon-gold); }
+    .logo-text p  { font-size: 9px; color: var(--neon-cyan); letter-spacing: 1px; }
+    nav { display: flex; gap: 6px; flex-wrap: wrap; }
+    nav a {
+      color: var(--muted); text-decoration: none;
+      font-size: 9px; font-weight: 700; letter-spacing: 1px;
+      padding: 6px 12px; border: 1px solid rgba(0,255,255,.2); border-radius: 4px; transition: all .2s;
+    }
+    nav a:hover, nav a.active { color: var(--neon-cyan); border-color: var(--neon-cyan); background: rgba(0,255,255,.1); }
+
+    .page-header {
+      max-width: 1400px; margin: 40px auto 32px; padding: 0 32px;
+      display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+    }
+    .page-header h2 { font-size: clamp(18px,3vw,32px); font-weight: 900; letter-spacing: 3px; color: var(--neon-gold); }
+    .page-header p  { font-size: 10px; color: var(--neon-cyan); letter-spacing: 1px; margin-top: 6px; opacity: .8; }
+
+    .period-selector { display: flex; gap: 6px; }
+    .period-btn {
+      background: transparent;
+      border: 1px solid rgba(0,255,255,.3);
+      color: rgba(0,255,255,.6);
+      padding: 6px 14px; font-family: 'Orbitron', monospace;
+      font-size: 10px; font-weight: 700; border-radius: 4px; cursor: pointer;
+      letter-spacing: .5px; transition: all .2s;
+    }
+    .period-btn:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+    .period-btn.active {
+      background: rgba(0,255,255,.15); border-color: var(--neon-cyan);
+      color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0,255,255,.3);
+    }
+
+    .funds-container { max-width: 1400px; margin: 0 auto; padding: 0 32px 64px; display: flex; flex-direction: column; gap: 32px; }
+
+    .fund-block {
+      background: var(--bg-card);
+      border: 1px solid rgba(0,255,136,.18);
+      border-radius: 14px;
+      padding: 28px 32px;
+      position: relative; overflow: hidden;
+    }
+    .fund-block::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-gold), transparent); opacity: .5;
+    }
+    .fund-block-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+    .fund-block-title { font-size: 14px; font-weight: 900; letter-spacing: 1.5px; color: var(--neon-gold); }
+    .fund-block-desc  { font-size: 12px; color: var(--muted); letter-spacing: .5px; margin-top: 4px; }
+    .fund-kpis { display: flex; gap: 20px; flex-wrap: wrap; }
+    .kpi {
+      background: rgba(0,255,136,.06); border: 1px solid rgba(0,255,136,.15);
+      border-radius: 8px; padding: 10px 16px; min-width: 110px; text-align: center;
+    }
+    .kpi-label { font-size: 12px; letter-spacing: 1px; color: var(--neon-cyan); margin-bottom: 4px; }
+    .kpi-val   { font-size: 16px; font-weight: 900; color: var(--neon-green); }
+    .kpi-val.pos { color: var(--neon-green); }
+    .kpi-val.neg { color: #ff4499; }
+    .kpi-val.gold { color: var(--neon-gold); }
+
+    .chart-wrap { position: relative; height: 280px; margin-top: 8px; }
+    .chart-overlay {
+      display: none; position: absolute; inset: 0;
+      background: rgba(var(--bg-dark-rgb),.75); border-radius: 8px;
+      align-items: center; justify-content: center; gap: 10px;
+    }
+    .chart-overlay.visible { display: flex; }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 2px solid rgba(0,255,136,.2);
+      border-top-color: var(--neon-green);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 12px; color: var(--neon-cyan); letter-spacing: 1px; }
+
+    .fund-symbols { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .sym-tag {
+      font-size: 12px; font-weight: 700; letter-spacing: .5px;
+      padding: 3px 8px; border-radius: 3px;
+      background: rgba(0,255,255,.06); border: 1px solid rgba(0,255,255,.2); color: var(--neon-cyan);
+    }
+
+    @media (max-width: 768px) {
+      .header-inner, .page-header, .funds-container { padding-left: 16px; padding-right: 16px; }
+      .fund-block { padding: 20px 16px; }
+      .chart-wrap { height: 200px; }
+    }
+  </style>
+
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-area">
+      <div class="logo-gem"></div>
+      <div class="logo-text">
+        <h1>DOMVS AVREA O.P.N</h1>
+        <p>FUND TRACKER • EOD DATA • NEURAL ENGINE</p>
+      </div>
+    </div>
+    <nav>
+      <a href="index.html">◇ Portfolio</a>
+      <a href="FUNDS.html">◈ Funds</a>
+      <a href="FUND-TRACKER.html" class="active">▓ Tracker</a>
+      <a href="GENUSS-TRACKER.html">◆ Genussschein</a>
+      <a href="#" id="themeToggleBtn" onclick="toggleTheme();return false;" aria-label="Toggle light/dark theme">🌙</a>
+    </nav>
+  </div>
+</div>
+
+<div class="page-header">
+  <div>
+    <h2>▓ FUND TRACKER</h2>
+    <p>◆ EQUAL-WEIGHTED BASKETS, INDEXED TO 100 AT START OF SELECTED PERIOD • BENCHMARK OVERLAY (DASHED) • EOD HISTORICAL DATA</p>
+  </div>
+  <div class="period-selector" id="globalPeriod">
+    <button class="period-btn" onclick="setPeriod('3M',this)">3M</button>
+    <button class="period-btn" onclick="setPeriod('6M',this)">6M</button>
+    <button class="period-btn active" onclick="setPeriod('1Y',this)">1Y</button>
+    <button class="period-btn" onclick="setPeriod('ALL',this)">ALL</button>
+  </div>
+</div>
+
+<div class="funds-container" id="fundsContainer"></div>
+
+<script>
+  const API_BASE = 'https://theserver-open-ai.replit.app';
+  const EMISSION_DATE = '2024-01-02';
+
+  const funds = [
+    {
+      id: 0,
+      name: 'CRYPTO BEST 5',
+      desc: 'Top five cryptocurrencies based on market cap and stability.',
+      symbols: ['BCH-USD.cc','BNB-USD.cc','BTC-USD.cc','DOGE-USD.cc','ETH-USD.cc'],
+      color: '#cc00ff',
+      benchmark: { symbol: 'BTC-USD.cc', label: 'BTC' }
+    },
+    {
+      id: 1,
+      name: 'DAX BLUE CHIP BOND',
+      desc: 'Five largest and most stable DAX blue-chip German companies.',
+      symbols: ['ALV.XETRA','MBG.XETRA','BMW.XETRA','SIE.XETRA','SAP.XETRA'],
+      color: '#00ffff',
+      benchmark: { symbol: 'GDAXI.INDX', label: 'DAX' }
+    },
+    {
+      id: 2,
+      name: 'DAX DIVIDEND ELITE',
+      desc: 'Focused on liquidity and growth — leading German dividend stocks.',
+      symbols: ['ALV.XETRA','MUV2.XETRA','SRT3.XETRA','HNR1.XETRA','RHM.XETRA'],
+      color: '#00ff88',
+      benchmark: { symbol: 'GDAXI.INDX', label: 'DAX' }
+    },
+    {
+      id: 3,
+      name: 'CRYPTO EXPANSION BASKET',
+      desc: 'Broad DeFi and altcoin exposure across 20 actively traded cryptocurrencies.',
+      symbols: ['ADA-USD.cc','AAVE-USD.cc','BNB-USD.cc','BTC-USD.cc','DOGE-USD.cc','DOT-USD.cc','ETH-USD.cc','LINK-USD.cc','LTC-USD.cc','SOL-USD.cc','XRP-USD.cc'],
+      color: '#ff00ff',
+      benchmark: { symbol: 'BTC-USD.cc', label: 'BTC' }
+    },
+    {
+      id: 4,
+      name: 'DAX TOP 40 INDEX',
+      desc: 'Full cross-section of the German stock market — all major DAX 40 constituents.',
+      symbols: ['ADS.XETRA','ALV.XETRA','BMW.XETRA','SAP.XETRA','SIE.XETRA','DBK.XETRA','DTE.XETRA','BAYN.XETRA','BAS.XETRA','VOW3.XETRA','MBG.XETRA','MRK.XETRA','RWE.XETRA'],
+      color: '#ffd700',
+      benchmark: { symbol: 'GDAXI.INDX', label: 'DAX' }
+    },
+    {
+      id: 5,
+      name: 'DOW JONES 30 ALL STARS',
+      desc: 'Top-performing blue-chip companies in the United States.',
+      symbols: ['AAPL.US','MSFT.US','JPM.US','GS.US','JNJ.US','NKE.US','V.US','HD.US','MCD.US','KO.US','IBM.US','CVX.US','DIS.US'],
+      color: '#00ffff',
+      benchmark: { symbol: 'DJI.INDX', label: 'DOW' }
+    },
+    {
+      id: 6,
+      name: 'USA TECH INDEX',
+      desc: 'Forefront of American technology — high-growth and innovation leaders.',
+      symbols: ['AAPL.US','MSFT.US','NVDA.US','TSLA.US','AMZN.US','NFLX.US','ADBE.US','CRM.US','QCOM.US'],
+      color: '#00ff88',
+      benchmark: { symbol: 'NDX.INDX', label: 'NDX-100' }
+    },
+    {
+      id: 7,
+      name: 'TESLA',
+      desc: 'Single-asset tracker for Tesla Inc. (TSLA) — electric vehicle and energy leader.',
+      symbols: ['TSLA.US'],
+      color: '#ff4499',
+      benchmark: { symbol: 'GSPC.INDX', label: 'S&P500' }
+    },
+    {
+      id: 8,
+      name: 'NETFLIX',
+      desc: 'Single-asset tracker for Netflix Inc. (NFLX) — global streaming leader.',
+      symbols: ['NFLX.US'],
+      color: '#e50914',
+      benchmark: { symbol: 'GSPC.INDX', label: 'S&P500' }
+    }
+  ];
+
+  let currentPeriod = '1Y';
+  const chartInstances = {};
+  const cache = {};
+
+  function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  const THEME_KEY = 'neural-funds-theme';
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+  }
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+    Promise.all(funds.map(f => loadFund(f, currentPeriod)));
+  }
+  applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+
+  function getFromDate(period) {
+    const d = new Date();
+    if (period === 'ALL') return EMISSION_DATE;
+    const months = { '3M': 3, '6M': 6, '1Y': 12 };
+    d.setMonth(d.getMonth() - (months[period] || 12));
+    return d.toISOString().split('T')[0];
+  }
+
+  function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+  async function fetchHistory(symbol, from, to) {
+    const key = `${symbol}|${from}|${to}`;
+    if (cache[key]) return cache[key];
+    try {
+      const res = await fetch(`${API_BASE}/eod/historical/${encodeURIComponent(symbol)}?from=${from}&to=${to}&period=d`);
+      if (!res.ok) return [];
+      const json = await res.json();
+      const arr = Array.isArray(json) ? json : (json.data || []);
+      cache[key] = arr;
+      return arr;
+    } catch { return []; }
+  }
+
+  async function computeFundHistory(symbols, from, to) {
+    // True equal-weight: index EACH constituent's own price series to 100 first,
+    // then average the indexed series per date. Averaging raw prices instead (the
+    // old method) silently re-weights the basket toward whichever constituent has
+    // the highest absolute price (e.g. BTC in a crypto basket) — not equal-weighted.
+    const results = await Promise.all(symbols.map(s => fetchHistory(s, from, to)));
+    const symbolMaps = results.map(data => {
+      const map = {};
+      data.forEach(e => { map[e.date] = parseFloat(e.adjusted_close || e.close || 0); });
+      return map;
+    });
+    const allDates = new Set();
+    symbolMaps.forEach(m => Object.keys(m).forEach(d => allDates.add(d)));
+    const sortedDates = [...allDates].sort();
+    const bases = symbolMaps.map(m => {
+      for (const d of sortedDates) { if (m[d] > 0) return m[d]; }
+      return null;
+    });
+    const minCoverage = Math.ceil(symbols.length * 0.6);
+    const dates = [];
+    const indexed = [];
+    sortedDates.forEach(d => {
+      const vals = [];
+      symbolMaps.forEach((m, i) => {
+        if (m[d] > 0 && bases[i]) vals.push((m[d] / bases[i]) * 100);
+      });
+      if (vals.length >= minCoverage) {
+        dates.push(d);
+        indexed.push(vals.reduce((a,b)=>a+b,0) / vals.length);
+      }
+    });
+    return { dates, indexed };
+  }
+
+  async function computeBenchmarkSeries(symbol, from, to, alignDates) {
+    const data = await fetchHistory(symbol, from, to);
+    const map = {};
+    data.forEach(e => { map[e.date] = parseFloat(e.adjusted_close || e.close || 0); });
+    let base = null;
+    for (const d of alignDates) { if (map[d] > 0) { base = map[d]; break; } }
+    if (!base) return alignDates.map(() => null);
+    return alignDates.map(d => map[d] > 0 ? (map[d] / base) * 100 : null);
+  }
+
+  function renderChart(fund, dates, indexed, benchmarkIndexed) {
+    const canvasId = `chart-${fund.id}`;
+    const canvas   = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    if (chartInstances[fund.id]) { chartInstances[fund.id].destroy(); }
+
+    const last    = indexed[indexed.length - 1] || 100;
+    const isUp    = last >= 100;
+    const color   = isUp ? fund.color : '#ff4499';
+    const pct     = (last - 100).toFixed(2);
+    const sign    = last >= 100 ? '+' : '';
+
+    document.getElementById(`kpi-quote-${fund.id}`).textContent = `${last.toFixed(2)}`;
+    const perfEl = document.getElementById(`kpi-perf-${fund.id}`);
+    perfEl.textContent = `${sign}${pct}%`;
+    perfEl.className = `kpi-val ${isUp ? 'pos' : 'neg'}`;
+
+    if (dates.length > 0) {
+      document.getElementById(`kpi-date-${fund.id}`).textContent = dates[dates.length - 1];
+    }
+
+    const benchEl = document.getElementById(`kpi-bench-${fund.id}`);
+    if (benchEl) {
+      const benchLast = benchmarkIndexed && benchmarkIndexed.length ? [...benchmarkIndexed].reverse().find(v => v != null) : null;
+      if (benchLast != null) {
+        const deltaPp = (last - 100) - (benchLast - 100);
+        const dSign = deltaPp >= 0 ? '+' : '';
+        benchEl.textContent = `${dSign}${deltaPp.toFixed(2)}pp`;
+        benchEl.className = `kpi-val ${deltaPp >= 0 ? 'pos' : 'neg'}`;
+      } else {
+        benchEl.textContent = 'N/A';
+      }
+    }
+
+    const datasets = [{
+      label: fund.name,
+      data: indexed,
+      borderColor: color,
+      backgroundColor: color + '18',
+      borderWidth: 2,
+      tension: 0.3,
+      fill: true,
+      pointRadius: dates.length > 80 ? 0 : 2,
+      pointHoverRadius: 4,
+      pointBackgroundColor: color
+    }];
+
+    if (benchmarkIndexed) {
+      datasets.push({
+        label: fund.benchmark.label,
+        data: benchmarkIndexed,
+        borderColor: cssVar('--muted') || '#888',
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderDash: [6, 4],
+        tension: 0.3,
+        fill: false,
+        pointRadius: 0,
+        pointHoverRadius: 3,
+        spanGaps: true
+      });
+    }
+
+    chartInstances[fund.id] = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            align: 'end',
+            labels: {
+              boxWidth: 14, boxHeight: 2,
+              color: cssVar('--neon-cyan'),
+              font: { family: "'Orbitron',monospace", size: 9, weight: '700' }
+            }
+          },
+          tooltip: {
+            backgroundColor: `rgba(${cssVar('--bg-dark-rgb')},.97)`,
+            borderColor: color,
+            borderWidth: 1,
+            padding: 10,
+            titleFont: { family: "'Orbitron',monospace", size: 10, weight: '700' },
+            bodyFont:  { family: "'Courier New',monospace", size: 11 },
+            callbacks: {
+              label: ctx => {
+                const v   = ctx.parsed.y;
+                const d   = (v - 100).toFixed(2);
+                const s   = v >= 100 ? '+' : '';
+                return [`QUOTE: ${v.toFixed(2)}`, `RETURN: ${s}${d}%`];
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            grid: { color: 'rgba(0,255,136,.07)' },
+            ticks: {
+              color: cssVar('--neon-green'),
+              font: { family: "'Orbitron',monospace", size: 9, weight: '700' },
+              callback: v => v.toFixed(0)
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: cssVar('--neon-cyan'),
+              font: { family: "'Orbitron',monospace", size: 8 },
+              maxTicksLimit: 8, maxRotation: 0
+            }
+          }
+        }
+      }
+    });
+  }
+
+  async function loadFund(fund, period) {
+    const overlay = document.getElementById(`overlay-${fund.id}`);
+    if (overlay) overlay.classList.add('visible');
+
+    const from = getFromDate(period);
+    const to   = todayStr();
+    const { dates, indexed } = await computeFundHistory(fund.symbols, from, to);
+
+    let benchmarkIndexed = null;
+    if (dates.length > 0 && fund.benchmark) {
+      benchmarkIndexed = await computeBenchmarkSeries(fund.benchmark.symbol, from, to, dates);
+    }
+
+    if (overlay) overlay.classList.remove('visible');
+
+    if (dates.length === 0) {
+      document.getElementById(`kpi-quote-${fund.id}`).textContent = 'N/A';
+      return;
+    }
+    renderChart(fund, dates, indexed, benchmarkIndexed);
+  }
+
+  function buildUI() {
+    const container = document.getElementById('fundsContainer');
+    const blocks = funds.map(fund => `
+        <div class="fund-block" id="fund-${fund.id}">
+          <div class="fund-block-header">
+            <div>
+              <div class="fund-block-title">${fund.name}</div>
+              <div class="fund-block-desc">${fund.desc} &nbsp;·&nbsp; ${fund.symbols.length} asset${fund.symbols.length > 1 ? 's' : ''}</div>
+            </div>
+            <div class="fund-kpis">
+              <div class="kpi">
+                <div class="kpi-label">CURRENT QUOTE</div>
+                <div class="kpi-val gold" id="kpi-quote-${fund.id}">—</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">RETURN</div>
+                <div class="kpi-val" id="kpi-perf-${fund.id}">—</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">LAST DATE</div>
+                <div class="kpi-val" style="font-size:12px;color:var(--neon-cyan);" id="kpi-date-${fund.id}">—</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">VS ${fund.benchmark.label}</div>
+                <div class="kpi-val" id="kpi-bench-${fund.id}">—</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chart-${fund.id}" style="width:100%;height:280px;"></canvas>
+            <div class="chart-overlay visible" id="overlay-${fund.id}">
+              <div class="spinner"></div>
+              <span class="loading-text" role="status" aria-live="polite">FETCHING EOD DATA...</span>
+            </div>
+          </div>
+          <div class="fund-symbols">
+            ${fund.symbols.map(s=>`<span class="sym-tag">${s}</span>`).join('')}
+          </div>
+        </div>
+      `);
+    container.innerHTML = blocks.join('');
+  }
+
+  async function setPeriod(period, btn) {
+    currentPeriod = period;
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    await Promise.all(funds.map(f => loadFund(f, period)));
+  }
+
+  buildUI();
+  Promise.all(funds.map(f => loadFund(f, currentPeriod)));
+</script>
+<script src="https://i.replit.com/script.js" async="" data-website-id="4e165485-82c8-48d6-a5ec-3afb111b2639"></script></body>
+</html>
