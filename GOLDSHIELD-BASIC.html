@@ -255,6 +255,14 @@
     /* ── SEARCH BAR ─────────────────────────────────────────── */
     .search-container { display: flex; justify-content: center; margin: 1rem 0; }
 
+    .load-error-banner {
+      max-width: 520px; margin: 0 auto 1rem; padding: .7rem 1rem;
+      background: rgba(255,0,60,.1); border: 1px solid rgba(255,0,60,.4);
+      border-radius: 6px; color: var(--red); font-size: .82rem; text-align: center;
+      font-family: var(--font-mono);
+    }
+    .stale-data { opacity: .45; filter: grayscale(.6); pointer-events: none; transition: opacity .2s, filter .2s; }
+
     .search-bar {
       display: flex; width: 100%; max-width: 520px; position: relative;
     }
@@ -816,6 +824,7 @@
         <div class="search-results" id="search-results"></div>
       </div>
     </section>
+    <div id="load-error-banner" class="load-error-banner" role="alert" style="display:none;"></div>
 
     <section class="nav-buttons">
       <div class="button-grid">
@@ -1357,8 +1366,23 @@
     async function loadStock(symbol) {
       console.log(`Loading stock data for: ${symbol}`);
       const data = await fetchStockData(symbol);
-      if (data && data.historical) { console.log('Stock data loaded successfully:', data); updateUI(data); renderCharts(data.historical); updateAdvancedSignals(data); }
-      else { console.error('Failed to load stock data or missing historical data'); }
+      const banner = document.getElementById('load-error-banner');
+      const staleTargets = [document.getElementById('stock-info'), document.querySelector('.charts-section')];
+      if (data && data.historical) {
+        console.log('Stock data loaded successfully:', data);
+        banner.style.display = 'none';
+        staleTargets.forEach(el => el && el.classList.remove('stale-data'));
+        updateUI(data); renderCharts(data.historical); updateAdvancedSignals(data);
+      } else {
+        console.error('Failed to load stock data or missing historical data');
+        // Previously this failed silently -- the page kept showing the LAST successfully
+        // loaded symbol's data with no indication anything went wrong. Now: explicit error
+        // banner naming the symbol that failed, and the stale data is visibly greyed out
+        // instead of looking current.
+        banner.textContent = `⚠ Keine Daten für "${symbol}" gefunden — Symbol prüfen oder später erneut versuchen. Angezeigte Werte unten sind veraltet (letztes erfolgreich geladenes Symbol).`;
+        banner.style.display = 'block';
+        staleTargets.forEach(el => el && el.classList.add('stale-data'));
+      }
     }
 
     function generateDates(numDays, interval) {
@@ -1582,8 +1606,18 @@
       const wsDetail = document.getElementById('weekly-signal-detail');
       const weekly = buildWeeklyChannelSignal(data.historical);
       if (weekly) {
-        wsVal.textContent = (weekly.signal === 'long' ? '+' : weekly.signal === 'short' ? '-' : '') + weekly.strength.toFixed(2) + '%';
-        wsBadge.textContent = weekly.signal === 'long' ? 'LONG-BREAKOUT' : weekly.signal === 'short' ? 'SHORT-BREAKOUT' : 'IM KANAL';
+        // "strength" means two different things depending on signal -- breakout: % beyond the
+        // channel edge; in-channel: % of channel width to the NEAREST edge. Audited live across
+        // 10 symbols and found this was displayed identically either way, which reads as "how far
+        // did it move" in both cases even though the two numbers aren't comparable. Labeled
+        // explicitly now instead of letting the number speak for itself.
+        if (weekly.signal === 'flat') {
+          wsVal.textContent = weekly.strength.toFixed(1) + '% zum Rand';
+          wsBadge.textContent = 'IM KANAL';
+        } else {
+          wsVal.textContent = (weekly.signal === 'long' ? '+' : '-') + weekly.strength.toFixed(2) + '% Breakout';
+          wsBadge.textContent = weekly.signal === 'long' ? 'LONG-BREAKOUT' : 'SHORT-BREAKOUT';
+        }
         wsBadge.className = 'signal-badge ' + weekly.signal;
         document.getElementById('weekly-signal-card').className = 'signal-row ' + weekly.signal;
         wsDetail.textContent = `3-Wochen-Kanal: ${weekly.channelLow.toFixed(2)} - ${weekly.channelHigh.toFixed(2)} · Referenz-Close ${weekly.mondayClose.toFixed(2)} (${weekly.refDate})`;
