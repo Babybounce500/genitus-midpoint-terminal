@@ -1,0 +1,338 @@
+{
+  "generatedAt": "2026-11-16T00:23:04.840Z",
+  "daily": {
+    "4": [
+      {
+        "sym": "QCOM.US",
+        "isLong": true,
+        "signalDate": "2026-11-06",
+        "entryPrice": 164.94,
+        "stopped": false,
+        "stopDate": null,
+        "curPrice": 172.47,
+        "retPct": 4.57,
+        "daysElapsed": 5,
+        "complete": false
+      },
+      {
+        "sym": "MSFT.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 544.49,
+        "stopped": false,
+        "stopDate": null,
+        "curPrice": 523.88,
+        "retPct": 3.78,
+        "daysElapsed": 5,
+        "complete": false
+      },
+      {
+        "sym": "ABT.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 110.88,
+        "stopped": false,
+        "stopDate": null,
+        "curPrice": 108.52,
+        "retPct": 2.13,
+        "daysElapsed": 5,
+        "complete": false
+      },
+      {
+        "sym": "BKNG.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 162.48,
+        "stopped": false,
+        "stopDate": null,
+        "curPrice": 159.58,
+        "retPct": 1.78,
+        "daysElapsed": 5,
+        "complete": false
+      },
+      {
+        "sym": "AMZN.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 269.32,
+        "stopped": false,
+        "stopDate": null,
+        "curPrice": 266.66,
+        "retPct": 0.99,
+        "daysElapsed": 5,
+        "complete": false
+      },
+      {
+        "sym": "GOOGL.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 292.05,
+        "stopped": true,
+        "stopDate": "2026-11-13",
+        "curPrice": 303.73,
+        "retPct": -4,
+        "daysElapsed": 5,
+        "complete": true
+      },
+      {
+        "sym": "AAPL.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 345,
+        "stopped": true,
+        "stopDate": "2026-11-12",
+        "curPrice": 358.79,
+        "retPct": -4,
+        "daysElapsed": 5,
+        "complete": true
+      },
+      {
+        "sym": "AMD.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 473.39,
+        "stopped": true,
+        "stopDate": "2026-11-09",
+        "curPrice": 492.33,
+        "retPct": -4,
+        "daysElapsed": 5,
+        "complete": true
+      },
+      {
+        "sym": "INTC.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 56.86,
+        "stopped": true,
+        "stopDate": "2026-11-09",
+        "curPrice": 59.13,
+        "retPct": -4,
+        "daysElapsed": 5,
+        "complete": true
+      },
+      {
+        "sym": "CMCSA.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 24.16,
+        "stopped": true,
+        "stopDate": "2026-11-12",
+        "curPrice": 25.13,
+        "retPct": -4,
+        "daysElapsed": 5,
+        "complete": true
+      }
+    ],
+    "7": [
+      {
+        "sym": "MSFT.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 544.49,
+        "stopped": false,
+        "stopDate": null,
+        "curPrice": 523.88,
+        "retPct": 3.78,
+        "daysElapsed": 5,
+        "complete": false
+      },
+      {
+        "sym": "AMZN.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 269.32,
+        "stopped": false,
+        "stopDate": null,
+        "curPrice": 266.66,
+        "retPct": 0.99,
+        "daysElapsed": 5,
+        "complete": false
+      },
+      {
+        "sym": "GOOGL.US",
+        "isLong": false,
+        "signalDate": "2026-11-06",
+        "entryPrice": 292.05,
+        "stopped": true,
+        "stopDate": "2026-11-13",
+        "curPrice": 303.73,
+        "retPct": -4,
+        "daysElapsed": 5,
+        "complete": true
+      }
+    ]
+  },
+  "hourly": [
+    {
+      "sym": "NVDA.US",
+      "isShort": true,
+      "entryPrice": 172.72,
+      "exitPrice": 165.07,
+      "retPct": 4.429,
+      "resolved": true,
+      "barsHeld": 8
+    },
+    {
+      "sym": "INTC.US",
+      "isShort": true,
+      "entryPrice": 61.78,
+      "exitPrice": 60.35,
+      "retPct": 2.315,
+      "resolved": true,
+      "barsHeld": 8
+    },
+    {
+      "sym": "V.US",
+      "isShort": false,
+      "entryPrice": 417.25,
+      "exitPrice": 425.44,
+      "retPct": 1.961,
+      "resolved": true,
+      "barsHeld": 8
+    },
+    {
+      "sym": "AMZN.US",
+      "isShort": true,
+      "entryPrice": 273.26,
+      "exitPrice": 268.11,
+      "retPct": 1.886,
+      "resolved": true,
+      "barsHeld": 13
+    },
+    {
+      "sym": "CMCSA.US",
+      "isShort": false,
+      "entryPrice": 24.46,
+      "exitPrice": 24.88,
+      "retPct": 1.697,
+      "resolved": true,
+      "barsHeld": 6
+    },
+    {
+      "sym": "ISRG.US",
+      "isShort": true,
+      "entryPrice": 446.19,
+      "exitPrice": 440.42,
+      "retPct": 1.293,
+      "resolved": true,
+      "barsHeld": 8
+    },
+    {
+      "sym": "MA.US",
+      "isShort": false,
+      "entryPrice": 651.64,
+      "exitPrice": 658.95,
+      "retPct": 1.122,
+      "resolved": true,
+      "barsHeld": 6
+    },
+    {
+      "sym": "CSCO.US",
+      "isShort": true,
+      "entryPrice": 100.38,
+      "exitPrice": 99.61,
+      "retPct": 0.772,
+      "resolved": true,
+      "barsHeld": 7
+    },
+    {
+      "sym": "HD.US",
+      "isShort": false,
+      "entryPrice": 348.43,
+      "exitPrice": 351.02,
+      "retPct": 0.743,
+      "resolved": true,
+      "barsHeld": 6
+    },
+    {
+      "sym": "COST.US",
+      "isShort": false,
+      "entryPrice": 1081,
+      "exitPrice": 1083.62,
+      "retPct": 0.242,
+      "resolved": true,
+      "barsHeld": 6
+    },
+    {
+      "sym": "BA.US",
+      "isShort": true,
+      "entryPrice": 172.81,
+      "exitPrice": 173.4,
+      "retPct": -0.339,
+      "resolved": true,
+      "barsHeld": 8
+    },
+    {
+      "sym": "UPS.US",
+      "isShort": true,
+      "entryPrice": 111.25,
+      "exitPrice": 111.66,
+      "retPct": -0.369,
+      "resolved": true,
+      "barsHeld": 12
+    },
+    {
+      "sym": "MCD.US",
+      "isShort": false,
+      "entryPrice": 279,
+      "exitPrice": 277.81,
+      "retPct": -0.427,
+      "resolved": true,
+      "barsHeld": 8
+    },
+    {
+      "sym": "ORCL.US",
+      "isShort": true,
+      "entryPrice": 124.28,
+      "exitPrice": 125.44,
+      "retPct": -0.933,
+      "resolved": true,
+      "barsHeld": 8
+    },
+    {
+      "sym": "MSFT.US",
+      "isShort": false,
+      "entryPrice": 534.22,
+      "exitPrice": 526.03,
+      "retPct": -1.533,
+      "resolved": true,
+      "barsHeld": 8
+    },
+    {
+      "sym": "GOOGL.US",
+      "isShort": true,
+      "entryPrice": 290.09,
+      "exitPrice": 295.16,
+      "retPct": -1.748,
+      "resolved": false,
+      "barsHeld": 20
+    },
+    {
+      "sym": "AVGO.US",
+      "isShort": true,
+      "entryPrice": 350.22,
+      "exitPrice": 356.54,
+      "retPct": -1.805,
+      "resolved": true,
+      "barsHeld": 14
+    },
+    {
+      "sym": "XOM.US",
+      "isShort": true,
+      "entryPrice": 165.14,
+      "exitPrice": 170.03,
+      "retPct": -2.961,
+      "resolved": false,
+      "barsHeld": 20
+    },
+    {
+      "sym": "CVX.US",
+      "isShort": true,
+      "entryPrice": 212.31,
+      "exitPrice": 218.7,
+      "retPct": -3.007,
+      "resolved": false,
+      "barsHeld": 20
+    }
+  ]
+}
