@@ -444,9 +444,13 @@
 
     .signal-row {
       background: rgba(0,212,255,.06); border: 1px solid rgba(0,212,255,.2);
+      border-left: 3px solid rgba(0,212,255,.35);
       border-radius: 8px; padding: .65rem .8rem; margin-bottom: .6rem;
+      transition: border-color .25s, background .25s;
     }
     .signal-row:last-of-type { margin-bottom: 0; }
+    .signal-row.bullish, .signal-row.long  { border-left-color: var(--green); background: rgba(0,255,136,.04); }
+    .signal-row.bearish, .signal-row.short { border-left-color: var(--red);   background: rgba(255,0,60,.04); }
     .signal-row-top {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: .35rem; gap: .5rem;
@@ -1178,9 +1182,12 @@
     }
 
     // Overlay style for the SMA/channel "addons" -- same dashed-line convention for both charts.
-    function overlayDataset(label, data, color) {
-      return { label, data, borderColor: color, backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [5,3], pointRadius: 0, fill: false, tension: 0 };
+    // skipTooltip=true for constant/flat reference lines (channel bounds, RSI 30/70) -- they
+    // carry no per-point information, so showing them in every tooltip was just clutter.
+    function overlayDataset(label, data, color, skipTooltip) {
+      return { label, data, borderColor: color, backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [5,3], pointRadius: 0, fill: false, tension: 0, skipTooltip: !!skipTooltip };
     }
+    function fmtMoney(v) { return v == null ? '—' : '$' + Number(v).toFixed(2); }
 
     const yearData = {
       labels: generateDates(365, 'day'),
@@ -1194,8 +1201,8 @@
       labels: generateDates(30, 'day'),
       datasets: [
         { label:'Price', data:generatePriceData(30,245,275,10), backgroundColor:'rgba(0,212,255,0.12)', borderColor:'rgba(0,212,255,1)', borderWidth:2, pointRadius:1, fill:true, tension:0.1 },
-        overlayDataset('3W-Kanal Hoch', [], 'rgba(0,255,136,0.65)'),
-        overlayDataset('3W-Kanal Tief', [], 'rgba(255,0,60,0.65)')
+        overlayDataset('3W-Kanal Hoch', [], 'rgba(0,255,136,0.65)', true),
+        overlayDataset('3W-Kanal Tief', [], 'rgba(255,0,60,0.65)', true)
       ]
     };
     const weekData = {
@@ -1206,20 +1213,27 @@
       labels: generateDates(90, 'day'),
       datasets: [
         { label:'RSI(14)', data:[], borderColor:'rgba(0,212,255,1)', backgroundColor:'rgba(0,212,255,0.08)', borderWidth:1.5, pointRadius:0, fill:false, tension:0.15 },
-        overlayDataset('Überkauft (70)', new Array(91).fill(70), 'rgba(255,0,60,0.55)'),
-        overlayDataset('Überverkauft (30)', new Array(91).fill(30), 'rgba(0,255,136,0.55)')
+        overlayDataset('Überkauft (70)', new Array(91).fill(70), 'rgba(255,0,60,0.55)', true),
+        overlayDataset('Überverkauft (30)', new Array(91).fill(30), 'rgba(0,255,136,0.55)', true)
       ]
+    };
+
+    const sharedTooltip = {
+      mode:'index', intersect:false, backgroundColor:'rgba(5,6,8,0.95)', titleColor:'#fff',
+      bodyColor:'rgba(0,212,255,0.95)', borderColor:'rgba(0,212,255,0.4)', borderWidth:1,
+      padding:10, cornerRadius:6, boxPadding:4,
+      titleFont:{ family:"'JetBrains Mono', monospace", size:11, weight:'700' },
+      bodyFont:{ family:"'JetBrains Mono', monospace", size:11 },
+      filter: (item) => !item.dataset.skipTooltip,
+      callbacks: { label: (item) => `${item.dataset.label}: ${fmtMoney(item.parsed.y)}` }
     };
 
     const chartOptions = {
       responsive:true, maintainAspectRatio:false,
-      plugins: {
-        legend: { display:false },
-        tooltip: { mode:'index', intersect:false, backgroundColor:'rgba(5,6,8,0.9)', titleColor:'#fff', bodyColor:'rgba(0,212,255,0.9)', borderColor:'rgba(0,212,255,0.4)', borderWidth:1 }
-      },
+      plugins: { legend: { display:false }, tooltip: sharedTooltip },
       scales: {
-        x: { grid:{ display:false, color:'rgba(0,212,255,0.06)' }, ticks:{ color:'rgba(255,255,255,0.55)', maxTicksLimit:8, maxRotation:0 } },
-        y: { grid:{ color:'rgba(0,212,255,0.06)' }, ticks:{ color:'rgba(255,255,255,0.55)' } }
+        x: { grid:{ display:false, color:'rgba(0,212,255,0.06)' }, ticks:{ color:'rgba(255,255,255,0.55)', maxTicksLimit:7, maxRotation:0 } },
+        y: { grid:{ color:'rgba(0,212,255,0.06)' }, ticks:{ color:'rgba(255,255,255,0.55)', maxTicksLimit:6, callback: v => '$' + v } }
       },
       interaction: { mode:'nearest', axis:'x', intersect:false }
     };
@@ -1228,7 +1242,7 @@
       responsive:true, maintainAspectRatio:false,
       plugins: {
         legend: { display:false },
-        tooltip: { mode:'index', intersect:false, backgroundColor:'rgba(5,6,8,0.9)', titleColor:'#fff', bodyColor:'rgba(0,212,255,0.9)', borderColor:'rgba(0,212,255,0.4)', borderWidth:1 }
+        tooltip: { ...sharedTooltip, callbacks: { label: (item) => `${item.dataset.label}: ${item.parsed.y.toFixed(1)}` } }
       },
       scales: {
         x: { grid:{ display:false }, ticks:{ color:'rgba(255,255,255,0.55)', maxTicksLimit:6, maxRotation:0 } },
@@ -1301,11 +1315,14 @@
       if (modalChartInstance) modalChartInstance.destroy();
       const ctx = document.getElementById('modalChart');
       const isRsi = currentModalChartData.type === 'rsi';
-      const yScale = isRsi ? { min:0, max:100, grid:{color:'rgba(0,212,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.55)'} } : { grid:{color:'rgba(0,212,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.55)'} };
+      const yScale = isRsi
+        ? { min:0, max:100, grid:{color:'rgba(0,212,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.55)'} }
+        : { grid:{color:'rgba(0,212,255,0.06)'}, ticks:{color:'rgba(255,255,255,0.55)', maxTicksLimit:8, callback: v => '$' + v} };
+      const modalTooltip = { ...sharedTooltip, callbacks: { label: (item) => isRsi ? `${item.dataset.label}: ${item.parsed.y.toFixed(1)}` : `${item.dataset.label}: ${fmtMoney(item.parsed.y)}` } };
       modalChartInstance = new Chart(ctx, {
         type:'line',
         data: { labels:currentModalChartData.labels, datasets:currentModalChartData.datasets },
-        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(5,6,8,0.9)',titleColor:'#fff',bodyColor:'rgba(0,212,255,0.9)',borderColor:'rgba(0,212,255,0.4)',borderWidth:1} }, scales:{ x:{grid:{display:true,color:'rgba(0,212,255,0.06)'},ticks:{color:'rgba(255,255,255,0.55)',maxRotation:0}}, y:yScale } }
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:modalTooltip }, scales:{ x:{grid:{display:true,color:'rgba(0,212,255,0.06)'},ticks:{color:'rgba(255,255,255,0.55)',maxRotation:0}}, y:yScale } }
       });
     }
 
@@ -1553,6 +1570,7 @@
         tsVal.textContent = (trend.score >= 0 ? '+' : '') + trend.score;
         tsBadge.textContent = trend.verdict.toUpperCase();
         tsBadge.className = 'signal-badge ' + trend.verdict;
+        document.getElementById('trend-score-card').className = 'signal-row ' + trend.verdict;
         tsDetail.textContent = `SMA3 ${trend.s3.toFixed(2)} · SMA20 ${trend.s20.toFixed(2)} · SMA50 ${trend.s50.toFixed(2)} · SMA100 ${trend.s100.toFixed(2)}`;
       } else {
         tsVal.textContent = '—'; tsBadge.textContent = 'ZU WENIG DATEN'; tsBadge.className = 'signal-badge neutral'; tsDetail.textContent = 'Benötigt mind. 100 Handelstage Historie.';
@@ -1567,6 +1585,7 @@
         wsVal.textContent = (weekly.signal === 'long' ? '+' : weekly.signal === 'short' ? '-' : '') + weekly.strength.toFixed(2) + '%';
         wsBadge.textContent = weekly.signal === 'long' ? 'LONG-BREAKOUT' : weekly.signal === 'short' ? 'SHORT-BREAKOUT' : 'IM KANAL';
         wsBadge.className = 'signal-badge ' + weekly.signal;
+        document.getElementById('weekly-signal-card').className = 'signal-row ' + weekly.signal;
         wsDetail.textContent = `3-Wochen-Kanal: ${weekly.channelLow.toFixed(2)} - ${weekly.channelHigh.toFixed(2)} · Referenz-Close ${weekly.mondayClose.toFixed(2)} (${weekly.refDate})`;
       } else {
         wsVal.textContent = '—'; wsBadge.textContent = 'ZU WENIG DATEN'; wsBadge.className = 'signal-badge neutral'; wsDetail.textContent = 'Benötigt mind. 4 abgeschlossene Handelswochen.';
@@ -1578,9 +1597,10 @@
       const rsiDetail = document.getElementById('rsi-ampel-detail');
       const rsi = calculateRSI(prices);
       rsiVal.textContent = rsi.toFixed(1);
-      if (rsi < 30) { rsiBadge.textContent = 'ÜBERVERKAUFT'; rsiBadge.className = 'signal-badge bullish'; rsiDetail.textContent = 'RSI(14) < 30 -- klassische Überverkauft-Zone.'; }
-      else if (rsi > 70) { rsiBadge.textContent = 'ÜBERKAUFT'; rsiBadge.className = 'signal-badge bearish'; rsiDetail.textContent = 'RSI(14) > 70 -- klassische Überkauft-Zone.'; }
-      else { rsiBadge.textContent = 'NEUTRAL'; rsiBadge.className = 'signal-badge neutral'; rsiDetail.textContent = 'RSI(14) zwischen 30 und 70 -- kein Extremwert.'; }
+      const rsiCard = document.getElementById('rsi-ampel-card');
+      if (rsi < 30) { rsiBadge.textContent = 'ÜBERVERKAUFT'; rsiBadge.className = 'signal-badge bullish'; rsiCard.className = 'signal-row bullish'; rsiDetail.textContent = 'RSI(14) < 30 -- klassische Überverkauft-Zone.'; }
+      else if (rsi > 70) { rsiBadge.textContent = 'ÜBERKAUFT'; rsiBadge.className = 'signal-badge bearish'; rsiCard.className = 'signal-row bearish'; rsiDetail.textContent = 'RSI(14) > 70 -- klassische Überkauft-Zone.'; }
+      else { rsiBadge.textContent = 'NEUTRAL'; rsiBadge.className = 'signal-badge neutral'; rsiCard.className = 'signal-row'; rsiDetail.textContent = 'RSI(14) zwischen 30 und 70 -- kein Extremwert.'; }
     }
 
     function updateUI(data) {
