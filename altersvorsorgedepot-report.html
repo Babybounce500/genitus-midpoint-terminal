@@ -1,0 +1,577 @@
+<title>Altersvorsorgedepot 2027</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: single-column editorial report, numbered sections for print pagination, callout tiles for key figures */
+:root{
+  --bg:#f7f5f0;
+  --surface:#ffffff;
+  --ink:#16233b;
+  --ink-soft:#4a5672;
+  --line:#dcd6c8;
+  --navy:#0f2a4a;
+  --navy-deep:#0a1c33;
+  --gold:#b8862f;
+  --gold-soft:#e8d8ae;
+  --good:#2f6f4e;
+  --warn:#9a5b1f;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1322;
+    --surface:#131d30;
+    --ink:#eef1f7;
+    --ink-soft:#a6b1c8;
+    --line:#2a3650;
+    --navy:#2a5a92;
+    --navy-deep:#132743;
+    --gold:#d8ae5e;
+    --gold-soft:#3a3222;
+    --good:#5fae84;
+    --warn:#d69a5a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1322;
+  --surface:#131d30;
+  --ink:#eef1f7;
+  --ink-soft:#a6b1c8;
+  --line:#2a3650;
+  --navy:#2a5a92;
+  --navy-deep:#132743;
+  --gold:#d8ae5e;
+  --gold-soft:#3a3222;
+  --good:#5fae84;
+  --warn:#d69a5a;
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+}
+.wrap{
+  max-width:860px;
+  margin:0 auto;
+  padding-block:32px 64px;
+}
+h1,h2,h3{
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  text-wrap:balance;
+  color:var(--ink);
+  margin:0;
+}
+h1{font-size:clamp(1.9rem,5vw,2.6rem);font-weight:700;letter-spacing:-0.01em;}
+h2{font-size:1.4rem;font-weight:700;}
+h3{font-size:1.05rem;font-weight:700;}
+p{line-height:1.6;color:var(--ink);margin:0;}
+.lede{color:var(--ink-soft);}
+
+a{color:var(--navy);text-decoration-color:var(--gold);}
+:root[data-theme="dark"] a, @media (prefers-color-scheme:dark){ a{color:var(--gold);} }
+
+/* masthead */
+.masthead{
+  background:linear-gradient(135deg,var(--navy-deep),var(--navy));
+  color:#f4f0e4;
+  border-radius:14px;
+  padding:28px 28px 24px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-bottom:28px;
+}
+.masthead .eyebrow{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:.72rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--gold-soft);
+}
+.masthead h1{color:#fbf8ef;}
+.masthead .meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px 22px;
+  font-size:.82rem;
+  color:#d7ccae;
+  margin-top:4px;
+  border-top:1px solid rgba(244,240,228,.18);
+  padding-top:12px;
+}
+.masthead .meta b{color:#fbf8ef;}
+
+/* toc */
+.toc{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px 20px;
+  font-size:.86rem;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px 18px;
+  margin-bottom:32px;
+}
+.toc a{color:var(--ink-soft);text-decoration:none;display:flex;gap:8px;}
+.toc a:hover{color:var(--navy);}
+.toc span.n{color:var(--gold);font-weight:700;font-family:'Space Grotesk',sans-serif;min-width:1.4em;}
+
+/* quick stats */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  margin-bottom:36px;
+}
+.stat{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-left:3px solid var(--gold);
+  border-radius:10px;
+  padding:14px 16px;
+}
+.stat .v{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.6rem;
+  font-weight:700;
+  color:var(--navy);
+  font-variant-numeric:tabular-nums;
+}
+:root[data-theme="dark"] .stat .v, @media (prefers-color-scheme:dark){ .stat .v{color:var(--gold);} }
+.stat .l{font-size:.78rem;color:var(--ink-soft);margin-top:2px;}
+
+/* sections */
+section{margin-bottom:40px;}
+.sec-head{
+  display:flex;
+  align-items:baseline;
+  gap:12px;
+  border-bottom:2px solid var(--gold);
+  padding-bottom:8px;
+  margin-bottom:16px;
+}
+.sec-head .num{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:.95rem;
+  font-weight:700;
+  color:var(--gold);
+  letter-spacing:.04em;
+}
+.body-text > * + *{margin-top:12px;}
+ul.clean, ol.clean{margin:0;padding-left:1.2em;}
+ul.clean li, ol.clean li{margin-bottom:6px;line-height:1.55;}
+ul.clean li::marker, ol.clean li::marker{color:var(--gold);}
+
+.pitchbox{
+  background:var(--gold-soft);
+  border:1px solid var(--gold);
+  border-radius:12px;
+  padding:18px 20px;
+  font-size:1.02rem;
+  line-height:1.65;
+  color:var(--navy-deep);
+}
+:root[data-theme="dark"] .pitchbox, @media (prefers-color-scheme:dark){ .pitchbox{color:var(--ink);} }
+.pitchbox b{color:var(--navy);}
+:root[data-theme="dark"] .pitchbox b, @media (prefers-color-scheme:dark){ .pitchbox b{color:var(--gold);} }
+
+/* timeline */
+.timeline{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--line);margin-left:6px;padding-left:20px;}
+.tl-item{position:relative;padding:4px 0 18px;}
+.tl-item::before{content:"";position:absolute;left:-26px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--bg);}
+.tl-item .date{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);}
+:root[data-theme="dark"] .tl-item .date, @media (prefers-color-scheme:dark){ .tl-item .date{color:var(--gold);} }
+.tl-item p{margin-top:2px;}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:480px;}
+thead th{
+  background:var(--navy);
+  color:#f4f0e4;
+  text-align:left;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:600;
+  font-size:.78rem;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  padding:10px 12px;
+}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:nth-child(even){background:color-mix(in srgb, var(--surface) 70%, var(--line) 30%);}
+td.hl{color:var(--good);font-weight:600;}
+td.warn{color:var(--warn);font-weight:600;}
+
+/* objection cards */
+.obj{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:14px 16px;
+  margin-bottom:10px;
+}
+.obj .q{font-weight:700;color:var(--navy);font-size:.92rem;}
+:root[data-theme="dark"] .obj .q, @media (prefers-color-scheme:dark){ .obj .q{color:var(--gold);} }
+.obj .a{margin-top:6px;font-size:.92rem;color:var(--ink-soft);line-height:1.55;}
+.obj .a b{color:var(--ink);}
+
+/* target groups */
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.grp{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+.grp .tag{font-family:'Space Grotesk',sans-serif;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);}
+.grp p{margin-top:6px;font-size:.88rem;color:var(--ink-soft);}
+
+.callout{
+  border:1px solid var(--line);
+  border-left:3px solid var(--warn);
+  background:var(--surface);
+  border-radius:10px;
+  padding:14px 16px;
+  font-size:.9rem;
+  color:var(--ink-soft);
+}
+.callout b{color:var(--warn);}
+
+footer{
+  border-top:1px solid var(--line);
+  padding-top:18px;
+  font-size:.78rem;
+  color:var(--ink-soft);
+}
+footer ol{padding-left:1.1em;}
+footer li{margin-bottom:4px;word-break:break-word;}
+
+.print-hint{font-size:.76rem;color:var(--ink-soft);text-align:right;margin-top:-18px;margin-bottom:28px;}
+
+@media print{
+  body{background:#fff;}
+  .wrap{max-width:100%;padding:0;}
+  .masthead{background:none;color:var(--navy-deep);border:2px solid var(--navy);}
+  .masthead h1, .masthead .eyebrow, .masthead .meta, .masthead .meta b{color:var(--navy-deep)!important;}
+  .toc, .print-hint{display:none;}
+  section{page-break-inside:avoid;margin-bottom:26px;}
+  .sec-head{page-break-after:avoid;}
+  a{text-decoration:none;color:var(--navy-deep);}
+}
+@media (max-width:560px){
+  .toc{grid-template-columns:1fr;}
+}
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="eyebrow">Beratungs-Briefing · Private Altersvorsorge</div>
+    <h1>Das Altersvorsorgedepot</h1>
+    <p style="color:#e7ddc0;">Der Riester-Nachfolger ab 2027 — Rechtslage, Förderung und Verkaufsargumente in einem Dokument.</p>
+    <div class="meta">
+      <span>Stand: <b>16. November 2026</b></span>
+      <span>Bundestag: <b>27.03.2026</b></span>
+      <span>Bundesrat: <b>08.05.2026</b></span>
+      <span>Produktstart: <b>01.01.2027</b></span>
+    </div>
+  </div>
+
+  <div class="print-hint">Zum Drucken: Browser-Menü → Drucken (Strg/Cmd+P) — Layout ist für A4 optimiert.</div>
+
+  <nav class="toc" aria-label="Inhalt">
+    <a href="#pitch"><span class="n">00</span> Elevator Pitch</a>
+    <a href="#was-ist-es"><span class="n">01</span> Was ist das Altersvorsorgedepot</a>
+    <a href="#foerderung"><span class="n">02</span> Förderung im Detail</a>
+    <a href="#fruehstart"><span class="n">03</span> Frühstart-Rente (Kinderdepot)</a>
+    <a href="#berechtigt"><span class="n">04</span> Wer ist förderberechtigt</a>
+    <a href="#produkt"><span class="n">05</span> Produktmerkmale</a>
+    <a href="#auszahlung"><span class="n">06</span> Auszahlphase &amp; Vererbung</a>
+    <a href="#vergleich"><span class="n">07</span> Vergleich: Riester / AV-Depot / ETF</a>
+    <a href="#dvag"><span class="n">08</span> DVAG-Positionierung</a>
+    <a href="#argumente"><span class="n">09</span> Verkaufsargumente &amp; Einwände</a>
+    <a href="#zielgruppen"><span class="n">10</span> Zielgruppen-Priorisierung</a>
+    <a href="#praxis"><span class="n">11</span> Praxishinweise &amp; offene Punkte</a>
+  </nav>
+
+  <div class="stats">
+    <div class="stat"><div class="v">540&nbsp;€</div><div class="l">Max. Grundzulage / Jahr</div></div>
+    <div class="stat"><div class="v">300&nbsp;€</div><div class="l">Kinderzulage / Kind / Jahr</div></div>
+    <div class="stat"><div class="v">10&nbsp;€</div><div class="l">Frühstart-Rente / Monat ab 6 J. (separates Kinderdepot)</div></div>
+    <div class="stat"><div class="v">200&nbsp;€</div><div class="l">Berufseinsteiger-Bonus (einmalig, &lt;25 J.)</div></div>
+    <div class="stat"><div class="v">1&nbsp;%</div><div class="l">Kostendeckel p.&nbsp;a. (Standarddepot)</div></div>
+  </div>
+
+  <section id="pitch">
+    <div class="sec-head"><span class="num">00</span><h2>Elevator Pitch</h2></div>
+    <div class="pitchbox">
+      „Der Staat beerdigt den Riester-Vertrag und bringt ab <b>1. Januar 2027</b> das <b>Altersvorsorgedepot</b> —
+      ohne Garantiezwang, dafür mit echter Aktienmarktrendite, einem gesetzlichen <b>Kostendeckel von 1&nbsp;%</b>
+      im Standardprodukt und einer Förderung, die mit bis zu <b>540&nbsp;€ Grundzulage</b>, <b>300&nbsp;€ pro Kind</b>
+      und einem <b>200&nbsp;€-Bonus für Berufseinsteiger</b> deutlich über das hinausgeht, was Riester je geboten hat.
+      Neu förderberechtigt sind erstmals auch <b>Selbstständige und Freiberufler</b>. Wer schon einen Riester-Vertrag
+      hat, verliert nichts — der läuft unverändert weiter. Aber wer heute neu plant, plant ab 2027 anders.“
+    </div>
+  </section>
+
+  <section id="was-ist-es">
+    <div class="sec-head"><span class="num">01</span><h2>Was ist das Altersvorsorgedepot</h2></div>
+    <div class="body-text">
+      <p>Das Altersvorsorgedepot ist das Kernstück des <b>Altersvorsorgereformgesetzes</b> und löst die klassische
+      Riester-Rente als Fördersystem für die private Altersvorsorge ab. Es handelt sich um ein <b>garantiefreies
+      Depotprodukt</b>: Statt eines vorgeschriebenen Beitragserhalts zum Rentenbeginn (der bei Riester zu
+      niedrigen Aktienquoten und mageren Renditen führte) wird frei in Fonds/ETFs investiert — mit entsprechend
+      höheren, aber nicht garantierten Renditechancen.</p>
+      <div class="timeline">
+        <div class="tl-item"><div class="date">27. März 2026</div><p>Bundestag beschließt das Altersvorsorgereformgesetz.</p></div>
+        <div class="tl-item"><div class="date">08. Mai 2026</div><p>Bundesrat stimmt zu.</p></div>
+        <div class="tl-item"><div class="date">Ende Mai 2026</div><p>Gesetz tritt in Kraft (Verkündung laut Bundesregierung).</p></div>
+        <div class="tl-item"><div class="date">01. Januar 2027</div><p>Start der neuen Produkte. Ab diesem Datum können <b>keine neuen Riester-Verträge</b> mehr abgeschlossen werden.</p></div>
+      </div>
+      <p>Für das <b>Standarddepot</b> — ein staatlich organisiertes Produkt für Sparer ohne eigene Produktwahl —
+      wird ein neuer <b>Staatsfonds</b> aufgebaut, der kostengünstig passiv investiert. Parallel dürfen private
+      Anbieter (Banken, Fondsgesellschaften, Versicherer wie Generali) eigene zertifizierte Altersvorsorgedepot-Produkte
+      anbieten — hier gilt der 1&nbsp;%-Kostendeckel nicht automatisch.</p>
+    </div>
+  </section>
+
+  <section id="foerderung">
+    <div class="sec-head"><span class="num">02</span><h2>Förderung im Detail</h2></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Förderbaustein</th><th>Höhe</th><th>Voraussetzung</th></tr></thead>
+        <tbody>
+          <tr><td>Grundzulage</td><td class="hl">50&nbsp;% auf die ersten 360&nbsp;€ Eigenbeitrag/Jahr (180&nbsp;€) + 25&nbsp;% auf weitere Beiträge bis 1.800&nbsp;€ (360&nbsp;€) → max. <b>540&nbsp;€/Jahr</b></td><td>Eigenbeitrag von mind. 360&nbsp;€/Jahr für die volle Förderquote</td></tr>
+          <tr><td>Kinderzulage</td><td class="hl">bis zu <b>300&nbsp;€ pro Kind/Jahr</b></td><td>Ein förderberechtigter Elternteil, eigenes Depot; Mindesteinzahlung in Quellen uneinheitlich angegeben (siehe Praxishinweise)</td></tr>
+          <tr><td>Berufseinsteiger-Bonus</td><td class="hl">einmalig <b>200&nbsp;€</b></td><td>Depoteröffnung vor dem 25. Geburtstag, Mindesteigenbeitrag 120&nbsp;€/Jahr</td></tr>
+          <tr><td>Mittelbare Förderung</td><td>wie Grundzulage des Partners</td><td>Ehe-/Lebenspartner ohne eigene Berechtigung, eigener Vertrag mit Mindesteigenbeitrag (meist 120&nbsp;€/Jahr genannt)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="body-text" style="margin-top:14px;">
+      <p><b>Steuerlich:</b> In der Ansparphase bleiben Erträge vollständig steuerfrei — keine Abgeltungsteuer,
+      keine Vorabpauschale. Besteuert wird erst in der Auszahlphase, in aller Regel mit dem dann niedrigeren
+      persönlichen Steuersatz im Ruhestand (nachgelagerte Besteuerung).</p>
+    </div>
+  </section>
+
+  <section id="fruehstart">
+    <div class="sec-head"><span class="num">03</span><h2>Frühstart-Rente (Kinderdepot)</h2></div>
+    <div class="callout" style="border-left-color:var(--navy);margin-bottom:16px;">
+      <b>Nicht verwechseln:</b> Die <b>Kinderzulage</b> (Abschnitt 02) ist ein Zuschuss von bis zu 300&nbsp;€/Jahr
+      auf den Eigenbeitrag der <b>Eltern in deren eigenem</b> Altersvorsorgedepot. Die <b>Frühstart-Rente</b> ist ein
+      komplett eigenständiges, separates <b>Depot auf den Namen des Kindes</b> — mehrere Quellen weisen ausdrücklich
+      darauf hin, dass beide Begriffe häufig durcheinandergebracht werden.
+    </div>
+    <div class="body-text">
+      <p>Die Frühstart-Rente ist ein eigenes Gesetzesvorhaben (parallel zum Altersvorsorgereformgesetz) und zahlt
+      für jedes Kind zwischen dem <b>6. und dem vollendeten 18. Lebensjahr</b> monatlich <b>10&nbsp;€ (120&nbsp;€/Jahr)</b>
+      vom Staat in ein individuelles Altersvorsorgedepot ein — <b>unabhängig davon, ob die Eltern selbst etwas
+      einzahlen.</b> Übergangsweise soll der Jahrgang 2020 die Zahlung für 2026 rückwirkend erhalten; danach rückt
+      jedes Jahr der neue Jahrgang der Sechsjährigen nach.</p>
+      <ul class="clean">
+        <li><b>Status (Stand 16.11.2026):</b> Kabinettsbeschluss 12.08.2026 → Bundestag beschließt 16.10.2026 →
+        Zustimmung des Bundesrats steht nach Angaben der Deutschen Rentenversicherung noch aus. Geplanter Start:
+        1. Januar 2027. Im Unterschied zum Altersvorsorgedepot selbst ist dieses Gesetz damit <b>noch nicht
+        vollständig abgeschlossen</b>.</li>
+        <li><b>Ohne eigene Produktwahl:</b> Legt die Familie kein eigenes Depot an, verwaltet die <b>Deutsche
+        Bundesbank</b> die 10&nbsp;€/Monat in einer öffentlichen Sammelanlage, die ausschließlich breit diversifiziert
+        in globale Aktien bzw. Aktienfonds investieren darf.</li>
+        <li><b>Zertifiziertes Standarddepot zwingend:</b> Die Förderung fließt nur in ein zertifiziertes
+        Standarddepot mit max. 1&nbsp;% Kosten/Jahr. Ein bereits bestehendes privates Kinderdepot kann laut
+        Bundesfinanzministerium <b>nicht</b> einfach weiterverwendet werden.</li>
+        <li><b>Zuzahlung durch Eltern/Erziehungsberechtigte</b> ist zusätzlich möglich, bis maximal
+        <b>6.840&nbsp;€/Jahr (570&nbsp;€/Monat)</b>.</li>
+        <li><b>Modellrechnung (Beispiel, nicht garantiert):</b> 10&nbsp;€/Monat von 6 bis 65 Jahre bei angenommenen
+        7&nbsp;% Wertentwicklung p.&nbsp;a. ergäben rund <b>107.000&nbsp;€</b> — reine Illustration, keine
+        Renditezusage.</li>
+        <li><b>Verbraucherzentrale rät:</b> Vor einer Zuzahlungsentscheidung mit einem einfachen, ungeförderten
+        Junior-/Kinderdepot vergleichen, da Kinder ohnehin eigene steuerliche Freibeträge haben.</li>
+      </ul>
+      <p><b>Vertriebschance:</b> Mehrere Anbieter (u.&nbsp;a. Deka) haben bereits angekündigt, neben dem
+      Altersvorsorgedepot auch eigene Frühstart-Renten-Produkte für Kinder anzubieten. Für Familien mit Kindern
+      ab 6 Jahren lohnt sich jetzt schon ein Beratungstermin zur Depot- bzw. Anbieterwahl, sobald das Gesetz final
+      steht.</p>
+    </div>
+  </section>
+
+  <section id="berechtigt">
+    <div class="sec-head"><span class="num">04</span><h2>Wer ist förderberechtigt</h2></div>
+    <div class="body-text">
+      <ul class="clean">
+        <li><b>Unmittelbar förderberechtigt:</b> alle, die in die gesetzliche Rentenversicherung einzahlen bzw. rentenversicherungspflichtig beschäftigt sind.</li>
+        <li><b>Neu ab 2027:</b> Selbstständige, Freiberufler und Gewerbetreibende — auch ohne RV-Pflicht. Das war bei Riester nicht möglich.</li>
+        <li><b>Mittelbar förderberechtigt:</b> Ehe- und Lebenspartner ohne eigene Berechtigung, über einen eigenen Vertrag.</li>
+        <li><b>Nicht unmittelbar förderberechtigt:</b> Personen, die bereits volle Altersrente beziehen, sowie Minijobber, die sich von der Rentenversicherungspflicht haben befreien lassen.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="produkt">
+    <div class="sec-head"><span class="num">05</span><h2>Produktmerkmale</h2></div>
+    <div class="body-text">
+      <ul class="clean">
+        <li><b>Keine Garantievorgabe</b> — im Gegensatz zu Riester muss kein Beitragserhalt garantiert werden, dadurch sind höhere Aktienquoten möglich.</li>
+        <li><b>Kostendeckel von 1&nbsp;% p.&nbsp;a.</b> — nach Kritik an den Kosten vom Bundestag Ende März 2026 beschlossen, gilt aber nur für das staatliche Standarddepot, nicht automatisch für frei gewählte Anbieterprodukte.</li>
+        <li><b>Staatsfonds als Standardlösung</b> für Sparer, die kein eigenes Produkt auswählen möchten.</li>
+        <li><b>Ausschluss von Kryptowährungen und Einzelaktien</b> als zulässige Anlageklassen — ein in der Fachwelt kritisierter Punkt.</li>
+        <li><b>Kombinierbar</b> mit einem normalen, ungeförderten ETF-Sparplan, um Förderung und niedrige Kosten gezielt zu kombinieren.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="auszahlung">
+    <div class="sec-head"><span class="num">06</span><h2>Auszahlphase &amp; Vererbung</h2></div>
+    <div class="body-text">
+      <ul class="clean">
+        <li><b>Beginn:</b> frühestens mit Vollendung des 65., spätestens mit Vollendung des 70. Lebensjahres.</li>
+        <li><b>Form:</b> Wahl zwischen Verrentung und Auszahlplan — eine lebenslange Verrentung ist nicht mehr verpflichtend. Ein Auszahlplan muss spätestens mit dem 85. Lebensjahr enden; verbleibendes Restkapital wird dann ausgezahlt.</li>
+        <li><b>Einmalentnahme:</b> zu Beginn der Auszahlphase bis zu 30&nbsp;% des Guthabens einmalig entnehmbar (einkommensteuerpflichtig), sofern vertraglich vereinbart. Eine vollständige Kapitalauszahlung ist nicht möglich.</li>
+        <li><b>Kündigung vor Rentenbeginn</b> gilt als „schädliche Verwendung“: Zulagen und Steuervorteile müssen zurückgezahlt werden — in der Praxis meist unwirtschaftlich.</li>
+        <li><b>Vererbung:</b> Ehe-/Lebenspartner können das Guthaben steuerneutral in ihr eigenes Altersvorsorgedepot übertragen, Förderung bleibt erhalten. Andere Erben (z.&nbsp;B. Kinder) müssen erhaltene Zulagen und Steuervorteile zurückzahlen — wie bei einer förderschädlichen Kündigung.</li>
+        <li><b>Riester-Bestandsschutz:</b> Verträge mit Abschluss bis 31.12.2026 laufen unverändert nach altem Recht weiter, kein Zwangswechsel. Wird Riester-Kapital in ein Altersvorsorgedepot übertragen, gelten ab dann durchgehend die neuen Regeln.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="vergleich">
+    <div class="sec-head"><span class="num">07</span><h2>Vergleich: Riester / Altersvorsorgedepot / ETF-Sparplan</h2></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Merkmal</th><th>Riester (Altvertrag)</th><th>Altersvorsorgedepot (neu)</th><th>ETF-Sparplan (ungefördert)</th></tr></thead>
+        <tbody>
+          <tr><td>Förderung</td><td>Grundzulage 175&nbsp;€ + Kinderzulage 185/300&nbsp;€</td><td class="hl">bis 540&nbsp;€ + 300&nbsp;€/Kind + 200&nbsp;€ Bonus</td><td class="warn">keine</td></tr>
+          <tr><td>Garantie</td><td>Beitragserhalt vorgeschrieben</td><td>keine Garantievorgabe</td><td>keine</td></tr>
+          <tr><td>Aktienquote</td><td>meist niedrig (Garantiezwang)</td><td class="hl">frei wählbar, höher möglich</td><td>frei wählbar</td></tr>
+          <tr><td>Kosten</td><td>oft hohe Abschluss-/Verwaltungskosten</td><td>Standarddepot: 1&nbsp;% Deckel; freie Produkte ohne Deckel</td><td class="hl">meist sehr niedrig (ETF-TER)</td></tr>
+          <tr><td>Steuern Ansparphase</td><td>steuerfrei</td><td>steuerfrei</td><td class="warn">Abgeltungsteuer + Vorabpauschale</td></tr>
+          <tr><td>Steuern Auszahlung</td><td>nachgelagert</td><td>nachgelagert</td><td>laufend bei Verkauf</td></tr>
+          <tr><td>Flexibilität</td><td>gering, Kündigung unwirtschaftlich</td><td>gering vor Rentenbeginn, danach Wahlrecht</td><td class="hl">jederzeit frei verfügbar</td></tr>
+          <tr><td>Neuabschluss ab 2027</td><td class="warn">nicht mehr möglich</td><td class="hl">ja</td><td>ja, immer</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="dvag">
+    <div class="sec-head"><span class="num">08</span><h2>DVAG-Positionierung</h2></div>
+    <div class="body-text">
+      <p>DVAG und Generali haben gemeinsam die Informationskampagne <b>„Deutschland macht Rente“</b> gestartet
+      (inkl. eigener Plattform deutschland-macht-rente.de), um frühzeitig auf die Reform aufmerksam zu machen
+      und Beratungsgespräche anzustoßen. Die Kampagne wurde mit dem <b>Cash. Innovationspreis 2026/27</b> im
+      Segment Finanzvertriebe ausgezeichnet.</p>
+      <p>Im Zentrum steht der <b>Allfinanz-Ansatz</b> der DVAG: ein Beratungsgespräch zur Altersvorsorge wird
+      genutzt, um den gesamten Absicherungs- und Vermögensaufbau-Bedarf des Kunden ganzheitlich zu betrachten —
+      ein klarer Unterschied zum reinen Online-Depot ohne persönliche Beratung.</p>
+      <div class="callout">
+        <b>Zu beachten:</b> Konkrete Produktkonditionen der Generali-Lösungen waren zum Kampagnenstart noch nicht
+        im Detail kommuniziert. Die Abschlussprovision für das Altersvorsorgedepot darf laut Reform nicht mehr
+        als Einmalzahlung vollständig vorab vereinnahmt werden, sondern muss über einen längeren Zeitraum verteilt
+        werden — relevant für die eigene Vergütungsplanung.
+      </div>
+    </div>
+  </section>
+
+  <section id="argumente">
+    <div class="sec-head"><span class="num">09</span><h2>Verkaufsargumente &amp; Einwandbehandlung</h2></div>
+    <div class="obj">
+      <div class="q">„Lohnt sich das überhaupt noch, nach dem Riester-Flop?“</div>
+      <div class="a">Kein Garantiezwang mehr → echte Aktienmarktrendite statt Nullzins-Fonds. Gesetzlicher Kostendeckel beim Standarddepot. Förderung deutlich höher als bei Riester (bis 540&nbsp;€ statt 175&nbsp;€ Grundzulage).</div>
+    </div>
+    <div class="obj">
+      <div class="q">„Ich bin selbstständig, das war für mich noch nie etwas.“</div>
+      <div class="a">Neu: Selbstständige, Freiberufler und Gewerbetreibende sind jetzt erstmals förderberechtigt — unabhängig von einer RV-Pflicht.</div>
+    </div>
+    <div class="obj">
+      <div class="q">„Ich will nicht, dass mein Geld 40 Jahre eingesperrt ist.“</div>
+      <div class="a">Flexiblere Auszahlphase als bei Riester: Wahl zwischen Verrentung und Auszahlplan bis 85, zu Rentenbeginn bis zu 30&nbsp;% als Einmalbetrag.</div>
+    </div>
+    <div class="obj">
+      <div class="q">„Was passiert, wenn ich vorher sterbe?“</div>
+      <div class="a">Der Ehe-/Lebenspartner kann das Guthaben steuerneutral übernehmen, die Förderung bleibt erhalten.</div>
+    </div>
+    <div class="obj">
+      <div class="q">„Ich habe doch schon einen Riester-Vertrag.“</div>
+      <div class="a">Bestandsschutz: Der Altvertrag läuft unverändert weiter, kein Zwang zum Wechsel. Gemeinsam prüfen, ob ein zusätzlicher Aufbau über das Altersvorsorgedepot sinnvoll ist.</div>
+    </div>
+    <div class="obj">
+      <div class="q">„Kann ich das nicht einfach selbst als ETF-Sparplan machen?“</div>
+      <div class="a">Ja — aber ohne die laufende Steuerfreiheit in der Ansparphase und ohne die staatliche Zulage von bis zu 540&nbsp;€/Jahr. Beides lässt sich sogar kombinieren.</div>
+    </div>
+    <div class="obj">
+      <div class="q">„Mein Kind ist doch noch klein, lohnt sich da schon was?“</div>
+      <div class="a">Ab dem 6. Geburtstag zahlt der Staat über die Frühstart-Rente automatisch 10&nbsp;€/Monat in ein eigenes Depot des Kindes — unabhängig davon, ob Sie selbst etwas einzahlen. Je früher das richtige Depot steht, desto länger läuft der Zinseffekt. Eigene Zuzahlung bis 570&nbsp;€/Monat möglich.</div>
+    </div>
+  </section>
+
+  <section id="zielgruppen">
+    <div class="sec-head"><span class="num">10</span><h2>Zielgruppen-Priorisierung</h2></div>
+    <div class="groups">
+      <div class="grp"><div class="tag">Höchste Dringlichkeit</div><p>Berufseinsteiger unter 25 — der 200&nbsp;€-Bonus verfällt, wenn das Depot nicht vor dem 25. Geburtstag eröffnet wird.</p></div>
+      <div class="grp"><div class="tag">Hoher Hebel</div><p>Junge Familien mit Kindern — Kinderzulage bis 300&nbsp;€/Kind/Jahr zusätzlich zur Grundzulage.</p></div>
+      <div class="grp"><div class="tag">Neue Zielgruppe</div><p>Eltern von Kindern ab 6 Jahren — Frühstart-Rente bringt 10&nbsp;€/Monat garantiert, unabhängig von Eigenbeiträgen; jetzt schon Depot-/Anbieterwahl vorbereiten.</p></div>
+      <div class="grp"><div class="tag">Neuer Markt</div><p>Selbstständige &amp; Freiberufler — erstmals förderberechtigt, bislang komplett ungenutztes Potenzial.</p></div>
+      <div class="grp"><div class="tag">Bestandskunden</div><p>Riester-Bestandskunden — Review, ob Parallelaufbau über das Altersvorsorgedepot zusätzlich sinnvoll ist.</p></div>
+    </div>
+  </section>
+
+  <section id="praxis">
+    <div class="sec-head"><span class="num">11</span><h2>Praxishinweise &amp; offene Punkte</h2></div>
+    <div class="callout">
+      <p><b>Vor verbindlicher Kundenberatung prüfen:</b> Die hier zusammengetragenen Angaben stammen aus
+      Finanzportalen, Verbraucherseiten und Fachmedien (Stand November 2026) und weichen in Details teils
+      voneinander ab:</p>
+      <ul class="clean" style="margin-top:8px;">
+        <li>Mindesteinzahlung für die volle Kinderzulage wird uneinheitlich angegeben (25&nbsp;€/Monat, 60&nbsp;€/Jahr oder 100&nbsp;% des Eigenbeitrags, je nach Quelle).</li>
+        <li>Wie Sozialämter lange Auszahlpläne im Rahmen der Grundsicherung behandeln, ist laut Fachpresse noch nicht abschließend geklärt.</li>
+        <li>Konkrete Kosten- und Produktkonditionen der Generali-Lösungen waren zum Redaktionsschluss dieses Reports noch nicht im Detail veröffentlicht; Produktstart ist der 1.1.2027.</li>
+        <li><b>Die Frühstart-Rente ist, anders als das Altersvorsorgedepot selbst, zum Redaktionsschluss (16.11.2026)
+        noch nicht final beschlossen</b> — der Bundestag hat zugestimmt (16.10.2026), die Zustimmung des Bundesrats
+        stand laut Deutscher Rentenversicherung noch aus. Details zu Anbieterwechsel, Übergang mit 18 und
+        Zusammenspiel mit der Kinderzulage können sich im weiteren Verfahren noch ändern.</li>
+      </ul>
+      <p style="margin-top:8px;">Für verbindliche Aussagen gegenüber Kunden: Gesetzestext (Altersvorsorgereformgesetz,
+      BGBl. 2026&nbsp;I) sowie das finale Generali-Produktangebot über die DVAG-Zentrale gegenprüfen.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p style="margin-bottom:8px;"><b>Quellen (Websuche, Stand 16.11.2026):</b></p>
+    <ol>
+      <li><a href="https://www.bundestag.de/dokumente/textarchiv/2026/kw13-de-altersvorsorge-1156798">Deutscher Bundestag — Bundestag beschließt das Altersvorsorgedepot</a></li>
+      <li><a href="https://www.franke-bornberg.de/de/altersvorsorgereformgesetz-was-reform-private-altersvorsorge-bringt">Franke &amp; Bornberg — Altersvorsorgereformgesetz 2026</a></li>
+      <li><a href="https://www.finanztip.de/altersvorsorge/altersvorsorgedepot/">Finanztip — Altersvorsorgedepot ab 2027</a></li>
+      <li><a href="https://www.ing.de/wissen/altersvorsorgedepot/">ING — Altersvorsorgedepot 2027</a></li>
+      <li><a href="https://zendepot.de/altersvorsorgedepot/was-ist-das-altersvorsorgedepot">Zendepot — Was ist das Altersvorsorgedepot</a></li>
+      <li><a href="https://extraetf.com/de/wissen/altersvorsorgedepot">extraETF — Altersvorsorgedepot</a></li>
+      <li><a href="https://www.gevestor.de/finanzwissen/finanzplanung/rente-und-vorsorge/altersvorsorgedepot-foerderung-vorteile-und-nachteile.html">GeVestor — Förderung, Vorteile und Nachteile</a></li>
+      <li><a href="https://www.aktienwelt360.de/2026/04/15/renten-revolution-2026-der-3-schritte-plan-fuer-das-neue-staatliche-altersvorsorge-depot/">Aktienwelt360 — Renten-Revolution 2026</a></li>
+      <li><a href="https://www.vermoegenszentrum.de/wissen/altersvorsorgedepot-wissenswertes-ueber-die-auszahlphase">Vermögenszentrum — Auszahlphase</a></li>
+      <li><a href="https://goldesel.de/altersvorsorgedepot/auszahlung">Goldesel — Auszahlung</a></li>
+      <li><a href="https://www.transparent-beraten.de/altersvorsorgedepot/auszahlung/">transparent-beraten.de — Auszahlung</a></li>
+      <li><a href="https://test.de/altersvorsorgedepot">test.de — Altersvorsorgedepot</a></li>
+      <li><a href="https://www.transparent-beraten.de/altersvorsorgedepot/foerderung/">transparent-beraten.de — Förderung</a></li>
+      <li><a href="https://www.beatvest.com/blog/altersvorsorgedepot-2027-guide">Beatvest — Altersvorsorgedepot 2027 Guide</a></li>
+      <li><a href="https://aktienrenterechner.de/ratgeber/was-ist-der-berufseinsteigerbonus">Aktienrenterechner — Berufseinsteigerbonus</a></li>
+      <li><a href="https://www.finanztip.de/daily/erst-altersvorsorge-dann-mehr-was-hinter-der-dvag-kampagne-steckt/">Finanztip — Was hinter der DVAG-Kampagne steckt</a></li>
+      <li><a href="https://www.buerger-geld.org/news/rente/altersvorsorgedepot-2027-dvag-und-generali-starten-kampagne-deutschland-macht-rente/">bürger-geld.org — DVAG &amp; Generali starten Kampagne</a></li>
+      <li><a href="https://www.cash-online.de/a/dkm-2026-cash-verleiht-innovationsawards-728642/4/">Cash.online — DKM 2026 Innovationsawards</a></li>
+      <li><a href="https://www.cash-online.de/a/altersvorsorgedepot-2027-der-fahrplan-fuer-finanzberater-724143/2/">Cash.online — Fahrplan für Finanzberater</a></li>
+      <li><a href="https://www.horizont.net/marketing/nachrichten/deutschland-macht-rente-so-werben-generali-und-dvag-fuer-private-altersvorsorge-235793">Horizont — So werben Generali und DVAG</a></li>
+      <li><a href="https://www.handelsblatt.com/vergleich/fruhstart-rente/">Handelsblatt — Frühstart-Rente 2026</a></li>
+      <li><a href="https://www.finanztip.de/altersvorsorge/fruehstart-rente/">Finanztip — Frühstart-Rente</a></li>
+      <li><a href="https://www.sparkasse.de/pk/ratgeber/finanzplanung/rente-planen/fruehstartrente.html">Sparkasse — Wie funktioniert die Frühstartrente?</a></li>
+      <li><a href="https://www.buerger-geld.org/news/rente/fruehstartrente-ab-2027-kostendeckel-aktienrisiko-und-unabhaengige-beratung">bürger-geld.org — Frühstartrente ab 2027</a></li>
+      <li><a href="https://www.ad-hoc-news.de/wissenschaft/fruehstartrente-beschlossen-staat-zahlt-kindern-monatlich-10-euro-ins-depot/70345413">ad-hoc-news — Frühstartrente beschlossen</a></li>
+      <li><a href="https://www.verbraucherzentrale.de/node/125744">Verbraucherzentrale — Frühstartrente: Was müssen Eltern jetzt wissen?</a></li>
+      <li><a href="https://www.bundesregierung.de/breg-de/bundesregierung/bundeskanzleramt/fruehstartrente-2449404">Bundesregierung — Startkapital für private Altersvorsorge</a></li>
+      <li><a href="https://www.leinetal24.de/verbraucher/fruehstart-rente-fuer-kinder-10-euro-vom-staat-so-viel-koennen-eltern-dazu-zahlen-zr-94414688.html">leinetal24 — Wie viel Eltern selbst dazuzahlen können</a></li>
+    </ol>
+    <p style="margin-top:12px;">Dieses Dokument ist eine Beratungsunterlage auf Basis öffentlich verfügbarer
+    Quellen, keine Rechts- oder Steuerberatung. Angaben ohne Gewähr; vor Kundeneinsatz gegen den
+    Gesetzestext und das finale Produktangebot prüfen.</p>
+  </footer>
+
+</div>
